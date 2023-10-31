@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">scraping test2</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="monday">Monday</string>
+    <string name="tab_label_monday">tab_label_monday</string>
+    <string name="item_1">Item 1</string>
+    <string name="item_2">Item 2</string>
+    <string name="item_3">Item 3</string>
+    <string name="tab2">Tab2</string>
+</resources>
