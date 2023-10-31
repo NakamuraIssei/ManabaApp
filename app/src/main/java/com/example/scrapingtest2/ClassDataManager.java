@@ -7,6 +7,7 @@ import android.widget.TextView;
 public class ClassDataManager extends DataManager{
 
     private static TextView className;
+    private String name;
     @SuppressLint("StaticFieldLeak")
     private static TextView classRoom;
 
