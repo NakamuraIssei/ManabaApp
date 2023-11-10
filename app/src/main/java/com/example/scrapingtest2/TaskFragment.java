@@ -20,7 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 public class TaskFragment extends Fragment {
+    private TaskDataManager taskDataManager;
 
+    TaskFragment(TaskDataManager taskDataManager){
+        this.taskDataManager=taskDataManager;
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // レイアウトファイルをインフレートしてViewを作成
@@ -37,8 +41,7 @@ public class TaskFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(layoutManager);
 
-        ArrayList<Data> taskList = TaskDataManager.getDataList();//課題の情報をtaskDataManagerから取得
-        TaskCustomAdapter adapter = new TaskCustomAdapter(getContext(), taskList);//Listviewを表示するためのadapterを設定
+        TaskCustomAdapter adapter = new TaskCustomAdapter(getContext(), taskDataManager);//Listviewを表示するためのadapterを設定
         recyclerView.setAdapter(adapter);//listViewにadapterを設定
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -89,7 +92,7 @@ public class TaskFragment extends Fragment {
             public void onClick(View v) {//ボタンが押されたら
                 Log.d("bbb","課題追加ボタンちゃんと押せてるよー！!");
                 // ダイアログクラスのインスタンスを作成
-                AddTaskCustomDialog dialog = new AddTaskCustomDialog(getContext(),adapter);//追加課題の画面のインスタンスを生成
+                AddTaskCustomDialog dialog = new AddTaskCustomDialog(getContext(),adapter,taskDataManager);//追加課題の画面のインスタンスを生成
                 // ダイアログを表示
                 dialog.show();//追加課題の画面を表示
             }

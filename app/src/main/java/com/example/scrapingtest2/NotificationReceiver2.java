@@ -19,12 +19,18 @@ import android.webkit.CookieManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 public class NotificationReceiver2  extends BroadcastReceiver {
     public NotificationManager notificationManager;
     public SQLiteDatabase db;
+    public static TaskDataManager taskDataManager;
+
+    static void setTaskDataManager(TaskDataManager taskDataManager){
+        NotificationReceiver2.taskDataManager=taskDataManager;
+    }
 
     public void onReceive(Context context, Intent intent) {
         CookieManager ck=CookieManager.getInstance();
@@ -42,15 +48,17 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             }
 
         }
-        ManabaScraper manabaScraper=new ManabaScraper(cookieBag);
+        ManabaScraper.setCookie(cookieBag);
         Log.d("aaa", "今からバックグラウンドでのスクレイピングするよ　NotificationReceiver2 44");
         try {
-            Log.d("aaa",manabaScraper.getTaskDataFromManaba().toString()+"NotificationReceiver2 45");
+            Log.d("aaa",ManabaScraper.receiveRequest("TaskData").toString()+"NotificationReceiver2 45");
         } catch (ExecutionException e) {
             Log.d("aaa","バックグラウンドでのスクレイピング失敗。NotificationReceiver2 47");
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             Log.d("aaa","バックグラウンドでのスクレイピング失敗。NotificationReceiver2 49");
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -155,7 +163,8 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
         switch(dataName){
             case "TaskData":
-                TaskDataManager.deleteFinishedTaskNotification(title,subTitle);
+                if(taskDataManager!=null)
+                    taskDataManager.deleteFinishedTaskNotification(title,subTitle);
                 break;
         }
 

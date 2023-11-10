@@ -18,24 +18,35 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class ManabaScraper {
-    private final ArrayList<String> urlList;
-    private HashMap<String, String> cookiebag;
-    public  ArrayList<String> taskInfor;
-    private ArrayList<String> classInfor;
+    private static ArrayList<String> urlList;
+    private static HashMap<String, String> cookiebag;
+    public static ArrayList<String> taskInfor;
+    private static ArrayList<String> classInfor;
 
-    private String classURL;
+    private static String classURL;
 
-    public ManabaScraper(HashMap<String, String> cookiebag){
-        this.cookiebag=cookiebag;
-        this.taskInfor =new ArrayList<>();
-        this.classInfor=new ArrayList<>();
-        this.urlList= new ArrayList<>(Arrays.asList(
+
+    public static ArrayList<String> receiveRequest(String dataName) throws ExecutionException, InterruptedException, IOException {
+        switch (dataName){
+            case "TaskData":
+                return scrapeTaskDataFromManaba();
+            case "ClassData":
+                return getClassInforFromManaba();
+
+        }
+        return null;
+    }
+    public static void setCookie(HashMap<String, String> cookiebag){
+        ManabaScraper.cookiebag =cookiebag;
+        taskInfor =new ArrayList<>();
+        classInfor=new ArrayList<>();
+        urlList= new ArrayList<>(Arrays.asList(
                 "https://ct.ritsumei.ac.jp/ct/home_summary_query",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_survey",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_report"));
-        this.classURL="https://ct.ritsumei.ac.jp/ct/home_course";
+        classURL="https://ct.ritsumei.ac.jp/ct/home_course";
     }
-    public ArrayList<String> getTaskDataFromManaba() throws ExecutionException, InterruptedException {
+    private static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {
         taskInfor.clear();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -76,7 +87,7 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    public ArrayList<String> getClassInforFromManaba() throws ExecutionException, InterruptedException, IOException {
+    private static ArrayList<String> getClassInforFromManaba() throws ExecutionException, InterruptedException, IOException {
 
         for (int i = 0; i < 7; i++) {
             ClassData.classData.add(new ArrayList<ClassData>());
@@ -139,8 +150,8 @@ public class ManabaScraper {
                 String name="次は空きコマです",room="";
                 if(!divs.isEmpty()&&!divs2.isEmpty()){
                     name = Objects.requireNonNull(divs.first()).text();
-                    room = Objects.requireNonNull(divs.first()).text();
-                    classInfor.add((7*(j-1)+i)-1+"??"+name+"??"+room);
+                    room = Objects.requireNonNull(divs2.first()).text();
+                    classInfor.add((7*(j-1)+i)-1+"???"+room+"???"+name);
                 }
 
                 //Log.d("class",name);

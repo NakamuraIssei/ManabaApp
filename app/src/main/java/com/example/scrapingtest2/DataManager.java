@@ -8,36 +8,38 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.util.Log;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class DataManager {
 
-    protected static String dataName;//継承先クラスのコンストラクタで設定！
-    protected static int dataCount;
-    protected static ArrayList<Data> dataList;
-    protected static SQLiteDatabase db;
-    protected static Cursor cursor;
-    protected static DateTimeFormatter formatter;
+    protected String dataName;//継承先クラスのコンストラクタで設定！
+    protected int dataCount;
+    protected ArrayList<Data> dataList;
+    protected SQLiteDatabase db;
+    protected Cursor cursor;
+    protected DateTimeFormatter formatter;
 
-    public static void prepareForWork(String DataName, Context context){
+    public void prepareForWork(String DataName){
         dataName=DataName;
-        dataCount =1;
+        dataCount =0;
         dataList=new ArrayList<Data>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
     };
-    public static void setDB(SQLiteDatabase DB, Cursor Cursor){
+    public void setDB(SQLiteDatabase DB, Cursor Cursor){
         db=DB;
         cursor=Cursor;
     }
-    public static void loadData(){
-        Log.d("aaa","今からデータをロードします。DataManager 45");
+    public void loadData(){
+        Log.d("aaa","今からデータをロードします。DataManager 41");
         while (cursor.moveToNext()) {
             @SuppressLint("Range")int datacount = cursor.getInt(cursor.getColumnIndex("myId"));
             @SuppressLint("Range")String title = cursor.getString(cursor.getColumnIndex("title"));
@@ -45,12 +47,12 @@ public class DataManager {
             @SuppressLint("Range")String notificationTiming = cursor.getString(cursor.getColumnIndex("notificationTiming"));
             Data data=new Data(datacount,title,subTitle);
             dataCount=(datacount+1)%99999999;
-            Log.d("aaa",data.getTitle()+"をロードしました。DataManager 53");
-            Log.d("aaa",notificationTiming+"を設定します。DataManager 54");
+            Log.d("aaa",datacount+"番目の"+data.getTitle()+"をロードしました。DataManager 50");
             if(!Objects.equals(notificationTiming, "")){
                 String[] parts = notificationTiming.split("\\?"); // ? をエスケープして使用
                 for (String time : parts) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        Log.d("aaa",notificationTiming+"を設定します。DataManager 55");
                         data.addNotificationTiming(LocalDateTime.parse(time, formatter));
                     }
                 }
@@ -60,11 +62,12 @@ public class DataManager {
             }
             dataList.add(data);
         }
+        Log.d("aaa","データロード完了!。DataManager 65");
     }
-    public static ArrayList<Data> getDataList(){
+    public ArrayList<Data> getDataList(){
         return dataList;
     }
-    public static void addData(String title,String subTitle){
+    public void addData(String title,String subTitle){
         Data data=new Data(dataCount,title,subTitle);
         dataCount =(dataCount +1)%99999999;
         //data.addNotificationTiming(notificationTiming);
@@ -72,7 +75,7 @@ public class DataManager {
         dataList.add(data);
         insertDataIntoDB(data);
     }
-    public static void addData(String title,String subTitle,LocalDateTime defaultTiming){
+    public void addData(String title,String subTitle,LocalDateTime defaultTiming){
         Log.d("aaa","データを追加します。DataManager 77");
         Data data=new Data(dataCount,title,subTitle);
         Log.d("aaa","データを作成しました。DataManager 79");
@@ -84,14 +87,14 @@ public class DataManager {
         dataList.add(data);
         insertDataIntoDB(data);
     }
-    public static void removeData(int num){
+    public void removeData(int num){
         for(LocalDateTime notificationTime:dataList.get(num).getNotificationTiming()){
             requestCancelNotification(dataName,dataList.get(num).getTitle(),dataList.get(num).getSubTitle(),notificationTime);
         }
         deleteDataFromDB(dataList.get(num));
         dataList.remove(num);
     }
-    public static void insertDataIntoDB(Data data){
+    public void insertDataIntoDB(Data data){
         if (db == null) {
             Log.d("aaa", "db空っぽです。(DataManager.insertDB())");
         }
@@ -116,16 +119,16 @@ public class DataManager {
             Log.d("aaa", dataName+"に追加失敗。DataManager 126");
         }
     }
-    public static void deleteDataFromDB(Data data){
+    public void deleteDataFromDB(Data data){
         String[] whereArgs = { String.valueOf(data.getId()) };
         db.delete(dataName, "myId = ?", whereArgs);
     }
-    public static void addNotificationTiming(int num,LocalDateTime notificationTiming){
+    public void addNotificationTiming(int num,LocalDateTime notificationTiming){
         dataList.get(num).addNotificationTiming(notificationTiming);
         requestSettingNotification(dataName,dataList.get(num).getId(),dataList.get(num).getTitle(),dataList.get(num).getSubTitle(),notificationTiming);
         updateNotificationTimingFromDB(dataList.get(num));
     }
-    public static void updateNotificationTimingFromDB(Data data){
+    public void updateNotificationTimingFromDB(Data data){
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             StringBuilder sb = new StringBuilder();
             //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -165,13 +168,13 @@ public class DataManager {
             Log.d("aaa", "通知情報を更新しました(DataManager.updateNotificationDataFromDB)" + result);
         }
     }
-    public static void requestSettingNotification(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
+    public void requestSettingNotification(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
         NotifyManager2.setNotification(dataName,dataId,title,subTitle,notificationTiming);
     }
-    static void requestCancelNotification(String dataName, String title, String subTitle, LocalDateTime notificationTiming){
+    public void requestCancelNotification(String dataName, String title, String subTitle, LocalDateTime notificationTiming){
         NotifyManager2.cancelNotification(dataName,title,subTitle,notificationTiming);
     }
-    static int deleteFinishedNotification(String title,String subTitle){
+    public int deleteFinishedNotification(String title,String subTitle){
         //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。
         for(Data data: dataList){
             if(Objects.equals(data.getTitle(), title) && Objects.equals(data.getSubTitle(), subTitle)){
@@ -181,10 +184,13 @@ public class DataManager {
         }
         return 0;
     }
-    static void deleteNotification(int dataNum,int notificationNum){
+    public void deleteNotification(int dataNum,int notificationNum){
         //dbの更新もここで行う。
         requestCancelNotification(dataName,dataList.get(dataNum).getTitle(),dataList.get(dataNum).getSubTitle(),dataList.get(dataNum).getNotificationTiming().get(notificationNum));
         dataList.get(dataNum).deleteNotificationTiming(notificationNum);
         updateNotificationTimingFromDB(dataList.get(dataNum));
+    }
+    public ArrayList<String> requestScraping() throws IOException, ExecutionException, InterruptedException {
+        return ManabaScraper.receiveRequest(dataName);
     }
 }

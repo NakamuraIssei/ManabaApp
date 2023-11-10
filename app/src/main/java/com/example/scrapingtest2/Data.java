@@ -31,6 +31,13 @@ public class Data {
     public ArrayList<LocalDateTime> getNotificationTiming(){
         return this.notificationTiming;
     }
+
+    public void replaceTitle(String title){
+        this.title=title;
+    }
+    public void replaceSubtitle(String subTitle){
+        this.subtitle=subTitle;
+    }
     public void addNotificationTiming(LocalDateTime newTiming){
         this.notificationTiming.add(newTiming);
         reorderNotificationTiming();

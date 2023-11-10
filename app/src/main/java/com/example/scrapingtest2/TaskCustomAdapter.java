@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.ViewHolder>{
     private Context context;
-    private ArrayList<Data> dataList;
+    private TaskDataManager taskDataManager;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         AppCompatImageButton pushButton;
@@ -30,9 +30,9 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
             text2 = itemView.findViewById(android.R.id.text2);
         }
     }
-    public TaskCustomAdapter(Context context, ArrayList<Data> dataList) {
+    public TaskCustomAdapter(Context context,TaskDataManager taskDataManager) {
         this.context = context;
-        this.dataList = dataList;
+        this.taskDataManager=taskDataManager;
         //notifyManager=new NotifyManager((AppCompatActivity) context);
     }
     @NonNull
@@ -43,16 +43,16 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String before=String.valueOf(dataList.get(position).getSubTitle());
+        String before=String.valueOf(taskDataManager.getDataList().get(position).getSubTitle());
         char[] charArray = before.toCharArray();
         charArray[10] = ' ';
         String deadline = new String(charArray);
         //ここまで期限の文字列の整理操作
-        holder.text1.setText(dataList.get(position).getTitle());
+        holder.text1.setText(taskDataManager.getDataList().get(position).getTitle());
         holder.text2.setText(deadline);
-        if(!dataList.get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
+        if(!taskDataManager.getDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
 
-        TaskDataManager.addBellButton(position,holder.pushButton);
+        taskDataManager.addBellButton(position,holder.pushButton);
         //TaskData.taskData.get(position).setBellButton(holder.pushButton)
         holder.pushButton.setOnClickListener(v -> {
             //TaskData item = dataList.get(position);
@@ -61,7 +61,7 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
 
             Log.d("aaa","ベルボタン押せてるよー！TaskCustomAdapter 65");
             // ダイアログクラスのインスタンスを作成
-            NotificationCustomDialog dialog = new NotificationCustomDialog(context,position,this);//追加課題の画面のインスタンスを生成
+            NotificationCustomDialog dialog = new NotificationCustomDialog(context,position,taskDataManager);//追加課題の画面のインスタンスを生成
             // ダイアログを表示
             dialog.show();//追加課題の画面を表示
 
@@ -73,7 +73,7 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
     }
     @Override
     public int getItemCount() {
-        return dataList.size();
+        return taskDataManager.getDataList().size();
     }
 
 }

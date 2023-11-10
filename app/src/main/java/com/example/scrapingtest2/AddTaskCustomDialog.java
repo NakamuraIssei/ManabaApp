@@ -12,10 +12,12 @@ import android.widget.EditText;
 public class AddTaskCustomDialog extends Dialog {
 
     private TaskCustomAdapter adapter;
+    private TaskDataManager taskDataManager;
 
-    public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter) {
+    public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter,TaskDataManager taskDataManager) {
         super(context);
         this.adapter=adapter;
+        this.taskDataManager=taskDataManager;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class AddTaskCustomDialog extends Dialog {
                 Log.d("aaa", deadline+"AddTaskCustomDialog 52");
                 //TaskData context=new TaskData(title2.getText().toString(),1,"hoeghoge",deadline);
                 Log.d("aaa", title2.getText().toString()+"を追加します。AddTaskCustomDialog 54");
-                TaskDataManager.addTaskData(title2.getText().toString(),deadline);
+                taskDataManager.addTaskData(title2.getText().toString(),deadline);
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
                 Log.d("aaa", String.valueOf(Thread.currentThread())+"AddTaskCustomDialog 56");

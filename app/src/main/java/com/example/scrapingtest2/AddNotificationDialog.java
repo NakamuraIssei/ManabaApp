@@ -15,9 +15,11 @@ import java.time.ZoneId;
 
 public class AddNotificationDialog extends Dialog {
     private static Calendar selectedTime;
+    private static TaskDataManager taskDataManager;
 
-    public AddNotificationDialog(Context context) {
+    public AddNotificationDialog(Context context,TaskDataManager taskDataManager) {
         super(context);
+        AddNotificationDialog.taskDataManager=taskDataManager;
     }
     public static void setNotificationN(Context context, int position, NotificationCustomAdapter adapter ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -57,8 +59,8 @@ public class AddNotificationDialog extends Dialog {
                                             Log.d("aaa", String.valueOf(selectedTime.getTimeInMillis()));
 
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                TaskDataManager.addNotificationTiming(position,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
-                                                TaskDataManager.changeBellButton(position);
+                                                taskDataManager.addNotificationTiming(position,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
+                                                taskDataManager.changeBellButton(position);
 
                                                 adapter.notifyDataSetChanged();
                                             }
@@ -117,13 +119,13 @@ public class AddNotificationDialog extends Dialog {
 
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                 //まず編集する通知を削除する
-                                                TaskDataManager.deleteTaskNotification(taskDataId,position);
+                                                taskDataManager.deleteTaskNotification(taskDataId,position);
                                                 //taskData.cancelNotification(position);
                                                 //再設定した通知を追加
-                                                TaskDataManager.addNotificationTiming(taskDataId,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
+                                                taskDataManager.addNotificationTiming(taskDataId,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
                                                 //変更を反映
                                                 adapter.notifyDataSetChanged();
-                                                TaskDataManager.changeBellButton(taskDataId);
+                                                taskDataManager.changeBellButton(taskDataId);
 
                                             }
                                         }

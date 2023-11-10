@@ -21,11 +21,13 @@ import java.util.ArrayList;
 public class NotificationCustomDialog extends Dialog {
     private int position;
     private Context context;
+    private TaskDataManager taskDataManager;
 
-    public NotificationCustomDialog(Context context, int position, TaskCustomAdapter homeworkCustomAdapter) {
+    public NotificationCustomDialog(Context context, int position,TaskDataManager taskDataManager) {
         super(context);
         this.context=context;
         this.position=position;
+        this.taskDataManager=taskDataManager;
         //this.homeworkCustomAdapter=homeworkCustomAdapter;
     }
     @Override
@@ -44,11 +46,11 @@ public class NotificationCustomDialog extends Dialog {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
 
-        ArrayList<LocalDateTime> notificationList = TaskDataManager.getDataList().get(position).getNotificationTiming();//タップされた行の課題の通知情報を取得
+        ArrayList<LocalDateTime> notificationList = taskDataManager.getDataList().get(position).getNotificationTiming();//タップされた行の課題の通知情報を取得
 
         NotificationCustomAdapter adapter = new NotificationCustomAdapter(context, notificationList,position);//Listviewを表示するためのadapterを設定
         recyclerView.setAdapter(adapter);//listViewにadapterを設定
-        TaskDataManager.addAdapter(position,adapter);
+        taskDataManager.addAdapter(position,adapter);
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
@@ -60,7 +62,7 @@ public class NotificationCustomDialog extends Dialog {
                 int swipedPosition = viewHolder.getAdapterPosition();
                 NotificationCustomAdapter adapter = (NotificationCustomAdapter) recyclerView.getAdapter();
                 // 登録とかするんだったらなにかのリストから削除をする処理はここ
-                TaskDataManager.deleteTaskNotification(position,swipedPosition);
+                taskDataManager.deleteTaskNotification(position,swipedPosition);
                 //TaskData.taskData.get(position).cancelNotification(swipedPosition);
                 // 削除されたことを知らせて反映させる。
                 adapter.notifyItemRemoved(swipedPosition);

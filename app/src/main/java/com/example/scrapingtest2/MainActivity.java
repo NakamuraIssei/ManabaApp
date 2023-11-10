@@ -91,29 +91,29 @@ public class MainActivity extends AppCompatActivity {
         Bundle bundle = intent.getBundleExtra("BUNDLE");
         cookiebag = (HashMap<String, String>)bundle.getSerializable("cookiebag");
 
+        ManabaScraper.setCookie(cookiebag);
+
         NotifyManager2.prepareForNotificationWork(this);
-        TaskDataManager.prepareForTaskWork("TaskData",this);
+        TaskDataManager taskDataManager=new TaskDataManager("TaskData");
+        ClassDataManager classDataManager=new ClassDataManager("ClassData");
+        NotificationReceiver2.setTaskDataManager(taskDataManager);
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
-        Cursor cursor = db.query("TaskData", null, null, null, null, null, "myId");
+        Cursor taskCursor = db.query("TaskData", null, null, null, null, null, "myId");
+        Cursor classCursor = db.query("ClassData", null, null, null, null, null, "myId");
 
-        TaskDataManager.setDB(db,cursor);
-        TaskDataManager.loadTaskData();
-        Log.d("aaa","課題ロード完了！MainActivity 112");
-
-        ManabaScraper manabaScraper=new ManabaScraper(cookiebag);
+        taskDataManager.setDB(db,taskCursor);
+        classDataManager.setDB(db,classCursor);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            /*Supplier<String> loadData = () -> {
-                getDataFromDatabase();
-                return null;
-            };*/
-
-            Supplier<String> getTask = () -> {
-                try {
+            Supplier<String> setData = () -> {
+                taskDataManager.setTaskData();
+                Log.d("aaa","課題セッティング完了！MainActivity 110");
+                classDataManager.setClassData();
+                /*try {
                     ArrayList<String> taskList;
-                    taskList=manabaScraper.getTaskDataFromManaba();
+                    taskList=ManabaScraper.scrapeTaskDataFromManaba();
                     Log.d("aaa","課題スクレーピング完了！　MainActivity　126");
                     for(String k:taskList){
                         Log.d("aaa",k+"MainActivity　128");
@@ -121,9 +121,9 @@ public class MainActivity extends AppCompatActivity {
 
                         //TaskData context;
                         //context = new TaskData(str[0],1,"hoegohoge",str[1]);//締め切り日時と課題名をペアにする。
-                        if(TaskDataManager.isExist(str[0])){
+                        if(taskDataManager.isExist(str[0])){
                             Log.d("aaa",k+"持ってないから追加するよー！MainActivity　134");
-                            TaskDataManager.addTaskData(str[0],str[1]);//str[0]は課題名、str[1]は締め切り
+                            taskDataManager.addTaskData(str[0],str[1]);//str[0]は課題名、str[1]は締め切り
                             Log.d("aaa",k+"追加したよー！MainActivity　136");
                         }
                     }
@@ -134,24 +134,22 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("aaa","課題スクレーピングみすった！　MainActivity　138");
                     throw new RuntimeException(e);
                 }
+                return null;*/
                 return null;
             };
 
-            Supplier<String> getClassData = () -> {
+            /*Supplier<String> getClassData = () -> {
                 try {
                     Log.d("aaa","授業データ、スクレーピングするよー！　MainActivity　144");
-                    manabaScraper.getClassInforFromManaba();
+                    ManabaScraper.getClassInforFromManaba();
                 } catch (ExecutionException | InterruptedException | IOException e) {
                     Log.d("aaa","授業データ、スクレーピング失敗！　MainActivity　147");
                     throw new RuntimeException(e);
                 }
                 return null;
-            };
+            };*/
 
-            CompletableFuture.supplyAsync(getTask).thenCompose(result1 -> {
-                Log.d("aaa","課題スクレーピング完了！");
-                return CompletableFuture.supplyAsync(getClassData);
-            }).thenAccept(result2 -> {
+            CompletableFuture.supplyAsync(setData).thenAccept(result2 -> {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -165,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         recyclerView.setLayoutManager(layoutManager);
 
                         //ArrayList<TaskData> taskList = TaskData.getTask();//課題の情報をtaskDataから取得
-                        TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, TaskDataManager.getDataList());//Listviewを表示するためのadapterを設定
+                        TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
                         recyclerView.setAdapter(adapter);//listViewにadapterを設定
 
                         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -178,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
                                 int swipedPosition = viewHolder.getAdapterPosition();
                                 TaskCustomAdapter adapter = (TaskCustomAdapter) recyclerView.getAdapter();
                                 // 登録とかするんだったらなにかのリストから削除をする処理はここ
-                                TaskDataManager.removeTaskData(swipedPosition);
+                                taskDataManager.removeTaskData(swipedPosition);
                                 // 削除されたことを知らせて反映させる。
                                 adapter.notifyItemRemoved(swipedPosition);
                             }
@@ -216,7 +214,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(View v) {//ボタンが押されたら
                                 Log.d("aaa","課題追加ボタンちゃんと押せてるよー！! MainActivity 217");
                                 // ダイアログクラスのインスタンスを作成
-                                AddTaskCustomDialog dialog = new AddTaskCustomDialog(MainActivity.this,adapter);//追加課題の画面のインスタンスを生成
+                                AddTaskCustomDialog dialog = new AddTaskCustomDialog(MainActivity.this,adapter,taskDataManager);//追加課題の画面のインスタンスを生成
                                 // ダイアログを表示
                                 dialog.show();//追加課題の画面を表示
                             }
@@ -225,12 +223,12 @@ public class MainActivity extends AppCompatActivity {
                         className = findViewById(R.id.classnameView);
                         classRoom = findViewById(R.id.classroomView);
 
-                        className.setText(ClassData.getInfor().className);
-                        classRoom.setText(ClassData.getInfor().classRoom);
+                        className.setText(classDataManager.getClassInfor().getTitle());
+                        classRoom.setText(classDataManager.getClassInfor().getSubTitle());
 
-                        NotifyManager.notifyClassInfor(MainActivity.this,ClassData.getInfor().className,ClassData.getInfor().classRoom);
+                       // NotifyManager.notifyClassInfor(MainActivity.this,ClassData.getInfor().className,ClassData.getInfor().classRoom);
 
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             LocalDateTime currentDateTime = LocalDateTime.now();
                             long nextHour=(long)ClassData.getInfor().nextTiming.getHour()-(long)currentDateTime.getHour();
                             long nextMinute=(long)ClassData.getInfor().nextTiming.getMinute()-(long)currentDateTime.getMinute();
@@ -250,7 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
                             Log.d("aaa", "教室情報更新アラーム完了");
 
-                        }
+                        }*/
                     }
                 });
             });
@@ -264,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void getDataFromManaba(){
+    public void getDataFromManaba(TaskDataManager taskDataManager){
         urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_query");
         urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_survey");
         urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_report");
@@ -290,8 +288,8 @@ public class MainActivity extends AppCompatActivity {
                     classRoom.setText(ClassData.getInfor().classRoom);
                     NotifyManager.notifyClassInfor(this,ClassData.getInfor().className,ClassData.getInfor().classRoom);
 
-                    PagerAdapter2 adapter = new PagerAdapter2(this);
-                    viewPager.setAdapter(adapter);
+                    //PagerAdapter2 adapter = new PagerAdapter2(this);
+                    //viewPager.setAdapter(adapter);
 
                     IntentFilter intentFilter = new IntentFilter();
                     intentFilter.addAction("CLASSACTION");

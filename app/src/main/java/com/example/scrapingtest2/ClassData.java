@@ -80,7 +80,7 @@ public class ClassData {
 
             Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
             if(row==-1)return classData.get(0).get(0);
-            else return classData.get(row).get(line);
+            else return classData.get(0).get(0);
         }
         return ClassData.classData.get(0).get(0);
     }
