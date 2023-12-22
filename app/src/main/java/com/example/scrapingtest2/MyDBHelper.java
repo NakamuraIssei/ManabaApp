@@ -30,7 +30,6 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.execSQL(createClassDataTableQuery);
     }
 
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // データベースのバージョンが変更された場合の処理をここに記述します

@@ -37,42 +37,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NotificationListener {
 
     private HashMap<String, String> cookiebag;
-    private final ArrayList<String> urlList = new ArrayList<>();
-    private final ArrayList<String> tabName = new ArrayList<>();
-
-    private TabLayout tabLayout;
-    private ViewPager2 viewPager;
-
     private TextView className;
     private TextView classRoom;
-    private BroadcastReceiver classInforReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            className.setText(ClassData.getInfor().className);
-            classRoom.setText(ClassData.getInfor().classRoom);
-            NotifyManager.notifyClassInfor(getApplicationContext(),ClassData.getInfor().className,ClassData.getInfor().classRoom);
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                LocalDateTime currentDateTime = LocalDateTime.now();
-                long nextHour = (long) ClassData.getInfor().nextTiming.getHour() - (long) currentDateTime.getHour();
-                long nextMinute = (long) ClassData.getInfor().nextTiming.getMinute() - (long) currentDateTime.getMinute();
-                long currentTimeMillis = System.currentTimeMillis() + nextHour * 3600000L + nextMinute * 60000L;
-
-                Log.d("aaa", String.valueOf((currentTimeMillis - System.currentTimeMillis()) / 60000) + "分後に教室の情報を更新します");
-                Log.d("aaa", String.valueOf(currentTimeMillis) + "これが教室更新のエポックタイム");
-
-                intent = new Intent();
-                intent.setAction("CLASSACTION");
-                // PendingIntent pending = PendingIntent.getBroadcast( getApplicationContext(), 0, intent, 0 );
-                // アラームをセットする
-                AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                am.set(AlarmManager.RTC_WAKEUP, currentTimeMillis, pendingIntent);
-            }
-        }
-    };
+    private ClassDataManager cd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +65,10 @@ public class MainActivity extends AppCompatActivity {
 
         NotifyManager2.prepareForNotificationWork(this);
         TaskDataManager taskDataManager=new TaskDataManager("TaskData");
-        ClassDataManager classDataManager=new ClassDataManager("ClassData");
+        cd=new ClassDataManager("ClassData");
         NotificationReceiver2.setTaskDataManager(taskDataManager);
+
+        NotifyManager2.setNotificationListener(this);
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
@@ -104,50 +76,16 @@ public class MainActivity extends AppCompatActivity {
         Cursor classCursor = db.query("ClassData", null, null, null, null, null, "myId");
 
         taskDataManager.setDB(db,taskCursor);
-        classDataManager.setDB(db,classCursor);
+        cd.setDB(db,classCursor);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Supplier<String> setData = () -> {
                 taskDataManager.setTaskData();
                 Log.d("aaa","課題セッティング完了！MainActivity 110");
-                classDataManager.setClassData();
-                /*try {
-                    ArrayList<String> taskList;
-                    taskList=ManabaScraper.scrapeTaskDataFromManaba();
-                    Log.d("aaa","課題スクレーピング完了！　MainActivity　126");
-                    for(String k:taskList){
-                        Log.d("aaa",k+"MainActivity　128");
-                        String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
+                cd.setClassData();
 
-                        //TaskData context;
-                        //context = new TaskData(str[0],1,"hoegohoge",str[1]);//締め切り日時と課題名をペアにする。
-                        if(taskDataManager.isExist(str[0])){
-                            Log.d("aaa",k+"持ってないから追加するよー！MainActivity　134");
-                            taskDataManager.addTaskData(str[0],str[1]);//str[0]は課題名、str[1]は締め切り
-                            Log.d("aaa",k+"追加したよー！MainActivity　136");
-                        }
-                    }
-                } catch (ExecutionException e) {
-                    Log.d("aaa","課題スクレーピングみすった！　MainActivity　135");
-                    throw new RuntimeException(e);
-                } catch (InterruptedException e) {
-                    Log.d("aaa","課題スクレーピングみすった！　MainActivity　138");
-                    throw new RuntimeException(e);
-                }
-                return null;*/
                 return null;
             };
-
-            /*Supplier<String> getClassData = () -> {
-                try {
-                    Log.d("aaa","授業データ、スクレーピングするよー！　MainActivity　144");
-                    ManabaScraper.getClassInforFromManaba();
-                } catch (ExecutionException | InterruptedException | IOException e) {
-                    Log.d("aaa","授業データ、スクレーピング失敗！　MainActivity　147");
-                    throw new RuntimeException(e);
-                }
-                return null;
-            };*/
 
             CompletableFuture.supplyAsync(setData).thenAccept(result2 -> {
                 runOnUiThread(new Runnable() {
@@ -223,108 +161,21 @@ public class MainActivity extends AppCompatActivity {
                         className = findViewById(R.id.classnameView);
                         classRoom = findViewById(R.id.classroomView);
 
-                        className.setText(classDataManager.getClassInfor().getTitle());
-                        classRoom.setText(classDataManager.getClassInfor().getSubTitle());
+                        Data now=cd.getClassInfor();
 
-                       // NotifyManager.notifyClassInfor(MainActivity.this,ClassData.getInfor().className,ClassData.getInfor().classRoom);
-
-                        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            LocalDateTime currentDateTime = LocalDateTime.now();
-                            long nextHour=(long)ClassData.getInfor().nextTiming.getHour()-(long)currentDateTime.getHour();
-                            long nextMinute=(long)ClassData.getInfor().nextTiming.getMinute()-(long)currentDateTime.getMinute();
-                            Log.d("aaa","nextTiming is "+ClassData.getInfor().nextTiming);
-                            long currentTimeMillis = System.currentTimeMillis()+nextHour* 3600000L +nextMinute* 60000L;
-                            if(ClassData.getInfor().judge)currentTimeMillis+=86400000L;
-
-                            Log.d("aaa", String.valueOf((currentTimeMillis-System.currentTimeMillis())/60000)+"分後に教室の情報を更新します");
-                            Log.d("aaa", String.valueOf(currentTimeMillis)+"これが教室更新のエポックタイム");
-
-                            Intent intent = new Intent();
-                            intent.setAction("CLASSACTION");
-
-                            AlarmManager am = (AlarmManager) getSystemService( ALARM_SERVICE );
-                            PendingIntent pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                            am.set(AlarmManager.RTC_WAKEUP, currentTimeMillis, pendingIntent);
-
-                            Log.d("aaa", "教室情報更新アラーム完了");
-
-                        }*/
+                        className.setText(now.getTitle());
+                        classRoom.setText(now.getSubTitle());
                     }
                 });
             });
 
         }
-
-        //getDataFromDatabase();
-        //getDataFromManaba();
     }
-
-
-
-
-    public void getDataFromManaba(TaskDataManager taskDataManager){
-        urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_query");
-        urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_survey");
-        urlList.add("https://ct.ritsumei.ac.jp/ct/home_summary_report");
-        CompletableFuture<String> future1 = null;//非同期処理をするために、CompletableFuture型のデータを使う。
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない
-
-            future1.thenApply(res -> {//上で設定した非同期処理を行う。
-                return res; //
-            }).thenAccept(result-> {
-                Log.d("aaa","スクレーピング完了！");
-                //非同期処理を行った後にする処理（課題追加の部分やからまだいいかも）
-                runOnUiThread(() -> {//UIスレッドで処理を行う（画面描写に関する処理のため）
-                    // UI スレッドでテキストビューを更新する
-
-                    tabLayout = findViewById(R.id.tab_layout);
-                    viewPager = findViewById(R.id.view_pager);
-
-                    className = findViewById(R.id.classnameView);
-                    classRoom = findViewById(R.id.classroomView);
-
-                    className.setText(ClassData.getInfor().className);
-                    classRoom.setText(ClassData.getInfor().classRoom);
-                    NotifyManager.notifyClassInfor(this,ClassData.getInfor().className,ClassData.getInfor().classRoom);
-
-                    //PagerAdapter2 adapter = new PagerAdapter2(this);
-                    //viewPager.setAdapter(adapter);
-
-                    IntentFilter intentFilter = new IntentFilter();
-                    intentFilter.addAction("CLASSACTION");
-                    registerReceiver(classInforReceiver, intentFilter );
-
-
-                    // TabLayoutとViewPager2を連携
-                    new TabLayoutMediator(tabLayout, viewPager,
-                            (tab, position) -> tab.setText(tabName.get(position))
-                    ).attach();
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            LocalDateTime currentDateTime = LocalDateTime.now();
-                            long nextHour=(long)ClassData.getInfor().nextTiming.getHour()-(long)currentDateTime.getHour();
-                            long nextMinute=(long)ClassData.getInfor().nextTiming.getMinute()-(long)currentDateTime.getMinute();
-                            Log.d("aaa","nextTiming is "+ClassData.getInfor().nextTiming);
-                            long currentTimeMillis = System.currentTimeMillis()+nextHour* 3600000L +nextMinute* 60000L;
-                            if(ClassData.getInfor().judge)currentTimeMillis+=86400000L;
-
-                            Log.d("aaa", String.valueOf((currentTimeMillis-System.currentTimeMillis())/60000)+"分後に教室の情報を更新します");
-                            Log.d("aaa", String.valueOf(currentTimeMillis)+"これが教室更新のエポックタイム");
-
-                        Intent intent = new Intent();
-                        intent.setAction("CLASSACTION");
-
-                        AlarmManager am = (AlarmManager) getSystemService( ALARM_SERVICE );
-                        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-                        am.set(AlarmManager.RTC_WAKEUP, currentTimeMillis, pendingIntent);
-
-                        Log.d("aaa", "教室情報更新アラーム完了");
-
-                    }
-                });
-            });
-        }
+    @Override
+    public void onNotificationReceived(int dataId) {
+        dataId=(dataId+49)%49;
+        className.setText(cd.dataList.get(dataId).getTitle());
+        classRoom.setText(cd.dataList.get(dataId).getSubTitle());
     }
-
 
 }

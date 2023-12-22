@@ -89,47 +89,6 @@ public class ManabaScraper {
     }
     private static ArrayList<String> getClassInforFromManaba() throws ExecutionException, InterruptedException, IOException {
 
-        for (int i = 0; i < 7; i++) {
-            ClassData.classData.add(new ArrayList<ClassData>());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                for(int j=0;j<9;j++){
-                    //Log.d("aaa",i+"曜日"+j+"時間目追加するよー");
-                    ClassData.classData.get(i).add(new ClassData());
-                    switch (j){
-                        case 0:
-                            //Log.d("aaa",i+"曜日"+j+"時間目初期化するよー");
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(8, 30);
-                            //Log.d("aaa",i+"曜日"+j+"時間目初期化したよー");
-                            break;
-                        case 1:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(10, 10);
-                            break;
-                        case 2:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(12, 30);
-                            break;
-                        case 3:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(14, 10);
-                            break;
-                        case 4:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(15, 50);
-                            break;
-                        case 5:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(17, 30);
-                            break;
-                        case 6:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(19, 10);
-                            break;
-                        case 7:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(20, 50);
-                            break;
-                        case 8:
-                            ClassData.classData.get(i).get(j).nextTiming= LocalTime.of(8, 30);
-                            ClassData.classData.get(i).get(j).judge=true;
-                            break;
-                    }
-                }
-            }
-        }
         Log.d("aaa","時間割表初期化完了!");
         Document doc = Jsoup.connect(classURL).cookies(cookiebag).get();//jsoupでHTMLを取得する。
         //System.err.println(doc);
@@ -153,27 +112,11 @@ public class ManabaScraper {
                     room = Objects.requireNonNull(divs2.first()).text();
                     classInfor.add((7*(j-1)+i)-1+"???"+room+"???"+name);
                 }
-
-                //Log.d("class",name);
-                //Log.d("class",room);
-
-                ClassData.classData.get(j-1).get(i).classRoom=room;
-                ClassData.classData.get(j-1).get(i).className=name;
             }
         }
         for(String k:classInfor)Log.d("aaa",k+"ManabaScraper 152");
         Log.d("aaa",classInfor.size()+"ManabaScraper 153");
-        /*for(int i=0;i<ClassData.classData.size();i++){
-            for(int j=0;j<ClassData.classData.get(i).size();j++){
-                Log.d("ttt",i+"曜日");
-                Log.d("ttt",j+"時間目");
-                Log.d("ttt",ClassData.classData.get(i).get(j).className);
-                Log.d("ttt",ClassData.classData.get(i).get(j).classRoom);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Log.d("ttt", String.valueOf(ClassData.classData.get(i).get(j).nextTiming));
-                }
-            }
-        }*/
+
         return classInfor;
     }
 

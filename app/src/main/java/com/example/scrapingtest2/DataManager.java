@@ -2,7 +2,6 @@ package com.example.scrapingtest2;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -70,8 +69,6 @@ public class DataManager {
     public void addData(String title,String subTitle){
         Data data=new Data(dataCount,title,subTitle);
         dataCount =(dataCount +1)%99999999;
-        //data.addNotificationTiming(notificationTiming);
-        //requestSettingNotify(dataName,data.getId(),title,subTitle,notificationTiming);
         dataList.add(data);
         insertDataIntoDB(data);
     }
@@ -169,10 +166,10 @@ public class DataManager {
         }
     }
     public void requestSettingNotification(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
-        NotifyManager2.setNotification(dataName,dataId,title,subTitle,notificationTiming);
+        NotifyManager2.setTaskNotification(dataName,dataId,title,subTitle,notificationTiming);
     }
     public void requestCancelNotification(String dataName, String title, String subTitle, LocalDateTime notificationTiming){
-        NotifyManager2.cancelNotification(dataName,title,subTitle,notificationTiming);
+        NotifyManager2.cancelTaskNotification(dataName,title,subTitle,notificationTiming);
     }
     public int deleteFinishedNotification(String title,String subTitle){
         //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。

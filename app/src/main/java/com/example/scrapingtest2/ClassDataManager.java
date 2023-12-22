@@ -80,13 +80,19 @@ public class ClassDataManager extends DataManager{
                 line = 5;
             } else if (minute <1150) {
                 line = 6;
-            }else if (minute <1250) {
+            }else
                 line = 7;
-            }else line = 8;
 
-            //Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
-            if(line==0||line==8)return new Data(0,"時間外です。","行く当てなし");
-            else return dataList.get(7*row+line);
+            Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
+
+            if(line==7){
+                NotifyManager2.setClassNotification(dataName,7*row+6,"次は空きコマです","",now);
+                return new Data(0,"次は空きコマです","");
+            }
+            else{
+                NotifyManager2.setClassNotification(dataName,7*row+line-1,dataList.get(7*row+line-1).getTitle(),dataList.get(7*row+line-1).getSubTitle(),now);
+                return dataList.get(7*row+line-1);
+            }
         }
         return new Data(0,"時間外です。","行く当てなし");
     }

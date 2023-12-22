@@ -20,20 +20,23 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class NotificationReceiver2  extends BroadcastReceiver {
     public NotificationManager notificationManager;
     public SQLiteDatabase db;
+    public Cursor cursor;
     public static TaskDataManager taskDataManager;
 
-    static void setTaskDataManager(TaskDataManager taskDataManager){
-        NotificationReceiver2.taskDataManager=taskDataManager;
-    }
 
     public void onReceive(Context context, Intent intent) {
-        CookieManager ck=CookieManager.getInstance();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        /*CookieManager ck=CookieManager.getInstance();
         String cookies=ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
         HashMap<String, String> cookieBag=new HashMap<>();
 
@@ -79,23 +82,46 @@ public class NotificationReceiver2  extends BroadcastReceiver {
         } else {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
         }
+        */
+            String dataName = intent.getStringExtra("DATANAME");
+            int dataId = intent.getIntExtra("DATAID", 0);
+            int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
+            String title = intent.getStringExtra("TITLE");
+            String subTitle = intent.getStringExtra("SUBTITLE");
 
-        String dataName = intent.getStringExtra("DATANAME");
-        int dataId = intent.getIntExtra("DATAID",0);
-        int notificationId = intent.getIntExtra("NOTIFICATIONID",0);
-        String title = intent.getStringExtra("TITLE");
-        String subTitle = intent.getStringExtra("SUBTITLE");
+            pushNotification(title,subTitle,context,notificationId);
 
-        //通知作業
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {        // ・・・(1)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if(notificationManager ==null)
-                    notificationManager = context.getSystemService(NotificationManager.class);
+            //DB処理作業
+            MyDBHelper myDBHelper = new MyDBHelper(context);
+            db = myDBHelper.getWritableDatabase();
+
+
+            switch (Objects.requireNonNull(dataName)) {
+                case "TaskData":
+                    taskDataWork(title,subTitle,dataId);
+                    break;
+                case "ClassData":
+                    classDataWork(context,dataId);
+                    break;
             }
+        }
+
+    }
+    static void setTaskDataManager(TaskDataManager taskDataManager){
+        NotificationReceiver2.taskDataManager=taskDataManager;
+    }
+    private void pushNotification(String title,String subTitle,Context context,int notificationId){
+        //通知作業
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (notificationManager == null)
+                notificationManager = context.getSystemService(NotificationManager.class);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
             NotificationChannel channel                              // ・・・(2)
-                    = new NotificationChannel(String.valueOf(notificationId), "サンプルアプリ", importance);
+                    = null;
+
+            channel = new NotificationChannel(String.valueOf(notificationId), "サンプルアプリ", importance);
+
 
             channel.setDescription("説明・説明 ここに通知の説明を書くことができます");
 
@@ -106,7 +132,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                     = new NotificationCompat.Builder(context, String.valueOf(notificationId))     // ・・・(4)
 
                     .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                    .setContentTitle(title)
+                    .setContentTitle(String.valueOf(title))
                     .setContentText(subTitle)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
@@ -124,14 +150,12 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             this.notificationManager.notify((int) notificationId, builder.build());
             wakeLock.release();
         }
-        //DB処理作業
-        MyDBHelper myDBHelper = new MyDBHelper(context);
-        db = myDBHelper.getWritableDatabase();
-
-        String[] columns = {"notificationTiming"}; // 取り出したいカラム
-        String selection = "myId = ?"; // WHERE句
-        String[] selectionArgs = {String.valueOf(dataId)}; // WHERE句の引数
-        Cursor cursor = db.query(dataName, columns, selection, selectionArgs, null, null, null);
+    }
+    private void taskDataWork(String title,String subTitle,int dataId){
+        String[] tdColumns = {"notificationTiming"}; // 取り出したいカラム
+        String tdSelection = "myId = ?"; // WHERE句
+        String[] tdSelectionArgs = {String.valueOf(dataId)}; // WHERE句の引数
+        cursor = db.query("TaskData", tdColumns, tdSelection, tdSelectionArgs, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
             @SuppressLint("Range") String notificationTime = cursor.getString(cursor.getColumnIndex("notificationTiming"));
@@ -144,30 +168,74 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 String modifiedString = notificationTime.substring(firstQuestionMarkIndex + 1);
                 ContentValues values = new ContentValues();
                 values.put("notificationTiming", modifiedString);
-                db.update(dataName, values, selection, selectionArgs);
-            }
-            else{
+                db.update("TaskData", values, tdSelection, tdSelectionArgs);
+            } else {
                 ContentValues values = new ContentValues();
                 values.put("notificationTiming", "");
-                db.update(dataName, values, selection, selectionArgs);
+                db.update("TaskData", values, tdSelection, tdSelectionArgs);
             }
 
             cursor.close();
         }
-
-
-
         if (cursor != null) {
             cursor.close();
         }
+        if (taskDataManager != null)
+            taskDataManager.deleteFinishedTaskNotification(title, subTitle);
+    }
+    private void classDataWork(Context context,int dataId){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            // 次の授業の行を取得するクエリ
+            String selectQuery = "SELECT * FROM ClassData WHERE myId = " + (dataId + 1) % 49;
+            cursor = db.rawQuery(selectQuery, null);
 
-        switch(dataName){
-            case "TaskData":
-                if(taskDataManager!=null)
-                    taskDataManager.deleteFinishedTaskNotification(title,subTitle);
-                break;
+            // カーソルからデータを取得
+            if (cursor.moveToFirst()) {
+                @SuppressLint("Range") int myId = cursor.getInt(cursor.getColumnIndex("myId"));
+                @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("title"));
+                @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("subTitle"));
+
+                Log.d("ClassData", "myId: " + myId + ", nextClass: " + nextClass + ", nextRoom: " + nextRoom + "NotificationReceiver2 180");
+
+
+                // 今日の0時0分を取得
+                LocalDateTime nextTiming = null;
+
+                nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+
+                switch (myId % 7) {
+                    case 0:
+                        nextTiming = nextTiming.plusDays(1).plusHours(8).plusMinutes(30);
+                        break;
+                    case 1:
+                        nextTiming = nextTiming.plusHours(10).plusMinutes(10);
+                        break;
+                    case 2:
+                        nextTiming = nextTiming.plusHours(12).plusMinutes(30);
+                        break;
+                    case 3:
+                        nextTiming = nextTiming.plusHours(14).plusMinutes(10);
+                        break;
+                    case 4:
+                        nextTiming = nextTiming.plusHours(15).plusMinutes(50);
+                        break;
+                    case 5:
+                        nextTiming = nextTiming.plusHours(17).plusMinutes(30);
+                        break;
+                    case 6:
+                        nextTiming = nextTiming.plusHours(19).plusMinutes(10);
+                        break;
+                }
+
+                // カーソルを閉じる
+                cursor.close();
+
+                NotifyManager2.setContext(context);
+                NotifyManager2.setClassNotification("ClassData", myId, nextClass, nextRoom, nextTiming);
+
+            }
         }
-
     }
 }
 
