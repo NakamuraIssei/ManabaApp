@@ -19,14 +19,16 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + "myId INTEGER PRIMARY KEY,"
                 + "title TEXT,"
                 + "subTitle TEXT,"
-                + "notificationTiming TEXT)";
+                + "notificationTiming TEXT,"
+                + "done Boolern)";
         db.execSQL(createTaskDataTableQuery);
 
         String createClassDataTableQuery = "CREATE TABLE IF NOT EXISTS ClassData ("
                 + "myId INTEGER PRIMARY KEY,"
                 + "title TEXT,"
                 + "subTitle TEXT,"
-                + "notificationTiming TEXT)";
+                + "notificationTiming TEXT,"
+                + "done Boolern)";
         db.execSQL(createClassDataTableQuery);
     }
 

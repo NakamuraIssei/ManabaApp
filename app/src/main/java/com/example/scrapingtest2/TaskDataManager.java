@@ -22,8 +22,8 @@ public class TaskDataManager extends DataManager{
     private HashMap<Integer,NotificationCustomAdapter> notificationAdapterBag;
     private ArrayList<AppCompatImageButton> bellButtonList;
 
-    TaskDataManager(String dataName){
-        prepareForWork(dataName);
+    TaskDataManager(String dataName,int firstNum){
+        prepareForWork(dataName,firstNum);
         notificationAdapterBag =new HashMap<>();
         bellButtonList=new ArrayList<>();
     }
@@ -48,7 +48,7 @@ public class TaskDataManager extends DataManager{
     }
     public void setTaskData() {
         loadData();
-        getTaskDataFromManaba();
+        //getTaskDataFromManaba();
         reorderTaskData();
     }
     public void addTaskData(String title, String deadLine) {

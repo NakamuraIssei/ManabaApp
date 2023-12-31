@@ -22,24 +22,21 @@ public class ManabaScraper {
     private static HashMap<String, String> cookiebag;
     public static ArrayList<String> taskInfor;
     private static ArrayList<String> classInfor;
-
     private static String classURL;
 
-
     public static ArrayList<String> receiveRequest(String dataName) throws ExecutionException, InterruptedException, IOException {
+        taskInfor =new ArrayList<>();
+        classInfor=new ArrayList<>();
         switch (dataName){
             case "TaskData":
                 return scrapeTaskDataFromManaba();
             case "ClassData":
                 return getClassInforFromManaba();
-
         }
         return null;
     }
     public static void setCookie(HashMap<String, String> cookiebag){
         ManabaScraper.cookiebag =cookiebag;
-        taskInfor =new ArrayList<>();
-        classInfor=new ArrayList<>();
         urlList= new ArrayList<>(Arrays.asList(
                 "https://ct.ritsumei.ac.jp/ct/home_summary_query",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_survey",
@@ -69,11 +66,6 @@ public class ManabaScraper {
                                 assert dateElement != null;
                                 String deadLine = dateElement.text();//締め切りを文字列で取得。
                                 taskInfor.add(taskName+"???"+deadLine);//「課題名???締め切り」の形の文字列を作る。
-                                //Log.d("aaa",extractedText);
-                                //Log.d("aaa",dateText);
-                                //TaskData context;
-                                //context = new TaskData(extractedText,1,"hoegohoge",dateText);//締め切り日時と課題名をペアにする。
-                                //if(TaskData.isExist(context.name))TaskData.addTask(context,1);//ペアにした締め切り日時と課題名をtaskDataに入れる。第二引数にはdbに書き込むので1を入れる。書き込まないときは0
                             }
                         }
                     }
@@ -88,35 +80,48 @@ public class ManabaScraper {
         return taskInfor;
     }
     private static ArrayList<String> getClassInforFromManaba() throws ExecutionException, InterruptedException, IOException {
-
-        Log.d("aaa","時間割表初期化完了!");
-        Document doc = Jsoup.connect(classURL).cookies(cookiebag).get();//jsoupでHTMLを取得する。
-        //System.err.println(doc);
-        Elements doc2 = doc.select("#courselistweekly > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
-        //Log.d("bbb", String.valueOf(doc2));
-
-        Elements rows = doc2.select("tr");
-
         classInfor.clear();
-        for (int i = 1; i < rows.size(); i++) {
-            Element row = rows.get(i);
-            Elements cells = row.select("td"); // <td>要素を取得
-            for (int j = 1; j < cells.size(); j++) {
-                //Log.d("aaa",j+"曜日目の"+i+"時間目");
-                Element cell = cells.get(j);
-                Elements divs = cell.select("div.couraselocationinfo.couraselocationinfoV2");
-                Elements divs2 = cell.select("div.courselistweekly-nonborder.courselistweekly-c");
-                String name="次は空きコマです",room="";
-                if(!divs.isEmpty()&&!divs2.isEmpty()){
-                    name = Objects.requireNonNull(divs.first()).text();
-                    room = Objects.requireNonNull(divs2.first()).text();
-                    classInfor.add((7*(j-1)+i)-1+"???"+room+"???"+name);
-                }
-            }
-        }
-        for(String k:classInfor)Log.d("aaa",k+"ManabaScraper 152");
-        Log.d("aaa",classInfor.size()+"ManabaScraper 153");
+        CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
+            scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
+                try {
+                    Document doc = Jsoup.connect(classURL).cookies(cookiebag).get();//jsoupでHTMLを取得する。
+                    //System.err.println(doc);
+                    Elements doc2 = doc.select("#courselistweekly > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
+                    //Log.d("bbb", String.valueOf(doc2));
 
+                    Elements rows = doc2.select("tr");
+
+                    classInfor.clear();
+                    for (int i = 1; i < rows.size(); i++) {
+                        Element row = rows.get(i);
+                        Elements cells = row.select("td"); // <td>要素を取得
+                        for (int j = 1; j < cells.size(); j++) {
+                            //Log.d("aaa",j+"曜日目の"+i+"時間目");
+                            Element cell = cells.get(j);
+                            Elements divs = cell.select("div.couraselocationinfo.couraselocationinfoV2");
+                            Elements divs2 = cell.select("div.courselistweekly-nonborder.courselistweekly-c");
+                            String name="次は空きコマです",room="";
+                            if(!divs.isEmpty()&&!divs2.isEmpty()){
+                                name = Objects.requireNonNull(divs.first()).text();
+                                room = Objects.requireNonNull(divs2.first()).text();
+                                classInfor.add((7*(j-1)+i)-1+"???"+room+"???"+name);
+                            }
+                        }
+                    }
+                    for(String k:classInfor)Log.d("aaa",k+"ManabaScraper 152");
+                    Log.d("aaa",classInfor.size()+"ManabaScraper 153");
+
+                    return classInfor;
+
+                } catch (IOException e) {//tryの中でうまくいかなかった時の処理。
+                    e.printStackTrace();
+                }
+                return classInfor;
+            });
+
+            return scrapingTask.get();
+        }
         return classInfor;
     }
 

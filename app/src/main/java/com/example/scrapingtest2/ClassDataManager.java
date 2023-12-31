@@ -15,25 +15,23 @@ import java.util.concurrent.ExecutionException;
 
 public class ClassDataManager extends DataManager{
 
-    ClassDataManager(String dataName){
-        prepareForWork(dataName);
+    ClassDataManager(String dataName,int firstNum){
+        prepareForWork(dataName,firstNum);
     }
 
     public void setClassData() {
         loadData();
         Log.d("aaa","テーブルからのClassData読み込み完了！。ClassDataManager 24");
         if(dataCount!=49){
-            Log.d("aaa","ClassDataの数が"+dataCount+"しかなかったのでスクレーピングします。ClassDataManager 23");
+            Log.d("aaa","ClassDataの数が"+dataCount+"しかなかったので初期化します。ClassDataManager 26");
             dataList.clear();
             db.execSQL("DELETE FROM " + dataName);
             dataCount=0;
             for(int i=0;i<49;i++){
                 addData("次は空きコマです","");
             }
-            getClassDataFromManaba();
         }
     }
-
     public Data getClassInfor(){
         LocalDateTime now = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -84,7 +82,7 @@ public class ClassDataManager extends DataManager{
                 line = 7;
 
             Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
-
+            if(dataList.size()!=49)return new Data(0,"授業情報を取得できませんでした","");
             if(line==7){
                 NotifyManager2.setClassNotification(dataName,7*row+6,"次は空きコマです","",now);
                 return new Data(0,"次は空きコマです","");
@@ -96,7 +94,7 @@ public class ClassDataManager extends DataManager{
         }
         return new Data(0,"時間外です。","行く当てなし");
     }
-    private void getClassDataFromManaba(){
+    public void getClassDataFromManaba(){
         try {
             ArrayList<String> classList;
             classList=requestScraping();
@@ -116,7 +114,6 @@ public class ClassDataManager extends DataManager{
             throw new RuntimeException(e);
         }
     }
-
     private void replaceClassData(int num,String title,String subTitle){
         dataList.get(num).replaceTitle(title);
         dataList.get(num).replaceSubtitle(subTitle);

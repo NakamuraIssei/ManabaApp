@@ -25,19 +25,22 @@ public class DataManager {
     protected Cursor cursor;
     protected DateTimeFormatter formatter;
 
-    public void prepareForWork(String DataName){
+    // 0~48 授業用のid
+    // 49~ 課題用のid
+
+    public void prepareForWork(String DataName, int firstNum){//インスタンスを生成した時に使う初期化用のメゾッド
         dataName=DataName;
-        dataCount =0;
+        dataCount =firstNum;
         dataList=new ArrayList<Data>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
     };
-    public void setDB(SQLiteDatabase DB, Cursor Cursor){
+    public void setDB(SQLiteDatabase DB, Cursor Cursor){// データベースを渡す
         db=DB;
         cursor=Cursor;
     }
-    public void loadData(){
+    public void loadData(){//データベースからデータを読み込んで、dataListに追加
         Log.d("aaa","今からデータをロードします。DataManager 41");
         while (cursor.moveToNext()) {
             @SuppressLint("Range")int datacount = cursor.getInt(cursor.getColumnIndex("myId"));

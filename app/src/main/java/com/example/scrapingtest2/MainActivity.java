@@ -1,11 +1,6 @@
 package com.example.scrapingtest2;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
@@ -15,6 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.CookieManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -23,26 +19,20 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.tabs.TabLayoutMediator;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
-public class MainActivity extends AppCompatActivity implements NotificationListener {
+public class MainActivity extends AppCompatActivity implements ClassUpdateListener {
 
-    private HashMap<String, String> cookiebag;
+    private HashMap<String, String> cookieBag;
     private TextView className;
     private TextView classRoom;
     private ClassDataManager cd;
+    private CookieManager cookieManager;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,17 +45,21 @@ public class MainActivity extends AppCompatActivity implements NotificationListe
         //tabName.add("時間割");
         //tabName.add("自由時間");
         //tabName.add("就活");
-        cookiebag=new HashMap<>();
+
+        /*cookiebag=new HashMap<>();
 
         Intent intent = getIntent();
         Bundle bundle = intent.getBundleExtra("BUNDLE");
         cookiebag = (HashMap<String, String>)bundle.getSerializable("cookiebag");
 
-        ManabaScraper.setCookie(cookiebag);
+        ManabaScraper.setCookie(cookiebag);*/
+        cookieManager=CookieManager.getInstance();
+        cookieBag=new HashMap<>();
+        context=this;
 
         NotifyManager2.prepareForNotificationWork(this);
-        TaskDataManager taskDataManager=new TaskDataManager("TaskData");
-        cd=new ClassDataManager("ClassData");
+        TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
+        cd=new ClassDataManager("ClassData",0);
         NotificationReceiver2.setTaskDataManager(taskDataManager);
 
         NotifyManager2.setNotificationListener(this);
@@ -80,10 +74,9 @@ public class MainActivity extends AppCompatActivity implements NotificationListe
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Supplier<String> setData = () -> {
-                taskDataManager.setTaskData();
-                Log.d("aaa","課題セッティング完了！MainActivity 110");
+                taskDataManager.loadData();
+                taskDataManager.reorderTaskData();
                 cd.setClassData();
-
                 return null;
             };
 
@@ -91,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements NotificationListe
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
                         Log.d("aaa","授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
                         RecyclerView recyclerView = MainActivity.this.findViewById(R.id.RecycleView);//画面上のListViewの情報を変数listViewに設定
@@ -157,15 +149,35 @@ public class MainActivity extends AppCompatActivity implements NotificationListe
                                 dialog.show();//追加課題の画面を表示
                             }
                         });
+                        Button LogOffButton = MainActivity.this.findViewById(R.id.LogOff);//課題追加の画面を呼び出すボタンの設定
+                        LogOffButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
+                            @Override
+                            public void onClick(View v) {//ボタンが押されたら
+                                cookieManager.removeAllCookie();
+                            }
+                        });
 
                         className = findViewById(R.id.classnameView);
                         classRoom = findViewById(R.id.classroomView);
 
-                        Data now=cd.getClassInfor();
+                        if(!checkLogin()){
+                            LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context);//追加課題の画面のインスタンスを生成
+                            // ダイアログを表示
+                            dialog.show();//追加課題の画面を表示
+                        }else{
+                            ManabaScraper.setCookie(cookieBag);
+                            cd.getClassDataFromManaba();
+                            taskDataManager.getTaskDataFromManaba();
+                            taskDataManager.reorderTaskData();
 
-                        className.setText(now.getTitle());
-                        classRoom.setText(now.getSubTitle());
+                            Data now=cd.getClassInfor();
+                            className.setText(now.getTitle());
+                            classRoom.setText(now.getSubTitle());
+
+                            adapter.notifyDataSetChanged();
+                        }
                     }
+
                 });
             });
 
@@ -176,6 +188,35 @@ public class MainActivity extends AppCompatActivity implements NotificationListe
         dataId=(dataId+49)%49;
         className.setText(cd.dataList.get(dataId).getTitle());
         classRoom.setText(cd.dataList.get(dataId).getSubTitle());
+    }
+    @Override
+    public void updateDisplay(Data data) {
+        className.setText(data.getTitle());
+        classRoom.setText(data.getSubTitle());
+    }
+
+    public boolean checkLogin(){
+        String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
+        if (cookies != null) {//取ってきたクッキーが空でなければ
+            Log.d("aaa",cookies);
+            cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
+            String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
+            for (String cookie : cookieList) {//cookieListの中身でループを回す
+                Log.d("aaa", cookie.trim());
+                String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
+                cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
+            }
+            //flag=false;
+            for(String cookie : cookieBag.keySet()){
+                //if(flag)break;
+                if(Objects.equals(cookie, " sessionid")) {//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
+                    Log.d("aaa", "ログインできてたわー MainActivity 209");
+                    return true;
+                }
+            }
+            return false;
+        }
+        return false;
     }
 
 }

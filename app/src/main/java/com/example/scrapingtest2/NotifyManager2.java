@@ -21,7 +21,7 @@ public class NotifyManager2 {
     private static HashMap<NotificationData,Integer> dataBag;
     private static HashMap<Integer,PendingIntent> pendingIntentBag;
     private static AlarmManager notificationAlarmManager;
-    private static NotificationListener notificationListener;
+    private static ClassUpdateListener classUpdateListener;
     private static Context context;
 
     static void prepareForNotificationWork(Context context){
@@ -34,8 +34,8 @@ public class NotifyManager2 {
     static void setContext(Context context){
         NotifyManager2.context =context;
     }
-    static void setNotificationListener(NotificationListener listener) {
-        notificationListener = listener;
+    static void setNotificationListener(ClassUpdateListener listener) {
+        classUpdateListener = listener;
     }
     static void setTaskNotification(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
         Log.d("aaa",dataName+" "+title+" "+subTitle+" "+notificationTiming.toString()+" の通知設定依頼を受けました。NotyfyManager2 36");
@@ -98,9 +98,8 @@ public class NotifyManager2 {
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
             Log.d("aaa",japanEpochMilli+"でAlarmMangerに設定しました。NotyfyManager2 96");
         }
-        if (notificationListener != null) {
-            notificationListener.onNotificationReceived(dataId-1);
+        if (classUpdateListener != null) {
+            classUpdateListener.onNotificationReceived(dataId-1);
         }
-
     }
 }
