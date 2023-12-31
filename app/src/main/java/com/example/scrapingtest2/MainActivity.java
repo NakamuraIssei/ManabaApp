@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
         NotifyManager2.prepareForNotificationWork(this);
         TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
+        AddNotificationDialog.setTaskdataManager(taskDataManager);
         cd=new ClassDataManager("ClassData",0);
         NotificationReceiver2.setTaskDataManager(taskDataManager);
 

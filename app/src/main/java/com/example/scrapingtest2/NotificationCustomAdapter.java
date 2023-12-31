@@ -53,7 +53,8 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
         else holder.text1.setText("アンドロイドのバージョンが小さいです");
         holder.editButton.setOnClickListener(v -> {
             Log.d("aaa","通知編集ボタン押せてるよー");
-           AddNotificationDialog.editNotificationN(context,taskDataId,this,position);
+            AddNotificationDialog dialog=new AddNotificationDialog(context);
+            dialog.editNotificationN(taskDataId,this,position);
         });
     }
     @Override

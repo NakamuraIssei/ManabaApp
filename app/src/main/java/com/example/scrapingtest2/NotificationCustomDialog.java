@@ -98,7 +98,8 @@ public class NotificationCustomDialog extends Dialog {
         addNotifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddNotificationDialog.setNotificationN(context,position,adapter);
+                AddNotificationDialog dialog=new AddNotificationDialog(context);
+                dialog.setNotificationN(position,adapter);
             }
         });
     }

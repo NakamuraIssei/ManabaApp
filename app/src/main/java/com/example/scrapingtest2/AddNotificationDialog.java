@@ -14,14 +14,20 @@ import java.time.ZoneId;
 
 
 public class AddNotificationDialog extends Dialog {
-    private static Calendar selectedTime;
+    private Calendar selectedTime;
     private static TaskDataManager taskDataManager;
+    private Context context;
 
-    public AddNotificationDialog(Context context,TaskDataManager taskDataManager) {
+    public AddNotificationDialog(Context context) {
         super(context);
+        this.context = context;
+    }
+
+    public static void setTaskdataManager(TaskDataManager taskDataManager){
         AddNotificationDialog.taskDataManager=taskDataManager;
     }
-    public static void setNotificationN(Context context, int position, NotificationCustomAdapter adapter ) {
+
+    public void setNotificationN(int position, NotificationCustomAdapter adapter ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             selectedTime = Calendar.getInstance();
             int year = selectedTime.get(Calendar.YEAR);
@@ -80,7 +86,7 @@ public class AddNotificationDialog extends Dialog {
             datePickerDialog.show();
         }
     }
-    public static void editNotificationN(Context context, int taskDataId, NotificationCustomAdapter adapter, int position) {
+    public void editNotificationN(int taskDataId, NotificationCustomAdapter adapter, int position) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             selectedTime = Calendar.getInstance();
             int year = selectedTime.get(Calendar.YEAR);
