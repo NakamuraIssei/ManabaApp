@@ -128,10 +128,10 @@ public class NotifyManager2 {
                 nextTiming = nextTiming.plusDays(1);
             }
 
-
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = nextTiming.atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
             long japanEpochMilli = japanInstant.toEpochMilli();
+
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
         dataCount=(dataCount+1)%99999999;
