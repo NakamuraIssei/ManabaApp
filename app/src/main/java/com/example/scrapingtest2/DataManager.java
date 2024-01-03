@@ -169,10 +169,10 @@ public class DataManager {
         }
     }
     public void requestSettingNotification(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
-        NotifyManager2.setTaskNotification(dataName,dataId,title,subTitle,notificationTiming);
+        NotifyManager2.setTaskNotificationAlarm(dataName,dataId,title,subTitle,notificationTiming);
     }
     public void requestCancelNotification(String dataName, String title, String subTitle, LocalDateTime notificationTiming){
-        NotifyManager2.cancelTaskNotification(dataName,title,subTitle,notificationTiming);
+        NotifyManager2.cancelTaskNotificationAlarm(dataName,title,subTitle,notificationTiming);
     }
     public int deleteFinishedNotification(String title,String subTitle){
         //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。

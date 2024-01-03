@@ -15,14 +15,14 @@ import java.util.Objects;
 
 public class LoginDialog extends Dialog {
 
-    private WebView myWebView;
-    private String url;
-    private HashMap<String, String> cookieBag;
-    private CookieManager cookieManager;
-    private TaskDataManager taskDataManager;
-    private ClassDataManager classDataManager;
-    private TaskCustomAdapter adapter;
-    private static ClassUpdateListener classUpdateListener;
+    public WebView myWebView;
+    public String url;
+    public HashMap<String, String> cookieBag;
+    public CookieManager cookieManager;
+    public TaskDataManager taskDataManager;
+    public ClassDataManager classDataManager;
+    public TaskCustomAdapter adapter;
+    public static ClassUpdateListener classUpdateListener;
     public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager,TaskDataManager td,ClassDataManager cd,TaskCustomAdapter adapter,ClassUpdateListener listener) {
         super(context);
         this.url=url;
@@ -71,7 +71,7 @@ public class LoginDialog extends Dialog {
                             taskDataManager.getTaskDataFromManaba();
                             taskDataManager.reorderTaskData();
                             adapter.notifyDataSetChanged();
-                            classUpdateListener.updateDisplay(classDataManager.getClassInfor());
+                            classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
                             dismiss();
                         }
                     }

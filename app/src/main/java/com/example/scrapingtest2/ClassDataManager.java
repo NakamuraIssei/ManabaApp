@@ -1,11 +1,7 @@
 package com.example.scrapingtest2;
 
-import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.content.Context;
 import android.util.Log;
-import android.util.Pair;
-import android.widget.TextView;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
@@ -84,11 +80,11 @@ public class ClassDataManager extends DataManager{
             Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
             if(dataList.size()!=49)return new Data(0,"授業情報を取得できませんでした","");
             if(line==7){
-                NotifyManager2.setClassNotification(dataName,7*row+6,"次は空きコマです","",now);
+                NotifyManager2.setClassNotificationAlarm(dataName,7*row+6,"次は空きコマです","",now);
                 return new Data(0,"次は空きコマです","");
             }
             else{
-                NotifyManager2.setClassNotification(dataName,7*row+line-1,dataList.get(7*row+line-1).getTitle(),dataList.get(7*row+line-1).getSubTitle(),now);
+                NotifyManager2.setClassNotificationAlarm(dataName,7*row+line-1,dataList.get(7*row+line-1).getTitle(),dataList.get(7*row+line-1).getSubTitle(),now);
                 return dataList.get(7*row+line-1);
             }
         }

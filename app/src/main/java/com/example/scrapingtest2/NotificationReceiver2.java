@@ -1,10 +1,8 @@
 package com.example.scrapingtest2;
 
 import android.annotation.SuppressLint;
-import android.app.AlarmManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -21,8 +19,6 @@ import androidx.core.app.NotificationManagerCompat;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -36,60 +32,12 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-        /*CookieManager ck=CookieManager.getInstance();
-        String cookies=ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
-        HashMap<String, String> cookieBag=new HashMap<>();
-
-        if (cookies != null) {//取ってきたクッキーが空でなければ
-            Log.d("aaa",cookies);
-            //クッキーバッグになんか残ってたら嫌やから空っぽにしておく
-            String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
-            for (String cookie : cookieList) {//cookieListの中身でループを回す
-                Log.d("aaa", cookie.trim());
-                String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
-                cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
-            }
-
-        }
-        ManabaScraper.setCookie(cookieBag);
-        Log.d("aaa", "今からバックグラウンドでのスクレイピングするよ　NotificationReceiver2 44");
-        try {
-            Log.d("aaa",ManabaScraper.receiveRequest("TaskData").toString()+"NotificationReceiver2 45");
-        } catch (ExecutionException e) {
-            Log.d("aaa","バックグラウンドでのスクレイピング失敗。NotificationReceiver2 47");
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            Log.d("aaa","バックグラウンドでのスクレイピング失敗。NotificationReceiver2 49");
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        Intent newIntent = new Intent(context, NotificationReceiver2.class);
-        newIntent.setAction(String.valueOf(500));
-        newIntent.putExtra("DATANAME","");
-        newIntent.putExtra("DATAID",1);
-        newIntent.putExtra("NOTIFICATIONID",300);
-        newIntent.putExtra("TITLE","固有値");
-        newIntent.putExtra("SUBTITLE","2023-10-30 10:30");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, newIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        long triggerTime = System.currentTimeMillis() + (60 * 1000); // 現在の時間から5分後
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            alarmManager.setAlarmClock(new AlarmManager.AlarmClockInfo(triggerTime, pendingIntent), pendingIntent);
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-        }
-        */
             String dataName = intent.getStringExtra("DATANAME");
             int dataId = intent.getIntExtra("DATAID", 0);
             int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
             String title = intent.getStringExtra("TITLE");
             String subTitle = intent.getStringExtra("SUBTITLE");
 
-            pushNotification(title,subTitle,context,notificationId);
 
             //DB処理作業
             MyDBHelper myDBHelper = new MyDBHelper(context);
@@ -98,10 +46,15 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
             switch (Objects.requireNonNull(dataName)) {
                 case "TaskData":
+                    pushNotification(title,subTitle,context,notificationId);
                     taskDataWork(title,subTitle,dataId);
                     break;
                 case "ClassData":
+                    pushNotification(title,subTitle,context,notificationId);
                     classDataWork(context,dataId);
+                    break;
+                case "BackScraping":
+                    backScraping(context);
                     break;
             }
         }
@@ -232,10 +185,38 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 cursor.close();
 
                 NotifyManager2.setContext(context);
-                NotifyManager2.setClassNotification("ClassData", myId, nextClass, nextRoom, nextTiming);
+                NotifyManager2.setClassNotificationAlarm("ClassData", myId, nextClass, nextRoom, nextTiming);
 
             }
         }
+    }
+
+    private void backScraping(Context context){
+        NotifyManager2.prepareForNotificationWork(context);
+        NotifyManager2.setBackScrapingAlarm();
+
+        CookieManager ck=CookieManager.getInstance();
+        String cookies=ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
+        HashMap<String, String> cookieBag=new HashMap<>();
+
+        if (cookies != null) {//取ってきたクッキーが空でなければ
+            //クッキーバッグになんか残ってたら嫌やから空っぽにしておく
+            String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
+            for (String cookie : cookieList) {//cookieListの中身でループを回す
+                Log.d("aaa", cookie.trim());
+                String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
+                cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
+            }
+        }
+        ManabaScraper.setCookie(cookieBag);
+        Log.d("aaa", "今からバックグラウンドでのスクレイピングするよ　NotificationReceiver2 209");
+            TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
+            cursor = db.query("TaskData", null, null, null, null, null, "myId");
+            taskDataManager.setDB(db,cursor);
+            taskDataManager.loadData();
+            taskDataManager.reorderTaskData();
+            taskDataManager.getTaskDataFromManaba();
+            taskDataManager.reorderTaskData();
     }
 }
 

@@ -1,5 +1,6 @@
 package com.example.scrapingtest2;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,6 +21,8 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -61,9 +64,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
         AddNotificationDialog.setTaskdataManager(taskDataManager);
         cd=new ClassDataManager("ClassData",0);
-        NotificationReceiver2.setTaskDataManager(taskDataManager);
 
+        NotificationReceiver2.setTaskDataManager(taskDataManager);
         NotifyManager2.setNotificationListener(this);
+        NotifyManager2.setBackScrapingAlarm();
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
@@ -191,11 +195,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         classRoom.setText(cd.dataList.get(dataId).getSubTitle());
     }
     @Override
-    public void updateDisplay(Data data) {
+    public void updateClassTextView(Data data) {
         className.setText(data.getTitle());
         classRoom.setText(data.getSubTitle());
     }
-
     public boolean checkLogin(){
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
         if (cookies != null) {//取ってきたクッキーが空でなければ
@@ -219,5 +222,4 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         }
         return false;
     }
-
 }
