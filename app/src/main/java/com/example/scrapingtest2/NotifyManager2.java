@@ -122,12 +122,10 @@ public class NotifyManager2 {
 
             if (currentHour < targetHour) {
                 // 現在時刻が12時より前の場合、今日の12時に設定
-                //nextTiming = nextTiming.plusHours(12);
-                nextTiming = now.plusMinutes(1);
+                nextTiming = nextTiming.plusHours(12);
             } else {
                 // 現在時刻が12時以降の場合、翌日の0時に設定
-                //nextTiming = nextTiming.plusDays(1);
-                nextTiming = now.plusMinutes(1);
+                nextTiming = nextTiming.plusDays(1);
             }
 
 
