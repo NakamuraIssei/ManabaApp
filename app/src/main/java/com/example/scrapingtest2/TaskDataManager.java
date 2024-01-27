@@ -96,7 +96,8 @@ public class TaskDataManager extends DataManager{
     public void deleteFinishedTaskNotification(String title,String subTitle){
         int num=deleteFinishedNotification(title,subTitle);
         changeBellButton(num);
-        notificationAdapterBag.get(num).notifyDataSetChanged();
+        if(notificationAdapterBag.get(num)!=null)
+            notificationAdapterBag.get(num).notifyDataSetChanged();
     }
     public void getTaskDataFromManaba(){
         try {
