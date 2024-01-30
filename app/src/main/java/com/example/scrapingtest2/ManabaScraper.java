@@ -9,7 +9,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class ManabaScraper {
             case "TaskData":
                 return scrapeTaskDataFromManaba();
             case "ClassData":
-                return getClassInforFromManaba();
+                return getClassDataFromManaba();
         }
         return null;
     }
@@ -59,13 +58,18 @@ public class ManabaScraper {
                         for(Element row : doc2){//切り取ったテーブルの中身でループを回す。
                             //Log.d("aaa", String.valueOf(row));
                             if(!row.text().equals("タイトル コース名 受付終了日時")){//rowのHTMLのテキストが"タイトル コース名 受付終了日時"で無ければ
-                                Element titleElement = row.selectFirst("h3.myassignments-title > a");//課題名の部分を切り取る。
-                                assert titleElement != null;
-                                String taskName = titleElement.text();//課題名を文字列で取得。
-                                Element dateElement = row.selectFirst("td:last-child");//締め切りの部分を切り取る。
-                                assert dateElement != null;
-                                String deadLine = dateElement.text();//締め切りを文字列で取得。
-                                taskInfor.add(taskName+"???"+deadLine);//「課題名???締め切り」の形の文字列を作る。
+                                Element taskNameElement = row.selectFirst("h3.myassignments-title > a");//課題名の部分を切り取る。
+                                Element deadLineElement = row.selectFirst("td:last-child");//締め切りの部分を切り取る。
+                                Element belongedClassElement = row.select("td:nth-child(2)").first();
+                                Element taskURLElement =row.selectFirst("td h3.myassignments-title a");
+
+                                if(taskNameElement!=null&&deadLineElement!=null&&belongedClassElement!=null&&taskURLElement!=null){
+                                    String taskName = taskNameElement.text();//課題名を文字列で取得。
+                                    String deadLine = deadLineElement.text();//締め切りを文字列で取得。
+                                    String belongedClassName = belongedClassElement.text();//締め切りを文字列で取得。
+                                    String taskURL =taskURLElement.attr("href");
+                                    taskInfor.add(taskName+"???"+deadLine+"???"+belongedClassName+"???"+taskURL);//「課題名???締め切り」の形の文字列を作る。
+                                }
                             }
                         }
                     }
@@ -79,7 +83,7 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    private static ArrayList<String> getClassInforFromManaba() throws ExecutionException, InterruptedException, IOException {
+    private static ArrayList<String> getClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {
         classInfor.clear();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -101,11 +105,16 @@ public class ManabaScraper {
                             Element cell = cells.get(j);
                             Elements divs = cell.select("div.couraselocationinfo.couraselocationinfoV2");
                             Elements divs2 = cell.select("div.courselistweekly-nonborder.courselistweekly-c");
-                            String name="次は空きコマです",room="";
+                            Element divs3 = cell.select("div.courselistweekly-nonborder.courselistweekly-c a[href]").first();
+
+                            String classRoom="",className="次は空きコマです",url="";
                             if(!divs.isEmpty()&&!divs2.isEmpty()){
-                                name = Objects.requireNonNull(divs.first()).text();
-                                room = Objects.requireNonNull(divs2.first()).text();
-                                classInfor.add((7*(j-1)+i)-1+"???"+room+"???"+name);
+                                classRoom = Objects.requireNonNull(divs.first()).text();
+                                className = Objects.requireNonNull(Objects.requireNonNull(divs2.first()).select("a")).text();
+                                className = className.substring(0, className.length() - 1);//最後に空白が入ってるから、それを消す。
+                                assert divs3 != null;
+                                url= Objects.requireNonNull(divs3.attr("href"));
+                                classInfor.add((7*(j-1)+i)-1+"???"+className+"???"+classRoom+"???"+url);//番号、授業名、教室名、URLの順番
                             }
                         }
                     }

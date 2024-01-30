@@ -1,5 +1,6 @@
 package com.example.scrapingtest2;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.util.Log;
 
@@ -11,24 +12,40 @@ import java.util.concurrent.ExecutionException;
 
 public class ClassDataManager extends DataManager{
 
-    ClassDataManager(String dataName,int firstNum){
-        prepareForWork(dataName,firstNum);
+    ClassDataManager(String dataName){
+        prepareForWork(dataName);
     }
 
-    public void setClassData() {
-        loadData();
-        Log.d("aaa","テーブルからのClassData読み込み完了！。ClassDataManager 24");
-        if(dataCount!=49){
-            Log.d("aaa","ClassDataの数が"+dataCount+"しかなかったので初期化します。ClassDataManager 26");
-            dataList.clear();
-            db.execSQL("DELETE FROM " + dataName);
-            dataCount=0;
-            for(int i=0;i<49;i++){
-                addData("次は空きコマです","");
-            }
+    public void loadClassData(){//データベースからデータを読み込んで、dataListに追加
+        Log.d("aaa","今からクラスデータをロードします。ClassDataManager 22");
+        while (cursor.moveToNext()) {
+            @SuppressLint("Range")int datacount = cursor.getInt(cursor.getColumnIndex("classId"));
+            @SuppressLint("Range")String className = cursor.getString(cursor.getColumnIndex("className"));
+            @SuppressLint("Range")String classRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
+            @SuppressLint("Range")String classURL = cursor.getString(cursor.getColumnIndex("classURL"));
+            ClassData classData =new ClassData(datacount,className,classRoom,classURL);
+            dataCount=(datacount+1)%99999999;
+            Log.d("aaa",datacount+"番目の"+ classData.getClassName()+"をロードしました。ClassDataManager 30");
+
+            classDataList.add(classData);
         }
+        Log.d("aaa","クラスデータロード完了!。ClassDataManager 34");
     }
-    public Data getClassInfor(){
+    public Boolean checkClassData(){
+        return classDataList.size() == 49;
+    }
+    public void resetClassData() {
+        Log.d("aaa","ClassDataの数が"+dataCount+"しかなかったので初期化します。ClassDataManager 38");
+        classDataList.clear();
+        db.execSQL("DELETE FROM " + dataName);
+        for(int i=0;i<49;i++){
+            ClassData classData=new ClassData(i,"次は空きコマです。","","");
+            classDataList.add(classData);
+            insertClassDataIntoDB(classData);//ここでデータベースの中身を書く
+        }
+        dataCount=49;
+    }
+    public ClassData getClassInfor(){
         LocalDateTime now = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             now = LocalDateTime.now();
@@ -78,54 +95,85 @@ public class ClassDataManager extends DataManager{
                 line = 7;
 
             Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
-            if(dataList.size()!=49)return new Data(0,"授業情報を取得できませんでした","");
+            if(classDataList.size()!=49)return new ClassData(0,"授業情報を取得できませんでした","","");
             if(line==7){
                 NotifyManager2.setClassNotificationAlarm(dataName,7*row+6,"次は空きコマです","",now);
-                return new Data(0,"次は空きコマです","");
+                return new ClassData(0,"次は空きコマです","","");
             }
             else{
-                NotifyManager2.setClassNotificationAlarm(dataName,7*row+line-1,dataList.get(7*row+line-1).getTitle(),dataList.get(7*row+line-1).getSubTitle(),now);
-                return dataList.get(7*row+line-1);
+                NotifyManager2.setClassNotificationAlarm(dataName,7*row+line-1, classDataList.get(7*row+line-1).getClassName(), classDataList.get(7*row+line-1).getClassRoom(),now);
+                return classDataList.get(7*row+line-1);
             }
         }
-        return new Data(0,"時間外です。","行く当てなし");
+        return new ClassData(0,"時間外です。","行く当てなし","");
     }
     public void getClassDataFromManaba(){
         try {
             ArrayList<String> classList;
             classList=requestScraping();
-            Log.d("aaa","課題スクレーピング完了！　ClassDataManager 35");
+            Log.d("aaa","課題スクレーピング完了！　ClassDataManager 113");
             for(String k:classList){
-                Log.d("aaa",k+"ClassDataManager　37");
+                Log.d("aaa",k+"ClassDataManager　115");
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                replaceClassData(Integer.parseInt(str[0]),str[1],str[2]);
+                replaceClassDataIntoDB(Integer.parseInt(str[0]),str[1],str[2],str[3]);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
+                replaceClassDataIntoClassList(Integer.parseInt(str[0]),str[1],str[2],str[3]);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
             }
         } catch (ExecutionException e) {
-            Log.d("aaa","課題スクレーピングみすった！　ClassDataManager　42");
+            Log.d("aaa","課題スクレーピングみすった！　ClassDataManager　120");
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
-            Log.d("aaa","課題スクレーピングみすった！　ClassDataManager　45");
+            Log.d("aaa","課題スクレーピングみすった！　ClassDataManager　123");
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    private void replaceClassData(int num,String title,String subTitle){
-        dataList.get(num).replaceTitle(title);
-        dataList.get(num).replaceSubtitle(subTitle);
+    public void replaceClassDataIntoClassList(int classId, String className , String classRoom, String classURL){
+        ClassData classData =new ClassData(classId,className,classRoom,classURL);
+        classDataList.set(classId,classData);
+    }
+    public void replaceClassDataIntoDB(int classId, String className , String classRoom, String classURL){
+        classDataList.get(classId).setClassName(className);
+        classDataList.get(classId).setClassRoom(classRoom);
+        classDataList.get(classId).setClassURL(classURL);
 
         ContentValues values = new ContentValues();
-        values.put("title", title);
-        values.put("subTitle", subTitle);
-        String selection = "myId = ?";
-        String[] selectionArgs = {String.valueOf(num)};
+        values.put("className", className);
+        values.put("classRoom", classRoom);
+        values.put("classURL", classURL);
+        String selection = "classId = ?";
+        String[] selectionArgs = {String.valueOf(classId)};
 
         int affectedRows = db.update(dataName, values, selection, selectionArgs);
 
         if (affectedRows > 0) {
-            Log.d("aaa", dataName + "の" + num+"時間目を"+title+"に更新しました。ClassDataManager 65");
+            Log.d("aaa", dataName + "の" + classId+"時間目を"+className+"に更新しました。ClassDataManager 65");
         } else {
-            Log.d("aaa", dataName + "の" + num+"時間目を"+title+"に更新できませんでした。ClassDataManager 67");
+            Log.d("aaa", dataName + "の" + classId+"時間目を"+classRoom+"に更新できませんでした。ClassDataManager 67");
+        }
+    }
+    public void insertClassDataIntoDB(ClassData classData){
+        if (db == null) {
+            Log.d("aaa", "db空っぽです。(ClassDataManager 152)");
+        }
+        ContentValues values = new ContentValues();
+        values.put("classId", classData.getClassId());
+        values.put("className", classData.getClassName());
+        values.put("classRoom", classData.getClassRoom());
+        values.put("classURL", classData.getClassURL());
+
+        Log.d("aaa", values+" ClassDataManager 160");
+        Log.d("aaa", db+" ClassDataManager 161");
+        long newRowId = db.insert(dataName, null, values);
+        if (newRowId != -1) {
+            Log.d("aaa", dataName+"に"+ classData.getClassName()+"追加しました。ClassDataManager 164");
+        } else {
+            Log.d("aaa", dataName+"に追加失敗。ClassDataManager 166");
+        }
+    }
+    public void resetAlltaskList(){
+        for(int i=0;i<classDataList.size();i++){
+            classDataList.get(i).resetTaskList();
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.scrapingtest2;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
@@ -35,6 +36,8 @@ public class AddTaskCustomDialog extends Dialog {
         EditText day = findViewById(R.id.day);
         EditText hour = findViewById(R.id.hour);
         EditText minute = findViewById(R.id.minute);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) EditText URL = findViewById(R.id.classURL);
+        @SuppressLint({"MissingInflatedId", "LocalSuppress"}) EditText name = findViewById(R.id.className);
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,6 +47,8 @@ public class AddTaskCustomDialog extends Dialog {
                 String dayvalue=day.getText().toString();
                 String hourvalue=hour.getText().toString();
                 String minutevalue=minute.getText().toString();
+                String className=name.getText().toString();
+                String taskURL=URL.getText().toString();
 
                 if(monthvalue.length()<2)monthvalue='0'+monthvalue;
                 if(dayvalue.length()<2)dayvalue='0'+dayvalue;
@@ -54,7 +59,7 @@ public class AddTaskCustomDialog extends Dialog {
                 Log.d("aaa", deadline+"AddTaskCustomDialog 52");
                 //TaskData context=new TaskData(title2.getText().toString(),1,"hoeghoge",deadline);
                 Log.d("aaa", title2.getText().toString()+"を追加します。AddTaskCustomDialog 54");
-                taskDataManager.addTaskData(title2.getText().toString(),deadline);
+                taskDataManager.addTaskData(title2.getText().toString(),deadline,className,taskURL);
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
                 Log.d("aaa", String.valueOf(Thread.currentThread())+"AddTaskCustomDialog 56");

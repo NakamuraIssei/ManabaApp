@@ -68,8 +68,10 @@ public class LoginDialog extends Dialog {
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
                             classDataManager.getClassDataFromManaba();
+                            taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
-                            taskDataManager.reorderTaskData();
+                            taskDataManager.sortAllTaskDataList();
+                            taskDataManager.setTaskDataIntoClassData();
                             adapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
                             dismiss();

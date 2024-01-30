@@ -90,6 +90,28 @@
                 android:hint="分"
                 android:inputType="text" />
 
+            <EditText
+                android:id="@+id/classURL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:ems="10"
+                android:hint="URL"
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/className"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:ems="10"
+                android:hint="授業名"
+                android:inputType="text" />
+
             <Button
                 android:id="@+id/addbutton"
                 android:layout_width="wrap_content"

@@ -8,11 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.ArrayList;
 
 public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.ViewHolder>{
     private Context context;
@@ -43,16 +40,16 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
     }
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String before=String.valueOf(taskDataManager.getDataList().get(position).getSubTitle());
+        String before=String.valueOf(taskDataManager.getAllTaskDataList().get(position).getDueDate());
         char[] charArray = before.toCharArray();
         charArray[10] = ' ';
         String deadline = new String(charArray);
         //ここまで期限の文字列の整理操作
-        holder.text1.setText(taskDataManager.getDataList().get(position).getTitle());
+        holder.text1.setText(taskDataManager.getAllTaskDataList().get(position).getTaskName());
         holder.text2.setText(deadline);
-        if(!taskDataManager.getDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
+        if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
 
-        taskDataManager.addBellButton(position,holder.pushButton);
+        //taskDataManager.addBellButton(position,holder.pushButton);
         //TaskData.taskData.get(position).setBellButton(holder.pushButton)
         holder.pushButton.setOnClickListener(v -> {
             //TaskData item = dataList.get(position);
@@ -73,7 +70,7 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
     }
     @Override
     public int getItemCount() {
-        return taskDataManager.getDataList().size();
+        return taskDataManager.getAllTaskDataList().size();
     }
 
 }

@@ -6,43 +6,54 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class Data {
-    private int id;//課題の識別子
-    private String title;//課題名、クラス名
-    private String subtitle;//提出締め切り、教室名
+public class TaskData {
+    private int taskId;
+    private int belongedClassId;
+    private String taskName;//課題名、クラス名
+    private LocalDateTime dueDate;//提出締め切り、教室名
     private ArrayList<LocalDateTime> notificationTiming;//課題の通知時億
-    public Boolean done;//課題が提出済みかのフラグ
+    private String taskURL;//提出締め切り、教室名
+    public int hasSubmitted;//課題が提出済みかのフラグ 未提出なら0、提出済みなら1
 
-    public Data(int id,String title,String subtitle){
-        this.id =id;
-        this.title=title;
-        this.subtitle=subtitle;
+    public TaskData(int taskId, int belongedClassId,String taskName, LocalDateTime dueDate, String taskURL,int hasSubmitted){
+        this.taskId = taskId;
+        this.belongedClassId=belongedClassId;
+        this.taskName = taskName;
+        this.dueDate = dueDate;
+        this.taskURL=taskURL;
         this.notificationTiming=new ArrayList<LocalDateTime>();
-        this.done=false;
+        this.hasSubmitted =hasSubmitted;
     }
-    public int getId(){
-        return this.id;
+
+    public int getTaskId(){
+        return this.taskId;
     }
-    public String getTitle(){
-        return this.title;
+    public String getTaskName(){
+        return this.taskName;
     }
-    public String getSubTitle(){
-        return this.subtitle;
+    public LocalDateTime getDueDate(){
+        return this.dueDate;
+    }
+    public int getBelongedClassId(){
+        return this.belongedClassId;
     }
     public ArrayList<LocalDateTime> getNotificationTiming(){
         return this.notificationTiming;
     }
-    public Boolean getDone(){
-        return this.done;
+    public int getHasSubmitted(){
+        return this.hasSubmitted;
     }
-    public void replaceTitle(String title){
-        this.title=title;
+    public String getTaskURL(){
+        return this.taskURL;
     }
-    public void replaceSubtitle(String subTitle){
-        this.subtitle=subTitle;
+    public void replaceTaskName(String taskName){
+        this.taskName =taskName;
     }
-    public void replaceDone(boolean done){
-        this.done=done;
+    public void replaceDueDate(LocalDateTime dueDate){
+        this.dueDate =dueDate;
+    }
+    public void changeSubmitted(int hasSubmitted){
+        this.hasSubmitted =hasSubmitted;
     }
     public void addNotificationTiming(LocalDateTime newTiming){
         this.notificationTiming.add(newTiming);

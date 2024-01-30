@@ -66,7 +66,7 @@ public class AddNotificationDialog extends Dialog {
 
                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                 taskDataManager.addNotificationTiming(position,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
-                                                taskDataManager.changeBellButton(position);
+                                                //taskDataManager.changeBellButton(position);
 
                                                 adapter.notifyDataSetChanged();
                                             }
@@ -131,7 +131,7 @@ public class AddNotificationDialog extends Dialog {
                                                 taskDataManager.addNotificationTiming(taskDataId,selectedTime.getTime().toInstant().atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime());
                                                 //変更を反映
                                                 adapter.notifyDataSetChanged();
-                                                taskDataManager.changeBellButton(taskDataId);
+                                                //taskDataManager.changeBellButton(taskDataId);
 
                                             }
                                         }

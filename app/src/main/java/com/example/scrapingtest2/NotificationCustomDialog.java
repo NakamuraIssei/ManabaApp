@@ -28,7 +28,6 @@ public class NotificationCustomDialog extends Dialog {
         this.context=context;
         this.position=position;
         this.taskDataManager=taskDataManager;
-        //this.homeworkCustomAdapter=homeworkCustomAdapter;
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,7 @@ public class NotificationCustomDialog extends Dialog {
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         recyclerView.setLayoutManager(layoutManager);
 
-        ArrayList<LocalDateTime> notificationList = taskDataManager.getDataList().get(position).getNotificationTiming();//タップされた行の課題の通知情報を取得
+        ArrayList<LocalDateTime> notificationList = taskDataManager.getAllTaskDataList().get(position).getNotificationTiming();//タップされた行の課題の通知情報を取得
 
         NotificationCustomAdapter adapter = new NotificationCustomAdapter(context, notificationList,position);//Listviewを表示するためのadapterを設定
         recyclerView.setAdapter(adapter);//listViewにadapterを設定

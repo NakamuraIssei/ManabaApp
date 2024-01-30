@@ -1,103 +1,221 @@
 package com.example.scrapingtest2;
 
+import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.Build;
 import android.util.Log;
 
-import androidx.appcompat.widget.AppCompatImageButton;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Supplier;
 
 public class TaskDataManager extends DataManager{
 
     private HashMap<Integer,NotificationCustomAdapter> notificationAdapterBag;
-    private ArrayList<AppCompatImageButton> bellButtonList;
-
-    TaskDataManager(String dataName,int firstNum){
-        prepareForWork(dataName,firstNum);
+    private ArrayList<TaskData> allTaskDataList;
+    private DateTimeFormatter formatter;
+    //private ArrayList<AppCompatImageButton> bellButtonList;
+    TaskDataManager(String dataName){
+        prepareForWork(dataName);
         notificationAdapterBag =new HashMap<>();
-        bellButtonList=new ArrayList<>();
+        allTaskDataList =new ArrayList<TaskData>();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //2024-01-19 13:30
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
+        }
+        //bellButtonList=new ArrayList<>();
     }
-    public void addBellButton(int num,AppCompatImageButton bellButton){
-        bellButtonList.add(num, bellButton);
-        changeBellButton(num);
+    public void loadTaskData(){//データベースからデータを読み込んで、allTaskDataListに入れる
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Log.d("aaa","今からタスクデータをロードします。TaskDataManager 38");
+            while (cursor.moveToNext()) {
+                @SuppressLint("Range")int taskId = cursor.getInt(cursor.getColumnIndex("taskId"));
+                Log.d("aaa", String.valueOf(taskId));
+                @SuppressLint("Range")int belongedclassId = cursor.getInt(cursor.getColumnIndex("belongedClassId"));
+                Log.d("aaa", String.valueOf(belongedclassId));
+                @SuppressLint("Range")String taskName = cursor.getString(cursor.getColumnIndex("taskName"));
+                Log.d("aaa",taskName);
+                @SuppressLint("Range")String dueDate = cursor.getString(cursor.getColumnIndex("dueDate"));
+                Log.d("aaa","提出期限は"+dueDate);
+                @SuppressLint("Range")String notificationTiming = cursor.getString(cursor.getColumnIndex("notificationTiming"));
+                Log.d("aaa","通知タイミングは"+notificationTiming);
+                @SuppressLint("Range")String taskURL = cursor.getString(cursor.getColumnIndex("taskURL"));
+                Log.d("aaa",taskURL);
+                @SuppressLint("Range")int hasSubmitted = cursor.getInt(cursor.getColumnIndex("hasSubmitted"));
+                Log.d("aaa", String.valueOf(hasSubmitted));
+                LocalDateTime temp=LocalDateTime.parse(dueDate, formatter);
+                Log.d("aaa","締め切り日時は"+temp+"です。　TaskDataManager 56");
+                if(LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))){
+                    //締め切りを過ぎていなければ、allTaskListに登録
+                    Log.d("aaa",taskName+"は締め切りを過ぎていないので登録します。TaskDataManager 50");
+
+                    TaskData taskData =new TaskData(taskId,belongedclassId,taskName,LocalDateTime.parse(dueDate, formatter),taskURL,hasSubmitted);
+                    dataCount=(taskId+1)%99999999;
+                    Log.d("aaa",taskId+"番目の"+ taskData.getTaskName()+"をロードしました。TaskDataManager 42");
+                    if(!Objects.equals(notificationTiming, "")){
+                        String[] parts = notificationTiming.split("\\?"); // ? をエスケープして使用
+                        for (String time : parts) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                Log.d("aaa",notificationTiming+"を設定します。TskDataManager 57");
+                                taskData.addNotificationTiming(LocalDateTime.parse(time, formatter));
+                            }
+                        }
+                    }
+                    for(LocalDateTime nt: taskData.getNotificationTiming()){
+                        requestSettingNotification(dataName, taskData.getTaskId(), taskData.getTaskName(), dueDate,nt);
+                    }
+                    allTaskDataList.add(taskData);
+                }else{
+                    //締め切りを過ぎていれば、データベースから削除
+                    Log.d("aaa",taskName+"は締め切りを過ぎていたのでさくじょします。TaskDataManager 68");
+                    String[] whereArgs = { String.valueOf(taskId) };
+                    db.delete(dataName, "taskId = ?", whereArgs);
+                }
+
+            }
+            Log.d("aaa","タスクデータロード完了!。TaskDataManager 59");
+        }
     }
-    public void removeBellButton(int num){
-        bellButtonList.remove(num);
+    public void setTaskDataIntoClassData(){
+        for(TaskData taskData: allTaskDataList){
+            if(taskData.getHasSubmitted()==0)
+                classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
+        }
     }
-    public void changeBellButton(int num){
-        if(dataList.get(num).getNotificationTiming().isEmpty())
-            bellButtonList.get(num).setImageResource(R.drawable.empty_notification_bell_round);
-        else
-            bellButtonList.get(num).setImageResource(R.drawable.bell_round);
+    public void sortAllTaskDataList(){
+//        Comparator<TaskData> longComparator = new Comparator<TaskData>() {
+//            @Override
+//            public int compare(TaskData p1, TaskData p2) {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    return LocalDateTime.parse(p1.getDueDate(), formatter).compareTo(LocalDateTime.parse(p2.getDueDate(), formatter));
+//                }
+//                return 0;
+//            }
+//        };
+        Comparator<TaskData> taskDataComparator = new Comparator<TaskData>() {
+            @Override
+            public int compare(TaskData task1, TaskData task2) {
+                // hasSubmittedが大きい順に比較
+                int submittedComparison = Integer.compare(task2.getHasSubmitted(), task1.getHasSubmitted());
+                if (submittedComparison != 0) {
+                    return submittedComparison;
+                }
+
+                // hasSubmittedが同じ場合はdueDateが小さい順に比較
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    return task1.getDueDate().compareTo(task2.getDueDate());
+                }
+
+                return 0;
+            }
+        };
+
+        Collections.sort(allTaskDataList, taskDataComparator);
     }
+    public ArrayList<TaskData> getAllTaskDataList(){
+        return allTaskDataList;
+    }
+//    public void addBellButton(int num,AppCompatImageButton bellButton){
+//        bellButtonList.add(num, bellButton);
+//        changeBellButton(num);
+//    }
+//    public void removeBellButton(int num){
+//        bellButtonList.remove(num);
+//    }
+//    public void changeBellButton(int num){
+//        if(classDataList.get(num).getTaskList().getNotificationTiming().isEmpty())
+//            bellButtonList.get(num).setImageResource(R.drawable.empty_notification_bell_round);
+//        else
+//            bellButtonList.get(num).setImageResource(R.drawable.bell_round);
+//    }
     public void addAdapter(int num, NotificationCustomAdapter adapter){
         notificationAdapterBag.put(num,adapter);
     }
     public void removeAdapter(int num){
         notificationAdapterBag.remove(num);
     }
-    public void setTaskData() {
-        loadData();
-        //getTaskDataFromManaba();
-        reorderTaskData();
-    }
-    public void addTaskData(String title, String deadLine) {
+//    public void setTaskData() {
+//        loadData();
+//        //getTaskDataFromManaba();
+//        reorderTaskData();
+//    }
+    public void addTaskData(String taskName, String dueDate,String belongedClassName,String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            try {
-                LocalDateTime defaultTiming=LocalDateTime.parse(deadLine, formatter);
-                defaultTiming=defaultTiming.plusHours(-1);
-                Log.d("aaa",deadLine+"の一時間前は"+defaultTiming+"です。AddTaskCustomDialog 41");
-                addData(title, deadLine,defaultTiming);
-                Log.d("aaa","デフォルトの通知タイミングを設定できました。AddTaskCustomDialog 43");
-            } catch (DateTimeParseException e) {
-                addData(title, deadLine);
-                Log.d("aaa","デフォルトの通知タイミングを設定できませんでした。AddTaskCustomDialog 46");
+            if(isExist(taskName)){//既に持ってる場合は
+                makeTaskNotSubmitted(taskName);//未提出判定に
+            }else{
+                if(LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))) {//提出期限が過ぎていなければ
+                    try {
+                        LocalDateTime deadLine = LocalDateTime.parse(dueDate, formatter);
+                        Log.d("aaa", dataCount + "晩年の課題として" + taskName + "を作成します。授業番号は" + serchClassNum(belongedClassName) + "です。TaskDataManager 146");
+                        TaskData taskData = new TaskData(dataCount, serchClassNum(belongedClassName), taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        dataCount = (dataCount + 1) % 99999999;
+                        LocalDateTime defaultTiming = deadLine.plusHours(-1);
+                        Log.d("aaa", deadLine + "の一時間前は" + defaultTiming + "です。TaskdataManager 142");
+                        taskData.addNotificationTiming(defaultTiming);
+                        Log.d("aaa", taskData.getNotificationTiming().toString() + "デフォルトの通知を依頼します。TaskDataManager 149");
+                        requestSettingNotification(dataName, taskData.getTaskId(), taskName, dueDate, defaultTiming);
+                        Log.d("aaa", taskData.getNotificationTiming().toString() + "デフォルトの通知を依頼しました。TadskDataManager 151");
+                        allTaskDataList.add(taskData);
+                        insertTaskDataIntoDB(taskData);
+                    } catch (DateTimeParseException e) {
+                        Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
+                        TaskData taskData = new TaskData(dataCount, serchClassNum(belongedClassName), taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        dataCount = (dataCount + 1) % 99999999;
+                        allTaskDataList.add(taskData);
+                        insertTaskDataIntoDB(taskData);
+                    }
+                }else{//提出期限が過ぎていれば
+                    Log.d("aaa","スクレーピングした"+taskName+"は提出期限を過ぎていたので追加しません　TaskDataManager 179");
+                }
+                sortAllTaskDataList();
             }
-            reorderTaskData();
         }
     }
-    public void removeTaskData(int num) {
-        removeData(num);
-        removeAdapter(num);
-        removeBellButton(num);
-        reorderTaskData();
-    }
+//    public void removeTaskData(int num) {
+//        removeData(num);
+//        removeAdapter(num);
+//        //removeBellButton(num);
+//        sortTaskData();
+//    }
     public Boolean isExist(String name){
-        for(Data data:dataList)if(Objects.equals(data.getTitle(), name))return false;
-        return true;
+        for(TaskData taskData : allTaskDataList)if(Objects.equals(taskData.getTaskName(), name))return true;
+        return false;
     }
-    public void reorderTaskData(){
-        Comparator<Data> longComparator = new Comparator<Data>() {
-            @Override
-            public int compare(Data p1, Data p2) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    return LocalDateTime.parse(p1.getSubTitle(), formatter).compareTo(LocalDateTime.parse(p2.getSubTitle(), formatter));
-                }
-                return 0;
-            }
-        };
-
-        Collections.sort(dataList, longComparator);
+    public int serchClassNum(String belongedClassName){
+        for(ClassData classData:classDataList){
+            if(Objects.equals(belongedClassName, classData.getClassName()))return classData.getClassId();
+        }
+        Log.d("aaa",belongedClassName+"はありませんでした。TaskDataManager 182");
+        return -1;
     }
     public void deleteTaskNotification(int dataNum,int notificationNum){
         deleteNotification(dataNum,notificationNum);
-        changeBellButton(dataNum);
+        //changeBellButton(dataNum);
     }
     public void deleteFinishedTaskNotification(String title,String subTitle){
-        int num=deleteFinishedNotification(title,subTitle);
-        changeBellButton(num);
-        if(notificationAdapterBag.get(num)!=null)
-            notificationAdapterBag.get(num).notifyDataSetChanged();
+        subTitle = subTitle.substring(0, 10) + " " + subTitle.substring(11);//2024-06-12T03:10のTを消す。
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            int num= 0;
+            num = deleteFinishedNotification(title, LocalDateTime.parse(subTitle,formatter));
+            //changeBellButton(num);
+            if(notificationAdapterBag.get(num)!=null){
+                notificationAdapterBag.get(num).notifyDataSetChanged();
+            }else{
+                Log.d("aaa",num+"番目の課題の通知リストを更新できませんでした。");
+            }
+
+        }
     }
     public void getTaskDataFromManaba(){
         try {
@@ -108,10 +226,17 @@ public class TaskDataManager extends DataManager{
                 Log.d("aaa",k+"TaskDataManager　106");
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
 
-                if(isExist(str[0])){
+                if(!isExist(str[0])){//取得した課題を持っていなかったら追加する
                     Log.d("aaa",k+"持ってないから追加するよー！TaskDataManager　110");
-                    addTaskData(str[0],str[1]);//str[0]は課題名、str[1]は締め切り
+                    addTaskData(str[0],str[1],str[2],str[3]);//str[0]は課題名、str[1]は締め切り、str[2]は課題が出ている授業名、str[3]は課題提出URL
                     Log.d("aaa",k+"追加したよー！TaskDataManager　112");
+                }else{//取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
+                    for(int i=0;i<allTaskDataList.size();i++){
+                        if(Objects.equals(allTaskDataList.get(i).getTaskName(), str[0])){
+                            allTaskDataList.get(i).changeSubmitted(0);
+                            break;
+                        }
+                    }
                 }
             }
         } catch (ExecutionException e) {
@@ -123,5 +248,115 @@ public class TaskDataManager extends DataManager{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+    public void makeAllTasksSubmitted(){
+        for(int i=0;i<allTaskDataList.size();i++){
+            allTaskDataList.get(i).changeSubmitted(1);
+        }
+    }
+    public void makeTaskNotSubmitted(String taskName){
+        for(int i=0;i<allTaskDataList.size();i++){
+            if(Objects.equals(taskName, allTaskDataList.get(i).getTaskName())){
+                allTaskDataList.get(i).changeSubmitted(0);
+                break;
+            }
+        }
+    }
+    public void insertTaskDataIntoDB(TaskData taskData){
+        if (db == null) {
+            Log.d("aaa", "db空っぽです。(TaskDataManager 239)");
+        }
+        String dueDate=taskData.getDueDate().toString();
+        dueDate = dueDate.substring(0, 10) + " " + dueDate.substring(11);
+        ContentValues values = new ContentValues();
+        values.put("taskId", taskData.getTaskId());
+        values.put("belongedClassId", taskData.getTaskId());
+        values.put("taskName", taskData.getTaskName());
+        values.put("dueDate", dueDate);
+        values.put("taskURL", taskData.getTaskURL());
+        if(taskData.getHasSubmitted()==0)values.put("hasSubmitted", "0");
+        else values.put("hasSubmitted", "1");
+        String notificationtime="";
+        if (taskData.getNotificationTiming().size() > 0) {
+            String before = String.valueOf(taskData.getNotificationTiming().get(0));
+            char[] charArray2 = before.toCharArray();
+            charArray2[10] = ' ';
+            notificationtime = new String(charArray2);
+        } else notificationtime = "";
+        values.put("notificationTiming", notificationtime);
+        Log.d("aaa", values+" TaskDataManager 256");
+        Log.d("aaa", db+" TaskDataManager 257");
+        long newRowId = db.insert(dataName, null, values);
+        if (newRowId != -1) {
+            Log.d("aaa", dataName+"に"+ taskData.getTaskName()+"追加しました。TaskDataManager 268");
+        } else {
+            Log.d("aaa", dataName+"に追加失敗。TaskDataManager 262");
+        }
+    }
+    public void addNotificationTiming(int num,LocalDateTime notificationTiming){
+        allTaskDataList.get(num).addNotificationTiming(notificationTiming);
+        requestSettingNotification(dataName, allTaskDataList.get(num).getTaskId(), allTaskDataList.get(num).getTaskName(), allTaskDataList.get(num).getDueDate().toString(),notificationTiming);
+        updateNotificationTimingFromDB(allTaskDataList.get(num));
+    }
+    public void updateNotificationTimingFromDB(TaskData taskData){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            StringBuilder sb = new StringBuilder();
+            for (LocalDateTime nt : taskData.getNotificationTiming()) {
+                String dateTimeStr = nt.format(formatter);
+                // StringBuilderを使って文字列に追加
+                sb.append(dateTimeStr);
+                // エントリ間に '?' を追加
+                sb.append('?');
+            }
+            if (sb.length() > 0) {
+                sb.deleteCharAt(sb.length() - 1);
+            }
+            // 最終的な文字列を取得
+            String finalString = sb.toString();
+
+            ContentValues values = new ContentValues();
+            values.put("notificationTiming", finalString);
+
+            // WHERE 句を設定（どのレコードを更新するか）
+            String whereClause = "taskId=?";
+            String[] whereArgs = { String.valueOf(taskData.getTaskId()) };
+
+            // レコードを更新
+            Log.d("aaa",finalString+"を書き込みます(TaskDataManager 298)");
+            db.update(dataName, values, whereClause, whereArgs);
+            Cursor cursor = db.query(dataName, new String[]{"notificationTiming"}, whereClause, whereArgs, null, null, null);
+            if(cursor==null)Log.d("aaa","taskId="+String.valueOf(taskData.getTaskId())+"のやつが見つかりませんでした(TaskDataManager 301)");
+            String result = null;
+            assert cursor != null;
+            if (cursor.moveToFirst()) { // カーソルを最初の位置に移動
+                // カラムのインデックスを取得
+                int columnIndex = cursor.getColumnIndex("notificationTiming");
+                // 値を取得
+                result = cursor.getString(columnIndex);
+            }
+            Log.d("aaa", "通知情報を更新しました(TaskDataManager 310)" + result);
+        }
+    }
+    public void requestSettingNotification(String dataName, int taskId, String taskName, String dueDate, LocalDateTime notificationTiming){
+        NotifyManager2.setTaskNotificationAlarm(dataName,taskId,taskName,dueDate,notificationTiming);
+    }
+    public void requestCancelNotification(String dataName, String taskName, LocalDateTime dueDate, LocalDateTime notificationTiming){
+        NotifyManager2.cancelTaskNotificationAlarm(dataName,taskName,dueDate.toString(),notificationTiming);
+    }
+    public int deleteFinishedNotification(String taskName,LocalDateTime subTitle){
+        //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。
+        for(int i=0;i<allTaskDataList.size();i++){
+            if(Objects.equals(allTaskDataList.get(i).getTaskName(), taskName) && Objects.equals(allTaskDataList.get(i).getDueDate(), subTitle)){
+                allTaskDataList.get(i).deleteFinishedNotification();
+                return i;
+            }
+        }
+        return -1;
+    }
+    public void deleteNotification(int dataNum,int notificationNum){
+        //dbの更新もここで行う。
+        requestCancelNotification(dataName, allTaskDataList.get(dataNum).getTaskName(), allTaskDataList.get(dataNum).getDueDate(), allTaskDataList.get(dataNum).getNotificationTiming().get(notificationNum));
+        allTaskDataList.get(dataNum).deleteNotificationTiming(notificationNum);
+        updateNotificationTimingFromDB(allTaskDataList.get(dataNum));
     }
 }

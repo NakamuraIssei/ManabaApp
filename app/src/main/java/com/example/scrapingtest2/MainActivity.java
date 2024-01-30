@@ -1,6 +1,5 @@
 package com.example.scrapingtest2;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,8 +20,6 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -61,9 +58,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         context=this;
 
         NotifyManager2.prepareForNotificationWork(this);
-        TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
+        TaskDataManager taskDataManager=new TaskDataManager("TaskData");
         AddNotificationDialog.setTaskdataManager(taskDataManager);
-        cd=new ClassDataManager("ClassData",0);
+        cd=new ClassDataManager("ClassData");
 
         NotificationReceiver2.setTaskDataManager(taskDataManager);
         NotifyManager2.setNotificationListener(this);
@@ -71,17 +68,21 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
-        Cursor taskCursor = db.query("TaskData", null, null, null, null, null, "myId");
-        Cursor classCursor = db.query("ClassData", null, null, null, null, null, "myId");
+        Cursor taskCursor = db.query("TaskData", null, null, null, null, null, "taskId");
+        Cursor classCursor = db.query("ClassData", null, null, null, null, null, "classId");
 
         taskDataManager.setDB(db,taskCursor);
         cd.setDB(db,classCursor);
 
+        cd.loadClassData();
+        if(!cd.checkClassData())cd.resetClassData();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Supplier<String> setData = () -> {
-                taskDataManager.loadData();
-                taskDataManager.reorderTaskData();
-                cd.setClassData();
+                taskDataManager.loadTaskData();
+                Log.d("aaa","TaskDataロード完了！ MainActivity 83");
+                taskDataManager.setTaskDataIntoClassData();
+                taskDataManager.sortAllTaskDataList();
                 return null;
             };
 
@@ -101,19 +102,19 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
                         recyclerView.setAdapter(adapter);//listViewにadapterを設定
 
-                        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+                        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, 0) {
                             @Override
                             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                                 return false;
                             }
                             @Override
                             public void onSwiped (@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-                                int swipedPosition = viewHolder.getAdapterPosition();
-                                TaskCustomAdapter adapter = (TaskCustomAdapter) recyclerView.getAdapter();
-                                // 登録とかするんだったらなにかのリストから削除をする処理はここ
-                                taskDataManager.removeTaskData(swipedPosition);
-                                // 削除されたことを知らせて反映させる。
-                                adapter.notifyItemRemoved(swipedPosition);
+//                                int swipedPosition = viewHolder.getAdapterPosition();
+//                                TaskCustomAdapter adapter = (TaskCustomAdapter) recyclerView.getAdapter();
+//                                // 登録とかするんだったらなにかのリストから削除をする処理はここ
+//                                taskDataManager.removeTaskData(swipedPosition);
+//                                // 削除されたことを知らせて反映させる。
+//                                adapter.notifyItemRemoved(swipedPosition);
                             }
                             @Override
                             public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
@@ -172,12 +173,13 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         }else{
                             ManabaScraper.setCookie(cookieBag);
                             cd.getClassDataFromManaba();
+                            taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
-                            taskDataManager.reorderTaskData();
+                            taskDataManager.sortAllTaskDataList();
 
-                            Data now=cd.getClassInfor();
-                            className.setText(now.getTitle());
-                            classRoom.setText(now.getSubTitle());
+                            ClassData now=cd.getClassInfor();
+                            className.setText(now.getClassName());
+                            classRoom.setText(now.getClassRoom());
 
                             adapter.notifyDataSetChanged();
                         }
@@ -191,13 +193,13 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     @Override
     public void onNotificationReceived(int dataId) {
         dataId=(dataId+49)%49;
-        className.setText(cd.dataList.get(dataId).getTitle());
-        classRoom.setText(cd.dataList.get(dataId).getSubTitle());
+        className.setText(cd.classDataList.get(dataId).getClassName());
+        classRoom.setText(cd.classDataList.get(dataId).getClassRoom());
     }
     @Override
-    public void updateClassTextView(Data data) {
-        className.setText(data.getTitle());
-        classRoom.setText(data.getSubTitle());
+    public void updateClassTextView(ClassData classData) {
+        className.setText(classData.getClassName());
+        classRoom.setText(classData.getClassRoom());
     }
     public boolean checkLogin(){
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう

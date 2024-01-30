@@ -17,11 +17,9 @@ import android.webkit.CookieManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 public class NotificationReceiver2  extends BroadcastReceiver {
     public NotificationManager notificationManager;
@@ -106,7 +104,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
     }
     private void taskDataWork(String title,String subTitle,int dataId){
         String[] tdColumns = {"notificationTiming"}; // 取り出したいカラム
-        String tdSelection = "myId = ?"; // WHERE句
+        String tdSelection = "taskId = ?"; // WHERE句
         String[] tdSelectionArgs = {String.valueOf(dataId)}; // WHERE句の引数
         cursor = db.query("TaskData", tdColumns, tdSelection, tdSelectionArgs, null, null, null);
 
@@ -139,16 +137,16 @@ public class NotificationReceiver2  extends BroadcastReceiver {
     private void classDataWork(Context context,int dataId){
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             // 次の授業の行を取得するクエリ
-            String selectQuery = "SELECT * FROM ClassData WHERE myId = " + (dataId + 1) % 49;
+            String selectQuery = "SELECT * FROM ClassData WHERE classId = " + (dataId + 1) % 49;
             cursor = db.rawQuery(selectQuery, null);
 
             // カーソルからデータを取得
             if (cursor.moveToFirst()) {
-                @SuppressLint("Range") int myId = cursor.getInt(cursor.getColumnIndex("myId"));
-                @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("title"));
-                @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("subTitle"));
+                @SuppressLint("Range") int classId = cursor.getInt(cursor.getColumnIndex("classId"));
+                @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("className"));
+                @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
 
-                Log.d("ClassData", "myId: " + myId + ", nextClass: " + nextClass + ", nextRoom: " + nextRoom + "NotificationReceiver2 180");
+                Log.d("ClassData", "classId: " + classId + ", nextClass: " + nextClass + ", nextRoom: " + nextRoom + "NotificationReceiver2 180");
 
 
                 // 今日の0時0分を取得
@@ -157,7 +155,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
 
-                switch (myId % 7) {
+                switch (classId % 7) {
                     case 0:
                         nextTiming = nextTiming.plusDays(1).plusHours(8).plusMinutes(30);
                         break;
@@ -185,7 +183,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 cursor.close();
 
                 NotifyManager2.setContext(context);
-                NotifyManager2.setClassNotificationAlarm("ClassData", myId, nextClass, nextRoom, nextTiming);
+                NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
 
             }
         }
@@ -210,13 +208,19 @@ public class NotificationReceiver2  extends BroadcastReceiver {
         }
         ManabaScraper.setCookie(cookieBag);
         Log.d("aaa", "今からバックグラウンドでのスクレイピングするよ　NotificationReceiver2 209");
-            TaskDataManager taskDataManager=new TaskDataManager("TaskData",49);
-            cursor = db.query("TaskData", null, null, null, null, null, "myId");
+            TaskDataManager taskDataManager=new TaskDataManager("TaskData");
+            ClassDataManager classDataManager=new ClassDataManager("ClassData");
+            cursor = db.query("TaskData", null, null, null, null, null, "taskId");
             taskDataManager.setDB(db,cursor);
-            taskDataManager.loadData();
-            taskDataManager.reorderTaskData();
+            cursor = db.query("ClassData", null, null, null, null, null, "classId");
+            classDataManager.setDB(db,cursor);
+            classDataManager.loadClassData();
+
+            taskDataManager.loadTaskData();
+            taskDataManager.setTaskDataIntoClassData();
+            taskDataManager.sortAllTaskDataList();
+            taskDataManager.makeAllTasksSubmitted();
             taskDataManager.getTaskDataFromManaba();
-            taskDataManager.reorderTaskData();
     }
 }
 
