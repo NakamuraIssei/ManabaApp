@@ -12,7 +12,6 @@ public class PagerAdapter2 extends FragmentStateAdapter {
         super(fragmentActivity);
         this.taskDataManager=taskDataManager;
     }
-
     @Override
     public int getItemCount() {
         return NUM_TABS;

@@ -117,11 +117,9 @@ public class LogInManager extends AppCompatActivity{
         cookieManager.removeAllCookie();
         Log.d("aaa", "ログオフ完了!");
     }
-
     void setListener(Listener listener) {
         this.listener = listener;
     }
-
     // 画面更新処理を呼び出すためのインタフェース
     interface Listener {
         void onSuccess();

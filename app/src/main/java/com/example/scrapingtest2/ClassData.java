@@ -54,7 +54,7 @@ public class ClassData {
     public Boolean hasTask() {
         return taskList.size() > 0;
     }
-    public void sortTaskList(){
+    public void sortTaskList() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Comparator<TaskData> longComparator = new Comparator<TaskData>() {
                 @Override
@@ -65,8 +65,5 @@ public class ClassData {
             };
             Collections.sort(taskList, longComparator);
         }
-    }
-    public LocalDateTime getFirstTaskDate(){
-        return taskList.get(0).getDueDate();
     }
 }

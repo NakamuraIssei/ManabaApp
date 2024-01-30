@@ -24,7 +24,7 @@ public class TaskDataManager extends DataManager{
     private HashMap<Integer,NotificationCustomAdapter> notificationAdapterBag;
     private ArrayList<TaskData> allTaskDataList;
     private DateTimeFormatter formatter;
-    //private ArrayList<AppCompatImageButton> bellButtonList;
+
     TaskDataManager(String dataName){
         prepareForWork(dataName);
         notificationAdapterBag =new HashMap<>();
@@ -93,15 +93,6 @@ public class TaskDataManager extends DataManager{
         }
     }
     public void sortAllTaskDataList(){
-//        Comparator<TaskData> longComparator = new Comparator<TaskData>() {
-//            @Override
-//            public int compare(TaskData p1, TaskData p2) {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    return LocalDateTime.parse(p1.getDueDate(), formatter).compareTo(LocalDateTime.parse(p2.getDueDate(), formatter));
-//                }
-//                return 0;
-//            }
-//        };
         Comparator<TaskData> taskDataComparator = new Comparator<TaskData>() {
             @Override
             public int compare(TaskData task1, TaskData task2) {
@@ -125,30 +116,9 @@ public class TaskDataManager extends DataManager{
     public ArrayList<TaskData> getAllTaskDataList(){
         return allTaskDataList;
     }
-//    public void addBellButton(int num,AppCompatImageButton bellButton){
-//        bellButtonList.add(num, bellButton);
-//        changeBellButton(num);
-//    }
-//    public void removeBellButton(int num){
-//        bellButtonList.remove(num);
-//    }
-//    public void changeBellButton(int num){
-//        if(classDataList.get(num).getTaskList().getNotificationTiming().isEmpty())
-//            bellButtonList.get(num).setImageResource(R.drawable.empty_notification_bell_round);
-//        else
-//            bellButtonList.get(num).setImageResource(R.drawable.bell_round);
-//    }
     public void addAdapter(int num, NotificationCustomAdapter adapter){
         notificationAdapterBag.put(num,adapter);
     }
-    public void removeAdapter(int num){
-        notificationAdapterBag.remove(num);
-    }
-//    public void setTaskData() {
-//        loadData();
-//        //getTaskDataFromManaba();
-//        reorderTaskData();
-//    }
     public void addTaskData(String taskName, String dueDate,String belongedClassName,String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if(isExist(taskName)){//既に持ってる場合は
@@ -182,12 +152,6 @@ public class TaskDataManager extends DataManager{
             }
         }
     }
-//    public void removeTaskData(int num) {
-//        removeData(num);
-//        removeAdapter(num);
-//        //removeBellButton(num);
-//        sortTaskData();
-//    }
     public Boolean isExist(String name){
         for(TaskData taskData : allTaskDataList)if(Objects.equals(taskData.getTaskName(), name))return true;
         return false;

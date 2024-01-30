@@ -133,6 +133,4 @@ public class ManabaScraper {
         }
         return classInfor;
     }
-
-
 }

@@ -30,7 +30,6 @@ public class TaskFragment extends Fragment {
         // レイアウトファイルをインフレートしてViewを作成
         return inflater.inflate(R.layout.activity_taskwork, container, false);
     }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

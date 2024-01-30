@@ -24,7 +24,6 @@ public class TaskData {
         this.notificationTiming=new ArrayList<LocalDateTime>();
         this.hasSubmitted =hasSubmitted;
     }
-
     public int getTaskId(){
         return this.taskId;
     }

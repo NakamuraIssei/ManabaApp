@@ -188,7 +188,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             }
         }
     }
-
     private void backScraping(Context context){
         NotifyManager2.prepareForNotificationWork(context);
         NotifyManager2.setBackScrapingAlarm();
