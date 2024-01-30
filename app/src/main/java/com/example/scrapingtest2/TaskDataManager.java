@@ -40,9 +40,9 @@ public class TaskDataManager extends DataManager{
             Log.d("aaa","今からタスクデータをロードします。TaskDataManager 38");
             while (cursor.moveToNext()) {
                 @SuppressLint("Range")int taskId = cursor.getInt(cursor.getColumnIndex("taskId"));
-                Log.d("aaa", String.valueOf(taskId));
+                Log.d("aaa", "taskId= "+String.valueOf(taskId));
                 @SuppressLint("Range")int belongedclassId = cursor.getInt(cursor.getColumnIndex("belongedClassId"));
-                Log.d("aaa", String.valueOf(belongedclassId));
+                Log.d("aaa", "belongedClassId= "+String.valueOf(belongedclassId));
                 @SuppressLint("Range")String taskName = cursor.getString(cursor.getColumnIndex("taskName"));
                 Log.d("aaa",taskName);
                 @SuppressLint("Range")String dueDate = cursor.getString(cursor.getColumnIndex("dueDate"));
@@ -234,7 +234,7 @@ public class TaskDataManager extends DataManager{
         dueDate = dueDate.substring(0, 10) + " " + dueDate.substring(11);
         ContentValues values = new ContentValues();
         values.put("taskId", taskData.getTaskId());
-        values.put("belongedClassId", taskData.getTaskId());
+        values.put("belongedClassId", taskData.getBelongedClassId());
         values.put("taskName", taskData.getTaskName());
         values.put("dueDate", dueDate);
         values.put("taskURL", taskData.getTaskURL());
