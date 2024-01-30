@@ -16,6 +16,9 @@ public class ClassDataManager extends DataManager{
         prepareForWork(dataName);
     }
 
+    public ArrayList<ClassData> getClassDataList(){
+        return classDataList;
+    }
     public void loadClassData(){//データベースからデータを読み込んで、dataListに追加
         Log.d("aaa","今からクラスデータをロードします。ClassDataManager 22");
         while (cursor.moveToNext()) {

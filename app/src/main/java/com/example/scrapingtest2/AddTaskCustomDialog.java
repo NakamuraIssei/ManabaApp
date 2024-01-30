@@ -15,10 +15,15 @@ public class AddTaskCustomDialog extends Dialog {
     private TaskCustomAdapter adapter;
     private TaskDataManager taskDataManager;
 
+    static GridAdapter gridAdapter;
+
     public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter,TaskDataManager taskDataManager) {
         super(context);
         this.adapter=adapter;
         this.taskDataManager=taskDataManager;
+    }
+    static void setGridAdapter(GridAdapter gridAdapter){
+        AddTaskCustomDialog.gridAdapter=gridAdapter;
     }
 
     @Override
@@ -62,6 +67,7 @@ public class AddTaskCustomDialog extends Dialog {
                 taskDataManager.addTaskData(title2.getText().toString(),deadline,className,taskURL);
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
+                gridAdapter.notifyDataSetChanged();
                 Log.d("aaa", String.valueOf(Thread.currentThread())+"AddTaskCustomDialog 56");
                 dismiss();  // ダイアログを閉じる
             }

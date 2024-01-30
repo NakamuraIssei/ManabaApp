@@ -137,12 +137,14 @@ public class TaskDataManager extends DataManager{
                         requestSettingNotification(dataName, taskData.getTaskId(), taskName, dueDate, defaultTiming);
                         Log.d("aaa", taskData.getNotificationTiming().toString() + "デフォルトの通知を依頼しました。TadskDataManager 151");
                         allTaskDataList.add(taskData);
+                        classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
                         insertTaskDataIntoDB(taskData);
                     } catch (DateTimeParseException e) {
                         Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
                         TaskData taskData = new TaskData(dataCount, serchClassNum(belongedClassName), taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         dataCount = (dataCount + 1) % 99999999;
                         allTaskDataList.add(taskData);
+                        classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
                         insertTaskDataIntoDB(taskData);
                     }
                 }else{//提出期限が過ぎていれば

@@ -8,32 +8,17 @@
 
     <TextView
         android:id="@+id/classnameView"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
+        android:layout_width="405dp"
+        android:layout_height="33dp"
         android:padding="12dp"
         android:text="次の授業名"
         android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/view_pager"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintVertical_bias="0.2"
-        />
-    <TextView
-        android:id="@+id/classroomView"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:padding="15dp"
-        android:text="教室名"
-        android:textSize="20sp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/view_pager"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.95"
-        app:layout_constraintVertical_bias="0.2"
-        />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.2" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"

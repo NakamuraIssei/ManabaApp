@@ -11,7 +11,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +31,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
     private HashMap<String, String> cookieBag;
     private TextView className;
-    private TextView classRoom;
+    private GridView classGridView;
+    private RecyclerView taskRecyclerView;
     private ClassDataManager cd;
     private CookieManager cookieManager;
     private Context context;
@@ -92,15 +95,15 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                     public void run() {
                         Log.d("aaa","授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
-                        RecyclerView recyclerView = MainActivity.this.findViewById(R.id.RecycleView);//画面上のListViewの情報を変数listViewに設定
+                        taskRecyclerView = MainActivity.this.findViewById(R.id.RecycleView);//画面上のListViewの情報を変数listViewに設定
 
                         // LinearLayoutManagerを設定する
                         LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-                        recyclerView.setLayoutManager(layoutManager);
+                        taskRecyclerView.setLayoutManager(layoutManager);
 
-                        //ArrayList<TaskData> taskList = TaskData.getTask();//課題の情報をtaskDataから取得
+                        //課題の情報をtaskDataから取得
                         TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
-                        recyclerView.setAdapter(adapter);//listViewにadapterを設定
+                        taskRecyclerView.setAdapter(adapter);//listViewにadapterを設定
 
                         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, 0) {
                             @Override
@@ -142,7 +145,21 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
                         };
                         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-                        itemTouchHelper.attachToRecyclerView(recyclerView);
+                        itemTouchHelper.attachToRecyclerView(taskRecyclerView);
+
+                        classGridView=findViewById(R.id.classTableGrid);
+                        classGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                // タップされたセルのPositionをログに表示
+                                Log.d("aaa", "Tapped Cell Position: " + position);
+
+                                // ここで必要な処理を追加
+                            }
+                        });
+                        GridAdapter gridAdapter=new GridAdapter(context,cd.getClassDataList());
+                        classGridView.setAdapter(gridAdapter);
+                        AddTaskCustomDialog.setGridAdapter(gridAdapter);
 
                         Button addButton = MainActivity.this.findViewById(R.id.AddButton);//課題追加の画面を呼び出すボタンの設定
                         addButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
@@ -164,10 +181,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         });
 
                         className = findViewById(R.id.classnameView);
-                        classRoom = findViewById(R.id.classroomView);
 
                         if(!checkLogin()){
-                            LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context);//追加課題の画面のインスタンスを生成
+                            LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context,gridAdapter);//追加課題の画面のインスタンスを生成
                             // ダイアログを表示
                             dialog.show();//追加課題の画面を表示
                         }else{
@@ -179,9 +195,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
                             ClassData now=cd.getClassInfor();
                             className.setText(now.getClassName());
-                            classRoom.setText(now.getClassRoom());
 
                             adapter.notifyDataSetChanged();
+                            gridAdapter.notifyDataSetChanged();
                         }
                     }
 
@@ -194,12 +210,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     public void onNotificationReceived(int dataId) {
         dataId=(dataId+49)%49;
         className.setText(cd.classDataList.get(dataId).getClassName());
-        classRoom.setText(cd.classDataList.get(dataId).getClassRoom());
     }
     @Override
     public void updateClassTextView(ClassData classData) {
         className.setText(classData.getClassName());
-        classRoom.setText(classData.getClassRoom());
     }
     public boolean checkLogin(){
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
