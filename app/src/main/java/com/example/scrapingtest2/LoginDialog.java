@@ -22,9 +22,9 @@ public class LoginDialog extends Dialog {
     public TaskDataManager taskDataManager;
     public ClassDataManager classDataManager;
     public TaskCustomAdapter adapter;
-    public GridAdapter gridAdapter;
+    public ClassGridAdapter classGridAdapter;
     public static ClassUpdateListener classUpdateListener;
-    public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager,TaskDataManager td,ClassDataManager cd,TaskCustomAdapter adapter,ClassUpdateListener listener,GridAdapter gridAdapter) {
+    public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter) {
         super(context);
         this.url=url;
         this.cookieBag=cookieBag;
@@ -32,7 +32,7 @@ public class LoginDialog extends Dialog {
         taskDataManager=td;
         classDataManager=cd;
         this.adapter=adapter;
-        this.gridAdapter=gridAdapter;
+        this.classGridAdapter = classGridAdapter;
         classUpdateListener=listener;
     }
     @Override
@@ -75,7 +75,7 @@ public class LoginDialog extends Dialog {
                             taskDataManager.sortAllTaskDataList();
                             taskDataManager.setTaskDataIntoClassData();
                             adapter.notifyDataSetChanged();
-                            gridAdapter.notifyDataSetChanged();
+                            classGridAdapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
                             dismiss();
                         }

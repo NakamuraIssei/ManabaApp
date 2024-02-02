@@ -6,20 +6,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class GridAdapter extends BaseAdapter {
+public class ClassGridAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
-
     private ArrayList<String>Day;
+    private static class ViewHolder {
+        public TextView dateText;
+    }
 
-    public GridAdapter(Context context, ArrayList<ClassData> classDataList) {
+    public ClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
         this.context = context;
         this.classDataList= classDataList;
         this.Day=new ArrayList<String>();
@@ -32,12 +33,10 @@ public class GridAdapter extends BaseAdapter {
         this.Day.add("土");
         this.Day.add("日");
     }
-
     @Override
     public int getCount() {
         return 8*8; // 7x7のセル数
     }
-
     @Override
     public Object getItem(int position) {
         // セルのデータを取得
@@ -45,13 +44,10 @@ public class GridAdapter extends BaseAdapter {
         int col = position % 8;
         return classDataList.get(8*row+col);
     }
-
     @Override
     public long getItemId(int position) {
         return position;
     }
-
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -96,10 +92,6 @@ public class GridAdapter extends BaseAdapter {
 
         return convertView;
     }
-    private static class ViewHolder {
-        public TextView dateText;
-    }
-
     private int calculateCellWidth() {
         // ここでセルの大きさを計算するロジックを実装
         // 例: 画面の幅を7で割った値をセルの大きさとする
@@ -107,7 +99,6 @@ public class GridAdapter extends BaseAdapter {
         int screenWidth = displayMetrics.widthPixels;
         return screenWidth * (23/3);
     }
-
     private int calculateCellHeight() {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels;

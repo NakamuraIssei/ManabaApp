@@ -157,9 +157,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                 // ここで必要な処理を追加
                             }
                         });
-                        GridAdapter gridAdapter=new GridAdapter(context,cd.getClassDataList());
-                        classGridView.setAdapter(gridAdapter);
-                        AddTaskCustomDialog.setGridAdapter(gridAdapter);
+                        ClassGridAdapter classGridAdapter =new ClassGridAdapter(context,cd.getClassDataList());
+                        classGridView.setAdapter(classGridAdapter);
+                        AddTaskCustomDialog.setGridAdapter(classGridAdapter);
 
                         Button addButton = MainActivity.this.findViewById(R.id.AddButton);//課題追加の画面を呼び出すボタンの設定
                         addButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         className = findViewById(R.id.classnameView);
 
                         if(!checkLogin()){
-                            LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context,gridAdapter);//追加課題の画面のインスタンスを生成
+                            LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context, classGridAdapter);//追加課題の画面のインスタンスを生成
                             // ダイアログを表示
                             dialog.show();//追加課題の画面を表示
                         }else{
@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             className.setText(now.getClassName());
 
                             adapter.notifyDataSetChanged();
-                            gridAdapter.notifyDataSetChanged();
+                            classGridAdapter.notifyDataSetChanged();
                         }
                     }
 

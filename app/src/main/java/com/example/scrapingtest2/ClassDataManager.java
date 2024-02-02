@@ -15,7 +15,6 @@ public class ClassDataManager extends DataManager{
     ClassDataManager(String dataName){
         prepareForWork(dataName);
     }
-
     public ArrayList<ClassData> getClassDataList(){
         return classDataList;
     }

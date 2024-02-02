@@ -24,8 +24,6 @@ public class DataManager {
     protected Cursor cursor;
     protected DateTimeFormatter formatter;
 
-    // 0~48 授業用のid
-    // 49~ 課題用のid
 
     public void prepareForWork(String DataName){//インスタンスを生成した時に使う初期化用のメゾッド
         dataName=DataName;

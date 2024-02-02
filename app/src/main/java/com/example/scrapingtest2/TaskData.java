@@ -27,29 +27,23 @@ public class TaskData {
     public int getTaskId(){
         return this.taskId;
     }
+    public int getBelongedClassId(){
+        return this.belongedClassId;
+    }
     public String getTaskName(){
         return this.taskName;
     }
     public LocalDateTime getDueDate(){
         return this.dueDate;
     }
-    public int getBelongedClassId(){
-        return this.belongedClassId;
-    }
     public ArrayList<LocalDateTime> getNotificationTiming(){
         return this.notificationTiming;
-    }
-    public int getHasSubmitted(){
-        return this.hasSubmitted;
     }
     public String getTaskURL(){
         return this.taskURL;
     }
-    public void replaceTaskName(String taskName){
-        this.taskName =taskName;
-    }
-    public void replaceDueDate(LocalDateTime dueDate){
-        this.dueDate =dueDate;
+    public int getHasSubmitted(){
+        return this.hasSubmitted;
     }
     public void changeSubmitted(int hasSubmitted){
         this.hasSubmitted =hasSubmitted;
@@ -77,5 +71,11 @@ public class TaskData {
             }
         };
         Collections.sort(notificationTiming, longComparator);
+    }
+    public void replaceTaskName(String taskName){
+        this.taskName =taskName;
+    }
+    public void replaceDueDate(LocalDateTime dueDate){
+        this.dueDate =dueDate;
     }
 }

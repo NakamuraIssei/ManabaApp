@@ -127,8 +127,8 @@ public class TaskDataManager extends DataManager{
                 if(LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))) {//提出期限が過ぎていなければ
                     try {
                         LocalDateTime deadLine = LocalDateTime.parse(dueDate, formatter);
-                        Log.d("aaa", dataCount + "晩年の課題として" + taskName + "を作成します。授業番号は" + serchClassNum(belongedClassName) + "です。TaskDataManager 146");
-                        TaskData taskData = new TaskData(dataCount, serchClassNum(belongedClassName), taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        Log.d("aaa", dataCount + "晩年の課題として" + taskName + "を作成します。授業番号は" + searchClassId(belongedClassName) + "です。TaskDataManager 146");
+                        TaskData taskData = new TaskData(dataCount, searchClassId(belongedClassName), taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         dataCount = (dataCount + 1) % 99999999;
                         LocalDateTime defaultTiming = deadLine.plusHours(-1);
                         Log.d("aaa", deadLine + "の一時間前は" + defaultTiming + "です。TaskdataManager 142");
@@ -141,7 +141,7 @@ public class TaskDataManager extends DataManager{
                         insertTaskDataIntoDB(taskData);
                     } catch (DateTimeParseException e) {
                         Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
-                        TaskData taskData = new TaskData(dataCount, serchClassNum(belongedClassName), taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        TaskData taskData = new TaskData(dataCount, searchClassId(belongedClassName), taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         dataCount = (dataCount + 1) % 99999999;
                         allTaskDataList.add(taskData);
                         classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
@@ -158,7 +158,7 @@ public class TaskDataManager extends DataManager{
         for(TaskData taskData : allTaskDataList)if(Objects.equals(taskData.getTaskName(), name))return true;
         return false;
     }
-    public int serchClassNum(String belongedClassName){
+    public int searchClassId(String belongedClassName){
         for(ClassData classData:classDataList){
             if(Objects.equals(belongedClassName, classData.getClassName()))return classData.getClassId();
         }

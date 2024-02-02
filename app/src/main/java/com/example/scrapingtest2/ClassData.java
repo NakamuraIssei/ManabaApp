@@ -11,6 +11,8 @@ public class ClassData {
     private int classId;
     private String className;
     private String classRoom;
+
+    //private String professorName;
     private String classURL;
     private ArrayList<TaskData> taskList;
 
@@ -18,6 +20,7 @@ public class ClassData {
         this.classId =classId;
         this.className=className;
         this.classRoom=classRoom;
+        //this.professorName;
         this.classURL=classURL;
         this.taskList=new ArrayList<TaskData>();
     }
@@ -32,9 +35,6 @@ public class ClassData {
     }
     public String getClassURL(){
         return this.classURL;
-    }
-    public ArrayList<TaskData> getTaskList(){
-        return this.taskList;
     }
     public void setClassName(String className){
         this.className=className;
@@ -53,6 +53,9 @@ public class ClassData {
     }
     public Boolean hasTask() {
         return taskList.size() > 0;
+    }
+    public ArrayList<TaskData> getTaskList(){
+        return this.taskList;
     }
     public void sortTaskList() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
