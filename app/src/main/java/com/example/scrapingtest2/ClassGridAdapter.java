@@ -16,10 +16,6 @@ public class ClassGridAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
     private ArrayList<String>Day;
-    private static class ViewHolder {
-        public TextView dateText;
-    }
-
     public ClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
         this.context = context;
         this.classDataList= classDataList;
@@ -72,7 +68,7 @@ public class ClassGridAdapter extends BaseAdapter {
                 holder.dateText.setText(String.valueOf(row));
             } else {
                 // セルにデータを表示
-                Log.d("aaa", (position - 8) - (position / 8) + "番目を時間割にひゅおうじします。GridAdapter 68");
+                Log.d("aaa", (position - 8) - (position / 8) + "番目を時間割に表示します。GridAdapter 68");
                 ClassData classData = classDataList.get((position - 8) - (position / 8));
 
                 // 特定の条件を満たす場合に背景色を設定
@@ -103,6 +99,9 @@ public class ClassGridAdapter extends BaseAdapter {
         DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         int screenWidth = displayMetrics.widthPixels;
         return screenWidth /8;
+    }
+    private static class ViewHolder {
+        public TextView dateText;
     }
 
 }

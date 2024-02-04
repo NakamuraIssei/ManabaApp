@@ -186,7 +186,7 @@ public class TaskDataManager extends DataManager{
     public void getTaskDataFromManaba(){
         try {
             ArrayList<String> taskList;
-            taskList=requestScraping();
+            taskList=ManabaScraper.scrapeTaskDataFromManaba();
             Log.d("aaa","課題スクレーピング完了！　TaskDataManager 104");
             for(String k:taskList){
                 Log.d("aaa",k+"TaskDataManager　106");
@@ -210,8 +210,6 @@ public class TaskDataManager extends DataManager{
             throw new RuntimeException(e);
         } catch (InterruptedException e) {
             Log.d("aaa","課題スクレーピングみすった！　TaskDataManager　119");
-            throw new RuntimeException(e);
-        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -22,9 +22,11 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 public class MainActivity extends AppCompatActivity implements ClassUpdateListener {
@@ -153,6 +155,23 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                 // タップされたセルのPositionをログに表示
                                 Log.d("aaa", "Tapped Cell Position: " + position);
+                                // positionの計算
+                                int row = position / 8;
+                                int col = position % 8;
+                                position = col * 8 + row;
+                                if(row!=0&&col!=0){
+                                    String className,classRoom,professorName,classURL;
+                                    ClassData classData =cd.getClassDataList().get((position - 8) - (position / 8));
+                                    className=classData.getClassName();
+                                    classRoom=classData.getClassRoom();
+                                    professorName=classData.getProfessorName();
+                                    classURL=classData.getClassURL();
+                                    Log.d("aaa", "今押した授業情報は"+className+"   "+professorName+"MainActivity 166");
+                                    if(!Objects.equals(className, "次は空きコマです。")){
+                                        ClassDialog classDialog=new ClassDialog(MainActivity.this,className,classRoom,professorName,classURL);
+                                        classDialog.show();
+                                    }
+                                }
 
                                 // ここで必要な処理を追加
                             }
@@ -189,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         }else{
                             ManabaScraper.setCookie(cookieBag);
                             cd.getClassDataFromManaba();
+                            cd.getProfessorNameFromManaba();
                             taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
                             taskDataManager.sortAllTaskDataList();

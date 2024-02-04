@@ -10,8 +10,10 @@ import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class LoginDialog extends Dialog {
 
@@ -70,6 +72,7 @@ public class LoginDialog extends Dialog {
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
                             classDataManager.getClassDataFromManaba();
+                            classDataManager.getProfessorNameFromManaba();
                             taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
                             taskDataManager.sortAllTaskDataList();

@@ -37,7 +37,7 @@ public class DataManager {
         db=DB;
         cursor=Cursor;
     }
-    public ArrayList<String> requestScraping() throws IOException, ExecutionException, InterruptedException {
-        return ManabaScraper.receiveRequest(dataName);
-    }
+//    public ArrayList<String> requestScraping() throws IOException, ExecutionException, InterruptedException {
+//        return ManabaScraper.receiveRequest(dataName);
+//    }
 }

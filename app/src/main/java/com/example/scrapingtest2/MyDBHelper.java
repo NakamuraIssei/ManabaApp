@@ -18,6 +18,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + "classId INTEGER PRIMARY KEY,"
                 + "className TEXT,"
                 + "classRoom TEXT,"
+                + "professorName TEXT,"
                 + "classURL Boolern)";
         db.execSQL(createTaskDataTableQuery);
 

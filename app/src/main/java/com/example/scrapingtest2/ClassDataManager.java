@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class ClassDataManager extends DataManager{
@@ -24,8 +25,9 @@ public class ClassDataManager extends DataManager{
             @SuppressLint("Range")int datacount = cursor.getInt(cursor.getColumnIndex("classId"));
             @SuppressLint("Range")String className = cursor.getString(cursor.getColumnIndex("className"));
             @SuppressLint("Range")String classRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
+            @SuppressLint("Range")String professorName = cursor.getString(cursor.getColumnIndex("professorName"));
             @SuppressLint("Range")String classURL = cursor.getString(cursor.getColumnIndex("classURL"));
-            ClassData classData =new ClassData(datacount,className,classRoom,classURL);
+            ClassData classData =new ClassData(datacount,className,classRoom,professorName,classURL);
             dataCount=(datacount+1)%99999999;
             Log.d("aaa",datacount+"番目の"+ classData.getClassName()+"をロードしました。ClassDataManager 30");
 
@@ -41,7 +43,7 @@ public class ClassDataManager extends DataManager{
         classDataList.clear();
         db.execSQL("DELETE FROM " + dataName);
         for(int i=0;i<49;i++){
-            ClassData classData=new ClassData(i,"次は空きコマです。","","");
+            ClassData classData=new ClassData(i,"次は空きコマです。","","","");
             classDataList.add(classData);
             insertClassDataIntoDB(classData);//ここでデータベースの中身を書く
         }
@@ -96,23 +98,23 @@ public class ClassDataManager extends DataManager{
             }else
                 line = 7;
 
-            Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目");
-            if(classDataList.size()!=49)return new ClassData(0,"授業情報を取得できませんでした","","");
+            Log.d("aaa","今見たのは"+row+"曜日"+line+"時間目 ClassDataManager 101");
+            if(classDataList.size()!=49)return new ClassData(0,"授業情報を取得できませんでした","","","");
             if(line==7){
                 NotifyManager2.setClassNotificationAlarm(dataName,7*row+6,"次は空きコマです","",now);
-                return new ClassData(0,"次は空きコマです","","");
+                return new ClassData(0,"次は空きコマです","","","");
             }
-            else{
+            else if(7*row+line-1>=0){
                 NotifyManager2.setClassNotificationAlarm(dataName,7*row+line-1, classDataList.get(7*row+line-1).getClassName(), classDataList.get(7*row+line-1).getClassRoom(),now);
                 return classDataList.get(7*row+line-1);
             }
         }
-        return new ClassData(0,"時間外です。","行く当てなし","");
+        return new ClassData(0,"時間外です。","行く当てなし","","");
     }
     public void getClassDataFromManaba(){
         try {
             ArrayList<String> classList;
-            classList=requestScraping();
+            classList=ManabaScraper.getClassDataFromManaba();
             Log.d("aaa","課題スクレーピング完了！　ClassDataManager 113");
             for(String k:classList){
                 Log.d("aaa",k+"ClassDataManager　115");
@@ -130,8 +132,25 @@ public class ClassDataManager extends DataManager{
             throw new RuntimeException(e);
         }
     }
+    public void getProfessorNameFromManaba(){
+        ArrayList<String>professorInfor;
+        try {
+            professorInfor=ManabaScraper.getProfessorNameFromManaba();
+            for(String k:professorInfor){
+                String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
+                for(int i=0;i<classDataList.size();i++){
+                    if(Objects.equals(classDataList.get(i).getClassName(), str[0])){//str[0] 授業名
+                        classDataList.get(i).setProfessorName(str[1]);//str[1] 教授名
+                    }
+                }
+            }
+        } catch (IOException | ExecutionException | InterruptedException e) {
+            Log.d("aaa","教授名スクレーピングみすった！　ClassDataManager　148");
+            throw new RuntimeException(e);
+        }
+    }
     public void replaceClassDataIntoClassList(int classId, String className , String classRoom, String classURL){
-        ClassData classData =new ClassData(classId,className,classRoom,classURL);
+        ClassData classData =new ClassData(classId,className,classRoom,"",classURL);
         classDataList.set(classId,classData);
     }
     public void replaceClassDataIntoDB(int classId, String className , String classRoom, String classURL){

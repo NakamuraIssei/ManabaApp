@@ -12,15 +12,15 @@ public class ClassData {
     private String className;
     private String classRoom;
 
-    //private String professorName;
+    private String professorName;
     private String classURL;
     private ArrayList<TaskData> taskList;
 
-    ClassData(int classId, String className, String classRoom, String classURL){
+    ClassData(int classId, String className, String classRoom, String professorName,String classURL){
         this.classId =classId;
         this.className=className;
         this.classRoom=classRoom;
-        //this.professorName;
+        this.professorName=professorName;
         this.classURL=classURL;
         this.taskList=new ArrayList<TaskData>();
     }
@@ -33,6 +33,9 @@ public class ClassData {
     public String getClassRoom(){
         return this.classRoom;
     }
+    public String getProfessorName(){
+        return this.professorName;
+    }
     public String getClassURL(){
         return this.classURL;
     }
@@ -41,6 +44,9 @@ public class ClassData {
     }
     public void setClassRoom(String classRoom){
         this.classRoom=classRoom;
+    }
+    public void setProfessorName(String professorName){
+        this.professorName=professorName;
     }
     public void setClassURL(String classURL){
         this.classURL=classURL;

@@ -18,32 +18,24 @@ import java.util.concurrent.ExecutionException;
 
 public class ManabaScraper {
     private static ArrayList<String> urlList;
+    private static ArrayList<String> classURL;
     private static HashMap<String, String> cookiebag;
     public static ArrayList<String> taskInfor;
     private static ArrayList<String> classInfor;
-    private static String classURL;
 
-    public static ArrayList<String> receiveRequest(String dataName) throws ExecutionException, InterruptedException, IOException {
-        taskInfor =new ArrayList<>();
-        classInfor=new ArrayList<>();
-        switch (dataName){
-            case "TaskData":
-                return scrapeTaskDataFromManaba();
-            case "ClassData":
-                return getClassDataFromManaba();
-        }
-        return null;
-    }
+
     public static void setCookie(HashMap<String, String> cookiebag){
         ManabaScraper.cookiebag =cookiebag;
         urlList= new ArrayList<>(Arrays.asList(
                 "https://ct.ritsumei.ac.jp/ct/home_summary_query",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_survey",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_report"));
-        classURL="https://ct.ritsumei.ac.jp/ct/home_course";
+        classURL=new ArrayList<>(Arrays.asList(
+                "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=timetable",
+                "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=list"));
     }
-    private static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {
-        taskInfor.clear();
+    public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {
+        taskInfor =new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
@@ -83,16 +75,17 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    private static ArrayList<String> getClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {
-        classInfor.clear();
+    public static ArrayList<String> getClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {
+        classInfor=new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
-                    Document doc = Jsoup.connect(classURL).cookies(cookiebag).get();//jsoupでHTMLを取得する。
+                    Log.d("ppp","授業スクレーピング開始します。ManabaScraper 84");
+                    Document doc = Jsoup.connect(classURL.get(0)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
                     //System.err.println(doc);
                     Elements doc2 = doc.select("#courselistweekly > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
-                    //Log.d("bbb", String.valueOf(doc2));
+                    Log.d("bbb", String.valueOf(doc2));
 
                     Elements rows = doc2.select("tr");
 
@@ -114,12 +107,57 @@ public class ManabaScraper {
                                 className = className.substring(0, className.length() - 1);//最後に空白が入ってるから、それを消す。
                                 assert divs3 != null;
                                 url= Objects.requireNonNull(divs3.attr("href"));
+                                Log.d("ppp","スクレーピングした授業は"+className+"です。ManabaScraper 109");
                                 classInfor.add((7*(j-1)+i)-1+"???"+className+"???"+classRoom+"???"+url);//番号、授業名、教室名、URLの順番
                             }
                         }
                     }
                     for(String k:classInfor)Log.d("aaa",k+"ManabaScraper 152");
                     Log.d("aaa",classInfor.size()+"ManabaScraper 153");
+
+                    return classInfor;
+
+                } catch (IOException e) {//tryの中でうまくいかなかった時の処理。
+                    Log.d("ppp","授業スクレーピング失敗しました。ManabaScraper 120");
+                    e.printStackTrace();
+                }
+                return classInfor;
+            });
+
+            return scrapingTask.get();
+        }
+        return classInfor;
+    }
+    public static ArrayList<String> getProfessorNameFromManaba() throws ExecutionException, InterruptedException, IOException {
+        classInfor=new ArrayList<>();
+        CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
+            scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
+                try {
+                    Document doc = Jsoup.connect(classURL.get(1)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
+                    //System.err.println(doc);
+                    Elements doc2 = doc.select("#container > div.pagebody > div > div.contentbody-left > div.my-infolist.my-infolist-mycourses > div.mycourses-body > div > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
+                    //Log.d("bbb", String.valueOf(doc2));
+
+                    Elements rows = doc2.select("tr");
+
+
+                    classInfor.clear();
+                    for (int i = 1; i < rows.size(); i++) {
+                        Element row = rows.get(i);
+                        Log.d("aaa",row.text()+"ManabaScraper 145");
+                        Elements div1,div2;
+
+                        div1 = row.select("td:nth-child(1) > span > a");
+                        div2 = row.select("td:nth-child(4)");
+
+                        String className="",professorName="";
+
+                        className = Objects.requireNonNull(Objects.requireNonNull(div1.text()));
+                        professorName = Objects.requireNonNull(Objects.requireNonNull(div2.text()));
+
+                        classInfor.add(className+"???"+professorName);
+                    }
 
                     return classInfor;
 
