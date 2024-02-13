@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -133,6 +132,21 @@ public class NotifyManager2 {
             long japanEpochMilli = japanInstant.toEpochMilli();
 
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
+        }
+        dataCount=(dataCount+1)%99999999;
+    }
+    static void setClassRegistrationAlarm(){
+        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+        notificationIntent.setAction(String.valueOf(dataCount));
+        notificationIntent.putExtra("DATANAME","ClassRegistration");
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Log.d("aaa","intent,pendingIntentとかの設定できました。NotyfyManager2 143");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
+            Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
+            long japanEpochMilli = japanInstant.toEpochMilli();
+            notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
+            Log.d("aaa",japanEpochMilli+"でAlarmMangerに設定しました。NotyfyManager2 149");
         }
         dataCount=(dataCount+1)%99999999;
     }

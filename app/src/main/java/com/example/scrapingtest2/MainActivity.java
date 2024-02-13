@@ -1,6 +1,7 @@
 package com.example.scrapingtest2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
@@ -22,11 +23,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 public class MainActivity extends AppCompatActivity implements ClassUpdateListener {
@@ -44,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         super.onCreate(savedInstanceState);
         Objects.requireNonNull(getSupportActionBar()).hide();
         setContentView(R.layout.activity_taskwork);
+        handleIntent(getIntent());
         //setContentView(R.layout.aaa);
 
         //tabName.add("課題");
@@ -67,9 +67,14 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         AddNotificationDialog.setTaskdataManager(taskDataManager);
         cd=new ClassDataManager("ClassData");
 
+        RegisterClassDialog.setClassDataManager(cd);
+        ChangeableClassDialog.setClassDataManager(cd);
+
         NotificationReceiver2.setTaskDataManager(taskDataManager);
         NotifyManager2.setNotificationListener(this);
         NotifyManager2.setBackScrapingAlarm();
+
+        NotificationReceiver2.setNotificationListener(this);
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
@@ -84,10 +89,6 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Supplier<String> setData = () -> {
-                taskDataManager.loadTaskData();
-                Log.d("aaa","TaskDataロード完了！ MainActivity 83");
-                taskDataManager.setTaskDataIntoClassData();
-                taskDataManager.sortAllTaskDataList();
                 return null;
             };
 
@@ -168,8 +169,13 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                     classURL=classData.getClassURL();
                                     Log.d("aaa", "今押した授業情報は"+className+"   "+professorName+"MainActivity 166");
                                     if(!Objects.equals(className, "次は空きコマです。")){
-                                        ClassDialog classDialog=new ClassDialog(MainActivity.this,className,classRoom,professorName,classURL);
-                                        classDialog.show();
+                                        if(classData.getClassIdChangeable()==0){
+                                            UnChangeableClassDialog unChangeableClassDialog =new UnChangeableClassDialog(MainActivity.this,className,classRoom,professorName,classURL);
+                                            unChangeableClassDialog.show();
+                                        }else{
+                                            ChangeableClassDialog changeableClassDialog =new ChangeableClassDialog(MainActivity.this,(position - 8) - (position / 8),className,classRoom,professorName,classURL);
+                                            changeableClassDialog.show();
+                                        }
                                     }
                                 }
 
@@ -179,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         ClassGridAdapter classGridAdapter =new ClassGridAdapter(context,cd.getClassDataList());
                         classGridView.setAdapter(classGridAdapter);
                         AddTaskCustomDialog.setGridAdapter(classGridAdapter);
+                        RegisterClassDialog.setClassGridAdapter(classGridAdapter);
+                        ChangeableClassDialog.setClassGridAdapter(classGridAdapter);
 
                         Button addButton = MainActivity.this.findViewById(R.id.AddButton);//課題追加の画面を呼び出すボタンの設定
                         addButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
@@ -207,17 +215,26 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             dialog.show();//追加課題の画面を表示
                         }else{
                             ManabaScraper.setCookie(cookieBag);
-                            cd.getClassDataFromManaba();
+                            cd.eraseUnchangeableClass();
+                            cd.getChangeableClassDataFromManaba();
+                            cd.eraseNotExistChangeableClass();
+                            cd.eraseRegisteredChangeableClass();
+                            cd.getUnChangeableClassDataFromManaba();
                             cd.getProfessorNameFromManaba();
+
+                            taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
                             taskDataManager.sortAllTaskDataList();
+                            taskDataManager.setTaskDataIntoRegisteredClassData();
+                            taskDataManager.setTaskDataIntoUnRegisteredClassData();
 
                             ClassData now=cd.getClassInfor();
                             className.setText(now.getClassName());
 
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
+                            if(DataManager.unRegisteredClassDataList.size()>0)NotifyManager2.setClassRegistrationAlarm();
                         }
                     }
 
@@ -234,6 +251,26 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     @Override
     public void updateClassTextView(ClassData classData) {
         className.setText(classData.getClassName());
+    }
+    @Override
+    public  void showRegisterClassDialog(){
+        for(ClassData classData:DataManager.unRegisteredClassDataList){
+            RegisterClassDialog registerClassDialog=new RegisterClassDialog(this,classData.getClassName(),classData.getProfessorName(),classData.getClassURL());
+            registerClassDialog.show();
+        }
+    }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d("ggg","い登録授業表示するよー！");
+
+        // 新しいIntentを処理する
+        handleIntent(intent);
+    }
+    private void handleIntent(Intent intent) {
+        if (intent != null && intent.getAction() != null && intent.getAction().equals("REGISTER_CLASS")) {
+
+        }
     }
     public boolean checkLogin(){
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう

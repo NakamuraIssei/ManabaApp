@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.os.Build;
 import android.util.Log;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -41,8 +40,8 @@ public class TaskDataManager extends DataManager{
             while (cursor.moveToNext()) {
                 @SuppressLint("Range")int taskId = cursor.getInt(cursor.getColumnIndex("taskId"));
                 Log.d("aaa", "taskId= "+String.valueOf(taskId));
-                @SuppressLint("Range")int belongedclassId = cursor.getInt(cursor.getColumnIndex("belongedClassId"));
-                Log.d("aaa", "belongedClassId= "+String.valueOf(belongedclassId));
+                @SuppressLint("Range")String belongedClassName = cursor.getString(cursor.getColumnIndex("belongedClassName"));
+                Log.d("aaa", "belongedClassName= "+belongedClassName);
                 @SuppressLint("Range")String taskName = cursor.getString(cursor.getColumnIndex("taskName"));
                 Log.d("aaa",taskName);
                 @SuppressLint("Range")String dueDate = cursor.getString(cursor.getColumnIndex("dueDate"));
@@ -55,11 +54,11 @@ public class TaskDataManager extends DataManager{
                 Log.d("aaa", String.valueOf(hasSubmitted));
                 LocalDateTime temp=LocalDateTime.parse(dueDate, formatter);
                 Log.d("aaa","締め切り日時は"+temp+"です。　TaskDataManager 56");
-                if(LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))){
-                    //締め切りを過ぎていなければ、allTaskListに登録
+                if(LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))&&((isExistInClassDataList(belongedClassName))||isExistInUnRegisteredClassDataList(belongedClassName))){
+                    //締め切りを過ぎていない、かつ、所属クラスが存在すれば、allTaskListに登録
                     Log.d("aaa",taskName+"は締め切りを過ぎていないので登録します。TaskDataManager 50");
 
-                    TaskData taskData =new TaskData(taskId,belongedclassId,taskName,LocalDateTime.parse(dueDate, formatter),taskURL,hasSubmitted);
+                    TaskData taskData =new TaskData(taskId,belongedClassName,taskName,LocalDateTime.parse(dueDate, formatter),taskURL,hasSubmitted);
                     dataCount=(taskId+1)%99999999;
                     Log.d("aaa",taskId+"番目の"+ taskData.getTaskName()+"をロードしました。TaskDataManager 42");
                     if(!Objects.equals(notificationTiming, "")){
@@ -77,7 +76,7 @@ public class TaskDataManager extends DataManager{
                     allTaskDataList.add(taskData);
                 }else{
                     //締め切りを過ぎていれば、データベースから削除
-                    Log.d("aaa",taskName+"は締め切りを過ぎていたのでさくじょします。TaskDataManager 68");
+                    Log.d("aaa",taskName+"は締め切りを過ぎていたか所属クラスがなかったので削除します。TaskDataManager 68");
                     String[] whereArgs = { String.valueOf(taskId) };
                     db.delete(dataName, "taskId = ?", whereArgs);
                 }
@@ -86,10 +85,28 @@ public class TaskDataManager extends DataManager{
             Log.d("aaa","タスクデータロード完了!。TaskDataManager 59");
         }
     }
-    public void setTaskDataIntoClassData(){
+    public void setTaskDataIntoRegisteredClassData(){
         for(TaskData taskData: allTaskDataList){
-            if(taskData.getHasSubmitted()==0)
-                classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
+            if(taskData.getHasSubmitted()==0) {
+                for(int i=0;i<classDataList.size();i++) {
+                    if (Objects.equals(classDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
+                        classDataList.get(i).addTaskData(taskData);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    public void setTaskDataIntoUnRegisteredClassData(){
+        for(TaskData taskData: allTaskDataList){
+            if(taskData.getHasSubmitted()==0) {
+                for(int i=0;i<unRegisteredClassDataList.size();i++) {
+                    if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
+                        unRegisteredClassDataList.get(i).addTaskData(taskData);
+                        break;
+                    }
+                }
+            }
         }
     }
     public void sortAllTaskDataList(){
@@ -128,7 +145,7 @@ public class TaskDataManager extends DataManager{
                     try {
                         LocalDateTime deadLine = LocalDateTime.parse(dueDate, formatter);
                         Log.d("aaa", dataCount + "晩年の課題として" + taskName + "を作成します。授業番号は" + searchClassId(belongedClassName) + "です。TaskDataManager 146");
-                        TaskData taskData = new TaskData(dataCount, searchClassId(belongedClassName), taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        TaskData taskData = new TaskData(dataCount, belongedClassName, taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         dataCount = (dataCount + 1) % 99999999;
                         LocalDateTime defaultTiming = deadLine.plusHours(-1);
                         Log.d("aaa", deadLine + "の一時間前は" + defaultTiming + "です。TaskdataManager 142");
@@ -137,14 +154,12 @@ public class TaskDataManager extends DataManager{
                         requestSettingNotification(dataName, taskData.getTaskId(), taskName, dueDate, defaultTiming);
                         Log.d("aaa", taskData.getNotificationTiming().toString() + "デフォルトの通知を依頼しました。TadskDataManager 151");
                         allTaskDataList.add(taskData);
-                        classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
                         insertTaskDataIntoDB(taskData);
                     } catch (DateTimeParseException e) {
                         Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
-                        TaskData taskData = new TaskData(dataCount, searchClassId(belongedClassName), taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        TaskData taskData = new TaskData(dataCount, belongedClassName, taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         dataCount = (dataCount + 1) % 99999999;
                         allTaskDataList.add(taskData);
-                        classDataList.get(taskData.getBelongedClassId()).addTaskData(taskData);
                         insertTaskDataIntoDB(taskData);
                     }
                 }else{//提出期限が過ぎていれば
@@ -183,7 +198,7 @@ public class TaskDataManager extends DataManager{
 
         }
     }
-    public void getTaskDataFromManaba(){
+    public void getTaskDataFromManaba(){//ここで課題の提出、未提出判定も行う。
         try {
             ArrayList<String> taskList;
             taskList=ManabaScraper.scrapeTaskDataFromManaba();
@@ -234,7 +249,7 @@ public class TaskDataManager extends DataManager{
         dueDate = dueDate.substring(0, 10) + " " + dueDate.substring(11);
         ContentValues values = new ContentValues();
         values.put("taskId", taskData.getTaskId());
-        values.put("belongedClassId", taskData.getBelongedClassId());
+        values.put("belongedClassName", taskData.getBelongedClassName());
         values.put("taskName", taskData.getTaskName());
         values.put("dueDate", dueDate);
         values.put("taskURL", taskData.getTaskURL());
@@ -322,5 +337,17 @@ public class TaskDataManager extends DataManager{
         requestCancelNotification(dataName, allTaskDataList.get(dataNum).getTaskName(), allTaskDataList.get(dataNum).getDueDate(), allTaskDataList.get(dataNum).getNotificationTiming().get(notificationNum));
         allTaskDataList.get(dataNum).deleteNotificationTiming(notificationNum);
         updateNotificationTimingFromDB(allTaskDataList.get(dataNum));
+    }
+    public Boolean isExistInClassDataList(String className){
+        for(ClassData classData:classDataList){
+            if(Objects.equals(className, classData.getClassName()))return true;
+        }
+        return false;
+    }
+    public Boolean isExistInUnRegisteredClassDataList(String className){
+        for(ClassData classData:unRegisteredClassDataList){
+            if(Objects.equals(className, classData.getClassName()))return true;
+        }
+        return false;
     }
 }

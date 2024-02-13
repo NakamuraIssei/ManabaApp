@@ -3,6 +3,7 @@ package com.example.scrapingtest2;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -13,6 +14,8 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 import android.webkit.CookieManager;
+import android.widget.Button;
+import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -26,6 +29,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
     public SQLiteDatabase db;
     public Cursor cursor;
     public static TaskDataManager taskDataManager;
+    private static ClassUpdateListener classUpdateListener;
 
 
     public void onReceive(Context context, Intent intent) {
@@ -54,9 +58,17 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 case "BackScraping":
                     backScraping(context);
                     break;
+                case "ClassRegistration":
+                    urgeClassRegistration(context);
+                    break;
+                case "REGISTER_CLASS":
+                    classUpdateListener.showRegisterClassDialog();
             }
         }
 
+    }
+    static void setNotificationListener(ClassUpdateListener listener) {
+        classUpdateListener = listener;
     }
     static void setTaskDataManager(TaskDataManager taskDataManager){
         NotificationReceiver2.taskDataManager=taskDataManager;
@@ -216,10 +228,61 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             classDataManager.loadClassData();
 
             taskDataManager.loadTaskData();
-            taskDataManager.setTaskDataIntoClassData();
+            taskDataManager.setTaskDataIntoRegisteredClassData();
             taskDataManager.sortAllTaskDataList();
             taskDataManager.makeAllTasksSubmitted();
             taskDataManager.getTaskDataFromManaba();
+    }
+    private void urgeClassRegistration(Context context){
+        //通知作業
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (notificationManager == null)
+                notificationManager = context.getSystemService(NotificationManager.class);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+
+            NotificationChannel channel                              // ・・・(2)
+                    = null;
+
+            channel = new NotificationChannel(String.valueOf(999999999), "サンプルアプリ", importance);
+
+
+            channel.setDescription("説明・説明 ここに通知の説明を書くことができます");
+
+
+            notificationManager.createNotificationChannel(channel);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, String.valueOf(999999999))
+                    .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setTimeoutAfter(6000L);
+
+            // カスタム通知レイアウトを設定
+            RemoteViews customLayout = new RemoteViews(context.getPackageName(), R.layout.notification_layout);
+            customLayout.setTextViewText(R.id.notification_title, "未登録授業があります。");
+            customLayout.setTextViewText(R.id.notification_message, "登録してちょ");
+
+            Intent intent = new Intent(context, NotificationReceiver2.class);
+            intent.setAction("REGISTER_CLASS"); // 呼び出したいメソッドを指定するアクションをセット
+            intent.putExtra("DATANAME","REGISTER_CLASS");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            customLayout.setOnClickPendingIntent(R.id.register_button, pendingIntent);
+
+            builder.setContent(customLayout);
+
+            NotificationManagerCompat notificationManager
+                    = NotificationManagerCompat.from(context);
+
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag"
+            );
+            wakeLock.acquire();
+
+            //Log.d("aaa", "notifymap"+this.notificationMap.toString());
+            this.notificationManager.notify((int) 999999999, builder.build());
+            wakeLock.release();
+        }
     }
 }
 

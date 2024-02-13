@@ -1,7 +1,5 @@
 package com.example.scrapingtest2;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
@@ -12,13 +10,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-public class ClassDialog extends Dialog{
+public class UnChangeableClassDialog extends Dialog{
     private String className;
     private String classRoom;
     private String professorName;
     private String classURL;
 
-    public ClassDialog(Context context, String className, String classRoom, String professorName,String classURL) {
+    public UnChangeableClassDialog(Context context, String className, String classRoom, String professorName, String classURL) {
         super(context);
         this.className=className;
         this.classRoom=classRoom;
@@ -46,8 +44,6 @@ public class ClassDialog extends Dialog{
 
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(classURL));
         chromeIntent.setPackage("com.android.chrome");  // Chromeのパッケージ名を指定
-
-
         classPageButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
             @SuppressLint("QueryPermissionsNeeded")
             @Override

@@ -16,6 +16,8 @@ public class ClassGridAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
     private ArrayList<String>Day;
+
+    //private int columns
     public ClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
         this.context = context;
         this.classDataList= classDataList;

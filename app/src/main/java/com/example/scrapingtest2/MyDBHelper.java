@@ -19,12 +19,13 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + "className TEXT,"
                 + "classRoom TEXT,"
                 + "professorName TEXT,"
-                + "classURL Boolern)";
+                + "classURL Boolern,"
+                + "classIdChangeable Boolern)";
         db.execSQL(createTaskDataTableQuery);
 
         String createClassDataTableQuery = "CREATE TABLE IF NOT EXISTS TaskData ("
                 + "taskId INTEGER PRIMARY KEY,"
-                + "belongedClassId INTEGER,"
+                + "belongedClassName TEXT,"
                 + "taskName TEXT,"
                 + "dueDate TEXT,"
                 + "notificationTiming TEXT,"

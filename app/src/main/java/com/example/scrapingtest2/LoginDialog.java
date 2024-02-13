@@ -10,10 +10,8 @@ import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 public class LoginDialog extends Dialog {
 
@@ -66,20 +64,30 @@ public class LoginDialog extends Dialog {
                         String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                         cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
                     }
+                    Log.d("kkk",cookieBag.keySet().toString());
                     for(String cookie : cookieBag.keySet()){
                         Log.d("aaa", cookie);
                         if(Objects.equals(cookie, " sessionid")){//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
-                            classDataManager.getClassDataFromManaba();
+                            classDataManager.eraseUnchangeableClass();
+                            classDataManager.getChangeableClassDataFromManaba();
+                            classDataManager.eraseNotExistChangeableClass();
+                            classDataManager.eraseRegisteredChangeableClass();
+                            classDataManager.getUnChangeableClassDataFromManaba();
                             classDataManager.getProfessorNameFromManaba();
+
+                            taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
                             taskDataManager.sortAllTaskDataList();
-                            taskDataManager.setTaskDataIntoClassData();
+                            taskDataManager.setTaskDataIntoRegisteredClassData();
+                            taskDataManager.setTaskDataIntoUnRegisteredClassData();
+
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
+                            if(DataManager.unRegisteredClassDataList.size()>0)NotifyManager2.setClassRegistrationAlarm();
                             dismiss();
                         }
                     }

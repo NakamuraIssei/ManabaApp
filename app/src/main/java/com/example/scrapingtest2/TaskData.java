@@ -8,16 +8,16 @@ import java.util.Comparator;
 
 public class TaskData {
     private int taskId;
-    private int belongedClassId;
+    private String belongedClassName;
     private String taskName;//課題名、クラス名
     private LocalDateTime dueDate;//提出締め切り、教室名
     private ArrayList<LocalDateTime> notificationTiming;//課題の通知時億
     private String taskURL;//提出締め切り、教室名
     public int hasSubmitted;//課題が提出済みかのフラグ 未提出なら0、提出済みなら1
 
-    public TaskData(int taskId, int belongedClassId,String taskName, LocalDateTime dueDate, String taskURL,int hasSubmitted){
+    public TaskData(int taskId, String belongedClassName, String taskName, LocalDateTime dueDate, String taskURL, int hasSubmitted){
         this.taskId = taskId;
-        this.belongedClassId=belongedClassId;
+        this.belongedClassName = belongedClassName;
         this.taskName = taskName;
         this.dueDate = dueDate;
         this.taskURL=taskURL;
@@ -27,8 +27,8 @@ public class TaskData {
     public int getTaskId(){
         return this.taskId;
     }
-    public int getBelongedClassId(){
-        return this.belongedClassId;
+    public String getBelongedClassName(){
+        return this.belongedClassName;
     }
     public String getTaskName(){
         return this.taskName;

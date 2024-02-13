@@ -20,6 +20,7 @@ public class DataManager {
     protected String dataName;//継承先クラスのコンストラクタで設定！
     protected int dataCount;
     protected static ArrayList<ClassData> classDataList;
+    protected static ArrayList<ClassData> unRegisteredClassDataList;
     protected SQLiteDatabase db;
     protected Cursor cursor;
     protected DateTimeFormatter formatter;
