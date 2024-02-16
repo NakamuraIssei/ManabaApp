@@ -25,7 +25,6 @@ public class DataManager {
     protected Cursor cursor;
     protected DateTimeFormatter formatter;
 
-
     public void prepareForWork(String DataName){//インスタンスを生成した時に使う初期化用のメゾッド
         dataName=DataName;
         dataCount =0;
@@ -38,7 +37,4 @@ public class DataManager {
         db=DB;
         cursor=Cursor;
     }
-//    public ArrayList<String> requestScraping() throws IOException, ExecutionException, InterruptedException {
-//        return ManabaScraper.receiveRequest(dataName);
-//    }
 }

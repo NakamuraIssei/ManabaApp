@@ -30,7 +30,6 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
     public TaskCustomAdapter(Context context,TaskDataManager taskDataManager) {
         this.context = context;
         this.taskDataManager=taskDataManager;
-        //notifyManager=new NotifyManager((AppCompatActivity) context);
     }
     @NonNull
     @Override
@@ -49,13 +48,7 @@ public class TaskCustomAdapter extends RecyclerView.Adapter<TaskCustomAdapter.Vi
         holder.text2.setText(deadline);
         if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
 
-        //taskDataManager.addBellButton(position,holder.pushButton);
-        //TaskData.taskData.get(position).setBellButton(holder.pushButton)
         holder.pushButton.setOnClickListener(v -> {
-            //TaskData item = dataList.get(position);
-            //NotificationData.setNotificationN(context, item.name, String.valueOf(item.taskDate), position, holder.pushButton);
-
-
             Log.d("aaa","ベルボタン押せてるよー！TaskCustomAdapter 65");
             // ダイアログクラスのインスタンスを作成
             NotificationCustomDialog dialog = new NotificationCustomDialog(context,position,taskDataManager);//追加課題の画面のインスタンスを生成

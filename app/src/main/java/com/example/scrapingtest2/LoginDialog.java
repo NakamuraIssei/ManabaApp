@@ -9,6 +9,7 @@ import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.GridView;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -23,8 +24,9 @@ public class LoginDialog extends Dialog {
     public ClassDataManager classDataManager;
     public TaskCustomAdapter adapter;
     public ClassGridAdapter classGridAdapter;
+    public GridView classGridView;
     public static ClassUpdateListener classUpdateListener;
-    public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter) {
+    public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter,GridView classGridView) {
         super(context);
         this.url=url;
         this.cookieBag=cookieBag;
@@ -33,6 +35,7 @@ public class LoginDialog extends Dialog {
         classDataManager=cd;
         this.adapter=adapter;
         this.classGridAdapter = classGridAdapter;
+        this.classGridView=classGridView;
         classUpdateListener=listener;
     }
     @Override
@@ -53,20 +56,16 @@ public class LoginDialog extends Dialog {
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onPageFinished(WebView view, String url) {//webViewがページを読み込み終えたら
-                Log.d("aaa", "ページ読んだよー"+Thread.currentThread().getName());
                 super.onPageFinished(view, url);//おまじない
                 String cookies1 = cookieManager.getCookie(url);//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
                 if (cookies1 != null) {//取ってきたクッキーが空でなければ
                     cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
                     String[] cookieList = cookies1.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
                     for (String cookie : cookieList) {//cookieListの中身でループを回す
-                        Log.d("aaa", cookie.trim());
                         String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                         cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
                     }
-                    Log.d("kkk",cookieBag.keySet().toString());
                     for(String cookie : cookieBag.keySet()){
-                        Log.d("aaa", cookie);
                         if(Objects.equals(cookie, " sessionid")){//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
@@ -84,6 +83,8 @@ public class LoginDialog extends Dialog {
                             taskDataManager.setTaskDataIntoRegisteredClassData();
                             taskDataManager.setTaskDataIntoUnRegisteredClassData();
 
+                            classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
+                            classGridAdapter.customGridSize();
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());

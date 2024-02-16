@@ -81,12 +81,9 @@ public class ManabaScraper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
-                    Log.d("ppp","授業スクレーピング開始します。ManabaScraper 84");
                     Document doc = Jsoup.connect(classURL.get(0)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
                     //System.err.println(doc);
                     Elements doc2 = doc.select("#courselistweekly > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
-                    Log.d("bbb", String.valueOf(doc2));
-
                     Elements rows = doc2.select("tr");
 
                     classInfor.clear();
@@ -107,14 +104,11 @@ public class ManabaScraper {
                                 className = className.substring(0, className.length() - 1);//最後に空白が入ってるから、それを消す。
                                 assert divs3 != null;
                                 classURL= Objects.requireNonNull(divs3.attr("href"));
-                                Log.d("ppp","スクレーピングした授業は"+className+"です。ManabaScraper 109");
                                 classInfor.add((7*(j-1)+i)-1+"???"+className+"???"+classRoom+"???"+classURL);//番号、授業名、教室名、URLの順番
                             }
                         }
                     }
                     for(String k:classInfor)Log.d("aaa",k+"ManabaScraper 152");
-                    Log.d("aaa",classInfor.size()+"ManabaScraper 153");
-
                     return classInfor;
 
                 } catch (IOException e) {//tryの中でうまくいかなかった時の処理。
@@ -134,11 +128,8 @@ public class ManabaScraper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
-                    Log.d("aaa","未登録授業スクレーピング開始します。ManabaScraper 137");
                     Document doc = Jsoup.connect(classURL.get(0)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
                     Elements doc2 = doc.select("#courselistweekly > div > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
-                    Log.d("bbb", String.valueOf(doc2));
-
                     Elements rows = doc2.select("tr");
 
                     classInfor.clear();
@@ -161,7 +152,6 @@ public class ManabaScraper {
                         classURL=Objects.requireNonNull(divs5.attr("href"));
 
                         if(!className.equals("") && !year.equals("") && !classRoom.equals("") && !professorName.equals("")&& !classURL.equals("")){
-                            Log.d("ppp",className+professorName+classURL);
                             classInfor.add(className+"???"+professorName+"???"+classURL);//授業名、教授名、URLの順番
                         }
                     }
@@ -185,17 +175,11 @@ public class ManabaScraper {
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
                     Document doc = Jsoup.connect(classURL.get(1)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
-                    //System.err.println(doc);
                     Elements doc2 = doc.select("#container > div.pagebody > div > div.contentbody-left > div.my-infolist.my-infolist-mycourses > div.mycourses-body > div > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
-                    //Log.d("bbb", String.valueOf(doc2));
-
                     Elements rows = doc2.select("tr");
-
-
                     classInfor.clear();
                     for (int i = 1; i < rows.size(); i++) {
                         Element row = rows.get(i);
-                        Log.d("aaa",row.text()+"ManabaScraper 145");
                         Elements div1,div2;
 
                         div1 = row.select("td:nth-child(1) > span > a");

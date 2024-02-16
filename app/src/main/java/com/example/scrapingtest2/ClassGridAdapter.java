@@ -16,6 +16,8 @@ public class ClassGridAdapter extends BaseAdapter {
     private Context context;
     private ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
     private ArrayList<String>Day;
+    private int rowNum;
+    private int columnNum;
 
     //private int columns
     public ClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
@@ -31,16 +33,23 @@ public class ClassGridAdapter extends BaseAdapter {
         this.Day.add("土");
         this.Day.add("日");
     }
+    public void customGridSize(){
+        rowNum =4;
+        columnNum =5;
+        for(int  i=0;i<classDataList.size();i++){
+            if(!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。")){
+                rowNum =Math.max(rowNum,(i%7)+1);
+                columnNum =Math.max(columnNum,(i/7)+1);
+            }
+        }
+    }
     @Override
     public int getCount() {
-        return 8*8; // 7x7のセル数
+        return (rowNum +1)*(columnNum +1); // 全体のマス数
     }
     @Override
     public Object getItem(int position) {
-        // セルのデータを取得
-        int row = position / 8;
-        int col = position % 8;
-        return classDataList.get(8*row+col);
+        return position;
     }
     @Override
     public long getItemId(int position) {
@@ -51,9 +60,8 @@ public class ClassGridAdapter extends BaseAdapter {
         ViewHolder holder;
 
         // positionの計算
-        int row = position / 8;
-        int col = position % 8;
-        position = col * 8 + row;
+        int row = position % (columnNum+1);
+        int col = position / (columnNum+1);
             // レイアウトをインフレートして新しいセルを作成
             LayoutInflater inflater = LayoutInflater.from(context);
             convertView = inflater.inflate(R.layout.class_table_cell, null);
@@ -65,13 +73,12 @@ public class ClassGridAdapter extends BaseAdapter {
             if(row == 0 && col == 0) {
                 holder.dateText.setText(""); // セル(0, 0)のテキストは空
             } else if (row == 0) {
-                holder.dateText.setText(this.Day.get(col));
+                holder.dateText.setText(String.valueOf(col));
             } else if (col == 0) {
-                holder.dateText.setText(String.valueOf(row));
+                holder.dateText.setText(this.Day.get(row));
             } else {
                 // セルにデータを表示
-                Log.d("aaa", (position - 8) - (position / 8) + "番目を時間割に表示します。GridAdapter 68");
-                ClassData classData = classDataList.get((position - 8) - (position / 8));
+                ClassData classData = classDataList.get((row-1)*7+(col-1));
 
                 // 特定の条件を満たす場合に背景色を設定
                 if (Objects.equals(classData.getClassRoom(), "")) {
@@ -84,23 +91,8 @@ public class ClassGridAdapter extends BaseAdapter {
                     }
                 }
             }
-//            AbsListView.LayoutParams params = new AbsListView.LayoutParams(calculateCellWidth(), calculateCellHeight());
-//            convertView.setLayoutParams(params);
             convertView.setTag(holder);
-
         return convertView;
-    }
-    private int calculateCellWidth() {
-        // ここでセルの大きさを計算するロジックを実装
-        // 例: 画面の幅を7で割った値をセルの大きさとする
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        int screenWidth = displayMetrics.widthPixels;
-        return screenWidth * (23/3);
-    }
-    private int calculateCellHeight() {
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        int screenWidth = displayMetrics.widthPixels;
-        return screenWidth /8;
     }
     private static class ViewHolder {
         public TextView dateText;

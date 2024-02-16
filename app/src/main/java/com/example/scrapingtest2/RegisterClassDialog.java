@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -22,15 +23,17 @@ public class RegisterClassDialog extends Dialog {
     private String professorName;
     private String classURL;
     private HashMap<String, Integer>bag;
+    private GridView gridView;
     private static ClassDataManager classDataManager;
     private static ClassGridAdapter classGridAdapter;
 
-    public RegisterClassDialog(Context context, String className,String professorName, String classURL) {
+    public RegisterClassDialog(Context context, String className,String professorName, String classURL,GridView gridView) {
         super(context);
         this.className=className;
         this.classRoom="";
         this.professorName=professorName;
         this.classURL="https://ct.ritsumei.ac.jp/ct/"+classURL;
+        this.gridView=gridView;
         bag=new HashMap<>();
         bag.put("月",0);
         bag.put("火",1);
@@ -67,7 +70,6 @@ public class RegisterClassDialog extends Dialog {
         nameText.setText(className);
 
         professorNameText.setText((professorName));
-        Log.d("sss",professorName+"ClassDialog 37");
 
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(classURL));
         chromeIntent.setPackage("com.android.chrome");  // Chromeのパッケージ名を指定
@@ -75,7 +77,6 @@ public class RegisterClassDialog extends Dialog {
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-                Log.d("ppp","授業ページに飛ぶよ　ClassDataDialog 54");
                 getContext().startActivity(chromeIntent);
             }
         });
@@ -90,6 +91,8 @@ public class RegisterClassDialog extends Dialog {
                     classRoom=dayEdit.getText().toString()+numEdit.getText().toString()+":"+classRoom;
                     classDataManager.registerUnRegisteredClass(className, (bag.get(classDay)*7)+classNum-1,classRoom,1);
                 }
+                classGridAdapter.customGridSize();
+                gridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
                 classGridAdapter.notifyDataSetChanged();
                 dismiss();
             }

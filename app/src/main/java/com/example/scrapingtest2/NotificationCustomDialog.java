@@ -73,7 +73,6 @@ public class NotificationCustomDialog extends Dialog {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                    Log.d("aaa","スワイプできてるやん");
                     View itemView = viewHolder.itemView;
                     //Drawable background;
                     //if (dX <= 0) {

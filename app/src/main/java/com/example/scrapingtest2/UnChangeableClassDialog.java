@@ -40,7 +40,6 @@ public class UnChangeableClassDialog extends Dialog{
         nameText.setText(className);
         roomText.setText(classRoom);
         professorNameText.setText((professorName));
-        Log.d("sss",professorName+"ClassDialog 37");
 
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(classURL));
         chromeIntent.setPackage("com.android.chrome");  // Chromeのパッケージ名を指定
@@ -48,7 +47,6 @@ public class UnChangeableClassDialog extends Dialog{
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-                Log.d("ppp","授業ページに飛ぶよ　ClassDataDialog 54");
                 getContext().startActivity(chromeIntent);
             }
         });

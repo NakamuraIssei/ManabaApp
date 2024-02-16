@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -24,6 +25,7 @@ public class ChangeableClassDialog extends Dialog {
     private HashMap<String, Integer> bag;
 
     private static ClassDataManager classDataManager;
+    private static GridView classGridView;
     private static ClassGridAdapter classGridAdapter;
 
     public ChangeableClassDialog(Context context,int classNum,String className, String classRoom, String professorName, String classURL) {
@@ -48,6 +50,9 @@ public class ChangeableClassDialog extends Dialog {
     static void setClassGridAdapter(ClassGridAdapter classGridAdapter){
         ChangeableClassDialog.classGridAdapter=classGridAdapter;
     }
+    static void setClassGridView(GridView classsGridView){
+        ChangeableClassDialog.classGridView=classsGridView;
+    }
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +62,6 @@ public class ChangeableClassDialog extends Dialog {
         TextView nameText,professorNameText;
         EditText classRoomEdit,dayEdit,numEdit;
         Button classPageButton,registerButton;
-        Log.d("aaa",classURL);
 
         nameText=findViewById(R.id.selectedClassName);
         classRoomEdit=findViewById(R.id.RoomEdit);
@@ -87,19 +91,20 @@ public class ChangeableClassDialog extends Dialog {
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-                classDataManager.replaceClassDataIntoDB(classNum,"次は空きコマです。","","",0);
-                classDataManager.replaceClassDataIntoClassList(classNum,"次は空きコマです。","","","",0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
+                classDataManager.replaceClassDataIntoDB(classNum-1,"次は空きコマです。","","",0);
+                classDataManager.replaceClassDataIntoClassList(classNum-1,"次は空きコマです。","","","",0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
                 classRoom=classRoomEdit.getText().toString();
                 classDay=dayEdit.getText().toString();
                 classNum= Integer.parseInt(numEdit.getText().toString());
                 if (!classDay.isEmpty() && (classNum<=7&&0<=classNum)) {
                     classRoom=dayEdit.getText().toString()+numEdit.getText().toString()+":"+classRoom;
                     classNum=(bag.get(classDay)*7)+classNum-1;
-                    Log.d("aaa",classURL);
                     classDataManager.replaceClassDataIntoDB(classNum,className,classRoom,classURL,1);
                     classDataManager.replaceClassDataIntoClassList(classNum,className,classRoom,professorName,classURL,1);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
+                    classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
+                    classGridAdapter.customGridSize();
+                    classGridAdapter.notifyDataSetChanged();
                 }
-                classGridAdapter.notifyDataSetChanged();
                 dismiss();
             }
         });

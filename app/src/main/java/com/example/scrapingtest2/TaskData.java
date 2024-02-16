@@ -72,10 +72,4 @@ public class TaskData {
         };
         Collections.sort(notificationTiming, longComparator);
     }
-    public void replaceTaskName(String taskName){
-        this.taskName =taskName;
-    }
-    public void replaceDueDate(LocalDateTime dueDate){
-        this.dueDate =dueDate;
-    }
 }

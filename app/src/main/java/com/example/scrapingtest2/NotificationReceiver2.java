@@ -85,7 +85,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
             channel = new NotificationChannel(String.valueOf(notificationId), "サンプルアプリ", importance);
 
-
             channel.setDescription("説明・説明 ここに通知の説明を書くことができます");
 
 
@@ -109,7 +108,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             );
             wakeLock.acquire();
 
-            //Log.d("aaa", "notifymap"+this.notificationMap.toString());
             this.notificationManager.notify((int) notificationId, builder.build());
             wakeLock.release();
         }
@@ -157,15 +155,10 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 @SuppressLint("Range") int classId = cursor.getInt(cursor.getColumnIndex("classId"));
                 @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("className"));
                 @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
-
-                Log.d("ClassData", "classId: " + classId + ", nextClass: " + nextClass + ", nextRoom: " + nextRoom + "NotificationReceiver2 180");
-
-
-                // 今日の0時0分を取得
+                                // 今日の0時0分を取得
                 LocalDateTime nextTiming = null;
 
                 nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-
 
                 switch (classId % 7) {
                     case 0:
@@ -190,7 +183,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                         nextTiming = nextTiming.plusHours(19).plusMinutes(10);
                         break;
                 }
-
                 // カーソルを閉じる
                 cursor.close();
 
@@ -212,7 +204,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             //クッキーバッグになんか残ってたら嫌やから空っぽにしておく
             String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
             for (String cookie : cookieList) {//cookieListの中身でループを回す
-                Log.d("aaa", cookie.trim());
                 String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                 cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
             }
@@ -278,8 +269,6 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                     "MyApp::MyWakelockTag"
             );
             wakeLock.acquire();
-
-            //Log.d("aaa", "notifymap"+this.notificationMap.toString());
             this.notificationManager.notify((int) 999999999, builder.build());
             wakeLock.release();
         }

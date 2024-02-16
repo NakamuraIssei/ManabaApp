@@ -15,18 +15,6 @@ public class NotificationData {
         this.subTitle=subTitle;
         this.notificationTiming=notificationTiming;
     }
-    public String getDataName(){
-        return this.dataName;
-    }
-    public String getTitle(){
-        return this.title;
-    }
-    public String getSubTitle(){
-        return this.subTitle;
-    }
-    public LocalDateTime getNotificationTiming(){
-        return this.notificationTiming;
-    }
     @Override
     public int hashCode() {
         return Objects.hash(dataName, title, subTitle, notificationTiming);

@@ -14,7 +14,6 @@ public class LoginActivity extends AppCompatActivity {
     private String loginUrl = "https://ct.ritsumei.ac.jp/ct/home_summary_report";
     private LogInManager logInManager;
     private Button logoutButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

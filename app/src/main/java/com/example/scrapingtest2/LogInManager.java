@@ -24,7 +24,6 @@ public class LogInManager extends AppCompatActivity{
     public LogInManager(AppCompatActivity activity) {
         cookieBag=new HashMap<>();
         this.loginActivity = activity;
-        if(cookieManager!=null)Log.d("aaa", "もうクッキー持ってるよー");
         cookieManager = CookieManager.getInstance();
     }
     public void checkLogin(String url) {
@@ -39,11 +38,9 @@ public class LogInManager extends AppCompatActivity{
                 super.onPageFinished(view, url);//おまじない
                 String cookies = cookieManager.getCookie(url);//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
                 if (cookies != null) {//取ってきたクッキーが空でなければ
-                    Log.d("aaa",cookies);
                     cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
                     String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
                     for (String cookie : cookieList) {//cookieListの中身でループを回す
-                        Log.d("aaa", cookie.trim());
                         String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                         cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
                     }
@@ -52,13 +49,11 @@ public class LogInManager extends AppCompatActivity{
                     for(String cookie : cookieBag.keySet()){
                         if(flag)break;
                         if(Objects.equals(cookie, " sessionid")) {//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
-                            Log.d("aaa", "ログインできてたわー LoginManager 55");
                             flag = true;
                             listener.onSuccess();//次の画面に遷移する
                         }
                     }
                     if(!flag){
-                        Log.d("aaa", "ログインできてへんかったわー");
                         doLogin(url);//doLoginを呼び出す
                     }
                 }
@@ -77,21 +72,17 @@ public class LogInManager extends AppCompatActivity{
             }//webView内で画面遷移？（他のページに飛ぶとか）できるようにする
             @Override
             public void onPageFinished(WebView view, String url) {//webViewがページを読み込み終えたら
-                Log.d("aaa", "ページ読んだよー"+Thread.currentThread().getName());
                 super.onPageFinished(view, url);//おまじない
                 String cookies1 = cookieManager.getCookie(url);//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
                 if (cookies1 != null) {//取ってきたクッキーが空でなければ
                     cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
                     String[] cookieList = cookies1.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
                     for (String cookie : cookieList) {//cookieListの中身でループを回す
-                        Log.d("aaa", cookie.trim());
                         String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                         cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
                     }
                     for(String cookie : cookieBag.keySet()){
-                        Log.d("aaa", cookie);
                         if(Objects.equals(cookie, " sessionid")){//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
-                            Log.d("aaa", "ログインできてたわー");
                             myWebView.setVisibility(View.GONE);//webViewを見えなくする
                             myWebView.getSettings().setJavaScriptEnabled(false);//JavaScriptの設定を外す
                             myWebView.destroy();//webViewを消す
@@ -102,7 +93,6 @@ public class LogInManager extends AppCompatActivity{
                 }
             }
         });
-
         // WebViewのJavaScriptの許可
         myWebView.getSettings().setJavaScriptEnabled(true);//WebViewで入力ができるようにJavaScriptを設定する
         myWebView.loadUrl(url);//上で挙動設定したwebViewにurlを読み込ませて動かす
@@ -110,12 +100,10 @@ public class LogInManager extends AppCompatActivity{
     public void clearCookies(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             cookieBag.entrySet().forEach(entry->{
-                Log.d("aaa", entry.getValue());
             });
         }
         myWebView.clearCache(false);
         cookieManager.removeAllCookie();
-        Log.d("aaa", "ログオフ完了!");
     }
     void setListener(Listener listener) {
         this.listener = listener;
