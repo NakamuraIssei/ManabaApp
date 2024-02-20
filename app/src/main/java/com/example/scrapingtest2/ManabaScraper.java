@@ -34,7 +34,7 @@ public class ManabaScraper {
                 "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=timetable",
                 "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=list"));
     }
-    public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {
+    public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {//ここのメゾッドで未提出課題、小テスト、アンケートの欄からスクレーピング
         taskInfor =new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -75,7 +75,7 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    public static ArrayList<String> getRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {
+    public static ArrayList<String> getRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
         classInfor=new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -122,7 +122,7 @@ public class ManabaScraper {
         }
         return classInfor;
     }
-    public static ArrayList<String> getUnRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {
+    public static ArrayList<String> getUnRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にない時間割(卒研とか)をスクレーピング
         classInfor=new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -168,7 +168,7 @@ public class ManabaScraper {
         }
         return classInfor;
     }
-    public static ArrayList<String> getProfessorNameFromManaba() throws ExecutionException, InterruptedException, IOException {
+    public static ArrayList<String> getProfessorNameFromManaba() throws ExecutionException, InterruptedException, IOException {//ここで授業担当の教授名をスクレーピング、授業名と教授名をセットで取得
         classInfor=new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
