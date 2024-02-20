@@ -28,12 +28,14 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
+
 public class MainActivity extends AppCompatActivity implements ClassUpdateListener {
 
     private HashMap<String, String> cookieBag;
     private TextView className;
     private GridView classGridView;
-    private RecyclerView taskRecyclerView;
+    private StickyListHeadersListView taskRecyclerView;
     private ClassDataManager cd;
     private CookieManager cookieManager;
     private Context context;
@@ -87,11 +89,11 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                     public void run() {
                         Log.d("aaa","授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
-                        taskRecyclerView = MainActivity.this.findViewById(R.id.RecycleView);//画面上のListViewの情報を変数listViewに設定
+                        taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
 
                         // LinearLayoutManagerを設定する
-                        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-                        taskRecyclerView.setLayoutManager(layoutManager);
+//                        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
+//                        taskRecyclerView.setLayoutManager(layoutManager);
 
                         //課題の情報をtaskDataから取得
                         TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
@@ -122,8 +124,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             }
 
                         };
-                        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-                        itemTouchHelper.attachToRecyclerView(taskRecyclerView);
+//                        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+//                        itemTouchHelper.attachToRecyclerView(taskRecyclerView);
 
                         classGridView=findViewById(R.id.classTableGrid);
                         classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
@@ -184,8 +186,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                 // ダイアログクラスのインスタンスを作成
                                 AddTaskCustomDialog dialog = new AddTaskCustomDialog(MainActivity.this,adapter,taskDataManager);//追加課題の画面のインスタンスを生成
                                 // ダイアログを表示
+                                for(TaskData taskData:taskDataManager.getAllTaskDataList())Log.d("aaa",taskData.getTaskName());
                                 dialog.show();//追加課題の画面を表示
                             }
+
                         });
                         Button LogOffButton = MainActivity.this.findViewById(R.id.LogOff);//課題追加の画面を呼び出すボタンの設定
                         LogOffButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら

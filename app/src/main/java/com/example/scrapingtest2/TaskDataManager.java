@@ -71,6 +71,20 @@ public class TaskDataManager extends DataManager{
             }
         }
     }
+    public int getTaskGroupId(int position){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            TaskData task=allTaskDataList.get(position);
+            if(task.getHasSubmitted()==1)return 0;//hasSubmittedは提出済みなら1そうでないなら0
+            else if (task.getDueDate().isBefore(LocalDateTime.now().plusDays(1).withHour(0).withMinute(0).withMinute(0))) {
+                return 1;
+            }
+            else if (task.getDueDate().isBefore(LocalDateTime.now().plusDays(2).withHour(0).withMinute(0).withMinute(0))) {
+                return 2;
+            }
+            else return 3;
+        }
+        return 3;
+    }
     public void setTaskDataIntoRegisteredClassData(){
         for(TaskData taskData: allTaskDataList){
             if(taskData.getHasSubmitted()==0) {

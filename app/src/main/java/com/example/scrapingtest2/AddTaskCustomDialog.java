@@ -65,6 +65,7 @@ public class AddTaskCustomDialog extends Dialog {
                 //TaskData context=new TaskData(title2.getText().toString(),1,"hoeghoge",deadline);
                 Log.d("aaa", title2.getText().toString()+"を追加します。AddTaskCustomDialog 54");
                 taskDataManager.addTaskData(title2.getText().toString(),deadline,className,taskURL);
+                taskDataManager.sortAllTaskDataList();
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
                 classGridAdapter.notifyDataSetChanged();
