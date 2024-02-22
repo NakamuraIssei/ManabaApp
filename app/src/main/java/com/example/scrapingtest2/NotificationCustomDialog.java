@@ -2,21 +2,30 @@ package com.example.scrapingtest2;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class NotificationCustomDialog extends Dialog {
     private int position;
@@ -96,8 +105,8 @@ public class NotificationCustomDialog extends Dialog {
         addNotifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddNotificationDialog dialog=new AddNotificationDialog(context);
-                dialog.setNotificationN(position,adapter);
+                AddNotificationBottomSheetDialog bottomSheetDialog = new AddNotificationBottomSheetDialog(context,0,position,adapter);//新規追加なのでoperationModeは0
+                bottomSheetDialog.show();
             }
         });
     }

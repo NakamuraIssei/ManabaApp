@@ -1,7 +1,6 @@
 package com.example.scrapingtest2;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
@@ -20,13 +19,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -46,18 +43,13 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         Objects.requireNonNull(getSupportActionBar()).hide();
         setContentView(R.layout.activity_taskwork);
 
-        //tabName.add("課題");
-        //tabName.add("時間割");
-        //tabName.add("自由時間");
-        //tabName.add("就活");
-
         cookieManager=CookieManager.getInstance();
         cookieBag=new HashMap<>();
         context=this;
 
         NotifyManager2.prepareForNotificationWork(this);
         TaskDataManager taskDataManager=new TaskDataManager("TaskData");
-        AddNotificationDialog.setTaskdataManager(taskDataManager);
+        AddNotificationBottomSheetDialog.setTaskDataManager(taskDataManager);
         cd=new ClassDataManager("ClassData");
 
         RegisterClassDialog.setClassDataManager(cd);
@@ -80,9 +72,6 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         if(!cd.checkClassData())cd.resetClassData();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-//            Supplier<String> setData = () -> {
-//                return null;
-//            }
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 runOnUiThread(new Runnable() {
                     @Override
@@ -90,10 +79,6 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         Log.d("aaa","授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
                         taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
-
-                        // LinearLayoutManagerを設定する
-//                        LinearLayoutManager layoutManager = new LinearLayoutManager(MainActivity.this);
-//                        taskRecyclerView.setLayoutManager(layoutManager);
 
                         //課題の情報をtaskDataから取得
                         TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
@@ -124,9 +109,6 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             }
 
                         };
-//                        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
-//                        itemTouchHelper.attachToRecyclerView(taskRecyclerView);
-
                         classGridView=findViewById(R.id.classTableGrid);
                         classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
                         classGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
