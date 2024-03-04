@@ -61,25 +61,7 @@ public class ClassData {
     public void addTaskData(TaskData taskData){
         taskList.add(taskData);
     }
-    public void resetTaskList() {
-        this.taskList.clear();
-    }
     public Boolean hasTask() {
         return taskList.size() > 0;
-    }
-    public ArrayList<TaskData> getTaskList(){
-        return this.taskList;
-    }
-    public void sortTaskList() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Comparator<TaskData> longComparator = new Comparator<TaskData>() {
-                @Override
-                public int compare(TaskData task1, TaskData task2) {
-                    // Assuming dueDate is in the format "yyyy-MM-dd"
-                    return task1.getDueDate().compareTo(task2.getDueDate());
-                }
-            };
-            Collections.sort(taskList, longComparator);
-        }
     }
 }

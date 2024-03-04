@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,10 +19,9 @@ public class ChangeableClassDialog extends Dialog {
     private String classRoom;
     private String professorName;
     private String classURL;
-    private String classDay;
+    private String classDay; //ここまではclassNumがあれば十分やから削除
     private int classNum;
-    private HashMap<String, Integer> bag;
-
+    private HashMap<String, Integer> dayBag;
     private static ClassDataManager classDataManager;
     private static GridView classGridView;
     private static ClassGridAdapter classGridAdapter;
@@ -35,14 +33,14 @@ public class ChangeableClassDialog extends Dialog {
         this.classRoom=classRoom;
         this.professorName=professorName;
         this.classURL=classURL;
-        bag =new HashMap<>();
-        bag.put("月",0);
-        bag.put("火",1);
-        bag.put("水",2);
-        bag.put("木",3);
-        bag.put("金",4);
-        bag.put("土",5);
-        bag.put("日",6);
+        dayBag =new HashMap<>();
+        dayBag.put("月",0);
+        dayBag.put("火",1);
+        dayBag.put("水",2);
+        dayBag.put("木",3);
+        dayBag.put("金",4);
+        dayBag.put("土",5);
+        dayBag.put("日",6);
     }
     static void setClassDataManager(ClassDataManager classDataManager){
         ChangeableClassDialog.classDataManager=classDataManager;
@@ -98,7 +96,7 @@ public class ChangeableClassDialog extends Dialog {
                 classNum= Integer.parseInt(numEdit.getText().toString());
                 if (!classDay.isEmpty() && (classNum<=7&&0<=classNum)) {
                     classRoom=dayEdit.getText().toString()+numEdit.getText().toString()+":"+classRoom;
-                    classNum=(bag.get(classDay)*7)+classNum-1;
+                    classNum=(dayBag.get(classDay)*7)+classNum-1;
                     classDataManager.replaceClassDataIntoDB(classNum,className,classRoom,classURL,1);
                     classDataManager.replaceClassDataIntoClassList(classNum,className,classRoom,professorName,classURL,1);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
                     classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);

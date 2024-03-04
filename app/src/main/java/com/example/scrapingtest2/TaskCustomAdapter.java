@@ -119,7 +119,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
             }
         }else holder.remainingTimeText.setText("");
 
-        if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
+        //if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
 
         holder.pushButton.setOnClickListener(v -> {
             Log.d("aaa","ベルボタン押せてるよー！TaskCustomAdapter 65");

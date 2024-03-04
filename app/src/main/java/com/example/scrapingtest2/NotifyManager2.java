@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.time.ZonedDateTime;
+
 
 public class NotifyManager2 {
     private static int dataCount;
@@ -48,13 +50,14 @@ public class NotifyManager2 {
         notificationIntent.putExtra("NOTIFICATIONID",dataCount);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         pendingIntentBag.put(dataCount,notificationPendingIntent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = notificationTiming.atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
             long japanEpochMilli = japanInstant.toEpochMilli();
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
+            Log.d("aaa","課題の通知アラームセット完了 NotyfiManger2 setTaskNotificationAlarm");
         }
         dataCount=(dataCount+1)%99999999;
     }
@@ -72,6 +75,7 @@ public class NotifyManager2 {
         pendingIntentBag.remove(notificationId);
     }
     static void setClassNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming) {
+        Log.d("className",title+"    NotifyManager2 setClassNotification");
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME",dataName);
@@ -79,7 +83,7 @@ public class NotifyManager2 {
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
@@ -98,23 +102,29 @@ public class NotifyManager2 {
             Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
             notificationIntent.setAction(String.valueOf(dataCount));
             notificationIntent.putExtra("DATANAME","BackScraping");
-            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
 
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime nextTiming=LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
-            int currentHour = now.getHour();
+
+// デフォルトのタイムゾーンから日本時間のタイムゾーンへ変換
+            ZoneId japanZoneId = ZoneId.of("Asia/Tokyo");
+            ZonedDateTime japanDateTime = now.atZone(ZoneId.systemDefault()).withZoneSameInstant(japanZoneId);
+
+
+            int hourOfDay = japanDateTime.getHour();
             int targetHour = 12;
 
-            if (currentHour < targetHour) {
+            if (hourOfDay < targetHour) {
                 // 現在時刻が12時より前の場合、今日の12時に設定
                 nextTiming = nextTiming.plusHours(12);
             } else {
                 // 現在時刻が12時以降の場合、翌日の0時に設定
                 nextTiming = nextTiming.plusDays(1);
             }
-
+            Log.d("aaa",nextTiming.toString()+"NotificationReceiver2 117");
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = nextTiming.atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
             long japanEpochMilli = japanInstant.toEpochMilli();
@@ -124,10 +134,11 @@ public class NotifyManager2 {
         dataCount=(dataCount+1)%99999999;
     }
     static void setClassRegistrationAlarm(){
+        Log.d("aaa","未登録授業通知設定します。");
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME","ClassRegistration");
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得

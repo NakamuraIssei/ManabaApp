@@ -192,7 +192,6 @@ public class TaskDataManager extends DataManager{
             taskList=ManabaScraper.scrapeTaskDataFromManaba();
             for(String k:taskList){
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-
                 if(!isExist(str[0])){//取得した課題を持っていなかったら追加する
                     addTaskData(str[0],str[1],str[2],str[3]);//str[0]は課題名、str[1]は締め切り、str[2]は課題が出ている授業名、str[3]は課題提出URL
                     Log.d("aaa",k+"追加したよー！TaskDataManager　112");
@@ -213,9 +212,10 @@ public class TaskDataManager extends DataManager{
             throw new RuntimeException(e);
         }
     }
-    public void makeAllTasksSubmitted(){
+    public void makeAllTasksSubmitted(){//ここでDBのhasSubmittedも更新
         for(int i=0;i<allTaskDataList.size();i++){
             allTaskDataList.get(i).changeSubmitted(1);
+            //changeHassubmitttedIntoDB(allTaskDataList.get(i).getTaskId(),true);
         }
     }
     public void makeTaskNotSubmitted(String taskName){
@@ -255,7 +255,28 @@ public class TaskDataManager extends DataManager{
             Log.d("aaa", dataName+"に追加失敗。TaskDataManager 262");
         }
     }
+    public void changeHassubmitttedIntoDB(int taskId,Boolean flag){
+        ContentValues values = new ContentValues();
+        values.put("hasSubmitted", flag);
+
+        // WHERE 句を設定（どのレコードを更新するか）
+        String whereClause = "taskId=?";
+        String[] whereArgs = { String.valueOf(taskId) };
+
+        // レコードを更新
+        db.update(dataName, values, whereClause, whereArgs);
+        Cursor cursor = db.query(dataName, new String[]{"hasSubmitted"}, whereClause, whereArgs, null, null, null);
+        String result = null;
+        assert cursor != null;
+        if (cursor.moveToFirst()) { // カーソルを最初の位置に移動
+            // カラムのインデックスを取得
+            int columnIndex = cursor.getColumnIndex("hasSubmitted");
+            // 値を取得
+            result = cursor.getString(columnIndex);
+        }
+    }
     public void addNotificationTiming(int num,LocalDateTime notificationTiming){
+        Log.d("aaa",num+"番目の課題のつうちを追加します。TaskdataManager addnotificationTioming");
         allTaskDataList.get(num).addNotificationTiming(notificationTiming);
         requestSettingNotification(dataName, allTaskDataList.get(num).getTaskId(), allTaskDataList.get(num).getTaskName(), allTaskDataList.get(num).getDueDate().toString(),notificationTiming);
         updateNotificationTimingFromDB(allTaskDataList.get(num));

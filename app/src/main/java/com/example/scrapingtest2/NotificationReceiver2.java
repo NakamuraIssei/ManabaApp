@@ -39,12 +39,10 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
             String title = intent.getStringExtra("TITLE");
             String subTitle = intent.getStringExtra("SUBTITLE");
-
-
+            Log.d("className",title+"///NotificationReceiver2 ");
             //DB処理作業
             MyDBHelper myDBHelper = new MyDBHelper(context);
             db = myDBHelper.getWritableDatabase();
-
 
             switch (Objects.requireNonNull(dataName)) {
                 case "TaskData":
@@ -63,6 +61,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                     break;
                 case "REGISTER_CLASS":
                     classUpdateListener.showRegisterClassDialog();
+                    break;
             }
         }
 
@@ -76,6 +75,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
     private void pushNotification(String title,String subTitle,Context context,int notificationId){
         //通知作業
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d("classname",title+"NotificationReceiver2 pushNotification");
             if (notificationManager == null)
                 notificationManager = context.getSystemService(NotificationManager.class);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -186,9 +186,8 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 // カーソルを閉じる
                 cursor.close();
 
-                NotifyManager2.setContext(context);
-                NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
-
+               NotifyManager2.setContext(context);
+               NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
             }
         }
     }
@@ -209,7 +208,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             }
         }
         ManabaScraper.setCookie(cookieBag);
-        Log.d("aaa", "今からバックグラウンドでのスクレイピングするよ　NotificationReceiver2 209");
+        Log.d("aaa", "今からバックグラウンドでのスクレイピングします。　NotificationReceiver2 209");
             TaskDataManager taskDataManager=new TaskDataManager("TaskData");
             ClassDataManager classDataManager=new ClassDataManager("ClassData");
             cursor = db.query("TaskData", null, null, null, null, null, "taskId");
@@ -224,6 +223,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             taskDataManager.makeAllTasksSubmitted();
             taskDataManager.getTaskDataFromManaba();
     }
+
     private void urgeClassRegistration(Context context){
         //通知作業
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -242,23 +242,20 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
             notificationManager.createNotificationChannel(channel);
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, String.valueOf(999999999))
-                    .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                    .setPriority(NotificationCompat.PRIORITY_MAX)
-                    .setTimeoutAfter(6000L);
-
-            // カスタム通知レイアウトを設定
-            RemoteViews customLayout = new RemoteViews(context.getPackageName(), R.layout.notification_layout);
-            customLayout.setTextViewText(R.id.notification_title, "未登録授業があります。");
-            customLayout.setTextViewText(R.id.notification_message, "登録してちょ");
 
             Intent intent = new Intent(context, NotificationReceiver2.class);
             intent.setAction("REGISTER_CLASS"); // 呼び出したいメソッドを指定するアクションをセット
             intent.putExtra("DATANAME","REGISTER_CLASS");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -3, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            customLayout.setOnClickPendingIntent(R.id.register_button, pendingIntent);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -3, intent, PendingIntent.FLAG_MUTABLE);
 
-            builder.setContent(customLayout);
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, String.valueOf(999999999))
+                    .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                    .setContentTitle("未登録授業があります。")
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .setFullScreenIntent(pendingIntent, true)
+                    .setTimeoutAfter(6000L);
+
 
             NotificationManagerCompat notificationManager
                     = NotificationManagerCompat.from(context);
@@ -269,6 +266,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                     "MyApp::MyWakelockTag"
             );
             wakeLock.acquire();
+            if(this.notificationManager==null)Log.d("aaa","notificationManagerがありません NotificationReceiver2");
             this.notificationManager.notify((int) 999999999, builder.build());
             wakeLock.release();
         }
