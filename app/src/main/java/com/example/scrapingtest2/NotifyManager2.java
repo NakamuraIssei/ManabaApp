@@ -98,7 +98,7 @@ public class NotifyManager2 {
             Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
             notificationIntent.setAction(String.valueOf(dataCount));
             notificationIntent.putExtra("DATANAME","BackScraping");
-            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
 
 
             LocalDateTime now = LocalDateTime.now();

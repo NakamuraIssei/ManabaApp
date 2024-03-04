@@ -14,7 +14,6 @@ public class AddTaskCustomDialog extends Dialog {
 
     private TaskCustomAdapter adapter;
     private TaskDataManager taskDataManager;
-
     static ClassGridAdapter classGridAdapter;
 
     public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter,TaskDataManager taskDataManager) {
@@ -25,7 +24,6 @@ public class AddTaskCustomDialog extends Dialog {
     static void setGridAdapter(ClassGridAdapter classGridAdapter){
         AddTaskCustomDialog.classGridAdapter = classGridAdapter;
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

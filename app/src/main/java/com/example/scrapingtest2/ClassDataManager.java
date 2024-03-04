@@ -140,6 +140,7 @@ public class ClassDataManager extends DataManager{
             Log.d("aaa","授業スクレーピングみすった！　ClassDataManager　156");
             throw new RuntimeException(e);
         } catch (IOException e) {
+            Log.d("aaa","授業スクレーピングみすった！　ClassDataManager　143"+e.toString());
             throw new RuntimeException(e);
         }
     }
@@ -188,6 +189,46 @@ public class ClassDataManager extends DataManager{
             eraseClassFromUnRegisteredClassDataList(className);
         }
     }
+    public Boolean isExistInClassDataList(String className){
+        for(int i=0;i<classDataList.size();i++){
+            if(Objects.equals(classDataList.get(i).getClassName(), className))return true;
+        }
+        return false;
+    }
+    public Boolean isExistInUnRegisteredClassDataList(String className){
+        for(int i = 0; i< unRegisteredClassDataList.size(); i++){
+            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className))return true;
+        }
+        return false;
+    }
+    public void eraseClassFromUnRegisteredClassDataList(String className){
+        for(int i = 0; i< unRegisteredClassDataList.size(); i++){
+            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)){
+                unRegisteredClassDataList.remove(i);
+                break;
+            }
+        }
+    }
+    public void registerUnRegisteredClass(String className,int num,String classRoom,int classIdChangeable){
+        for(int i=0;i<unRegisteredClassDataList.size();i++){
+            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)){
+                ClassData classData=unRegisteredClassDataList.get(i);
+                classData.setClassRoom(classRoom);
+                replaceClassDataIntoDB(num,className,classRoom,classData.getClassURL(),classIdChangeable);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
+                replaceClassDataIntoClassList(num,className,classRoom,classData.getProfessorName(),classData.getClassURL(),classIdChangeable);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
+            }
+            break;
+        }
+    }
+    public static int getMaxColumnNum(){
+        int column=5;
+        for(int  i=0;i<classDataList.size();i++){
+            if(!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。")){
+                column =Math.max(column,(i/7)+1);
+            }
+        }
+        return column;
+    }
     public void replaceClassDataIntoClassList(int classId, String className,String classRoom,String professorName,String classURL,int classIdChangeable){
         ClassData classData =new ClassData(classId,className,classRoom,professorName,classURL,classIdChangeable);
         classDataList.set(classId,classData);
@@ -231,45 +272,5 @@ public class ClassDataManager extends DataManager{
         } else {
             Log.d("aaa", dataName+"に追加失敗。ClassDataManager 166");
         }
-    }
-    public Boolean isExistInClassDataList(String className){
-        for(int i=0;i<classDataList.size();i++){
-            if(Objects.equals(classDataList.get(i).getClassName(), className))return true;
-        }
-        return false;
-    }
-    public Boolean isExistInUnRegisteredClassDataList(String className){
-        for(int i = 0; i< unRegisteredClassDataList.size(); i++){
-            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className))return true;
-        }
-        return false;
-    }
-    public void eraseClassFromUnRegisteredClassDataList(String className){
-        for(int i = 0; i< unRegisteredClassDataList.size(); i++){
-            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)){
-                unRegisteredClassDataList.remove(i);
-                break;
-            }
-        }
-    }
-    public void registerUnRegisteredClass(String className,int num,String classRoom,int classIdChangeable){
-        for(int i=0;i<unRegisteredClassDataList.size();i++){
-            if(Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)){
-                ClassData classData=unRegisteredClassDataList.get(i);
-                classData.setClassRoom(classRoom);
-                replaceClassDataIntoDB(num,className,classRoom,classData.getClassURL(),classIdChangeable);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
-                replaceClassDataIntoClassList(num,className,classRoom,classData.getProfessorName(),classData.getClassURL(),classIdChangeable);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
-            }
-            break;
-        }
-    }
-    public static int getMaxColumnNum(){
-        int column=5;
-        for(int  i=0;i<classDataList.size();i++){
-            if(!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。")){
-                column =Math.max(column,(i/7)+1);
-            }
-        }
-        return column;
     }
 }

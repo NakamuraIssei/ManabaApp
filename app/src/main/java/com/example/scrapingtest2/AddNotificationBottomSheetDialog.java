@@ -26,10 +26,11 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
     private CalendarView calendarView;
     private TimePicker timePicker;
     private TextView selectedTimeView,selectedDateView;
-    private int taskId,operationMode;//新規追加0、編集1
+    private int taskId,editNotificationNum,operationMode;//新規追加0、編集1
     private NotificationCustomAdapter adapter;
     private static TaskDataManager taskDataManager;
-    private int editNotificationNum;
+
+
     public AddNotificationBottomSheetDialog(@NonNull Context context,int operationMode,int taskId,NotificationCustomAdapter adapter) {
         super(context);
         this.operationMode=operationMode;
@@ -53,7 +54,6 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
     public static void setTaskDataManager(TaskDataManager taskDataManager){
         AddNotificationBottomSheetDialog.taskDataManager=taskDataManager;
     }
-
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +79,8 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
         calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                selectedDateView.setText(year+"年"+month+1+"月"+dayOfMonth+"日");
+                selectedDateView.setText("");
+                selectedDateView.setText(year+"年"+(month+1)+"月"+dayOfMonth+"日");
             }
         });
 

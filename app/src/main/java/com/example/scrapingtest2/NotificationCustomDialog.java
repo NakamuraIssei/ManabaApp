@@ -1,11 +1,13 @@
 package com.example.scrapingtest2;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -49,6 +52,8 @@ public class NotificationCustomDialog extends Dialog {
         RecyclerView recyclerView= findViewById(R.id.notifyRecyclerView);
 
         Button addNotifyButton = findViewById(R.id.addNotifyButton);
+        TextView selectedTaskNameText= findViewById(R.id.selectedTaskNameText);
+        selectedTaskNameText.setText(taskDataManager.getAllTaskDataList().get(position).getTaskName());
 
         // LinearLayoutManagerを設定する
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
@@ -60,7 +65,7 @@ public class NotificationCustomDialog extends Dialog {
         recyclerView.setAdapter(adapter);//listViewにadapterを設定
         taskDataManager.addAdapter(position,adapter);
 
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -84,15 +89,18 @@ public class NotificationCustomDialog extends Dialog {
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
                     View itemView = viewHolder.itemView;
                     //Drawable background;
-                    //if (dX <= 0) {
+                    if (dX < 0) {
                         //background = new ColorDrawable(Color.RED); // 右にスワイプしたときの背景
-                    //} else {
+                        ColorDrawable background = new ColorDrawable();
+                        background .setColor(Color.parseColor("#FF0000"));
+                        //background.setBounds(itemView.getLeft() , itemView.getTop(), (int)dX, itemView.getBottom());
+                        background.setBounds(itemView.getRight(), itemView.getTop(), itemView.getRight() + (int)dX, itemView.getBottom());
+                        background.draw(c);
+                    }
+                    //else {
                         //background = new ColorDrawable(Color.GREEN); // 左にスワイプしたときの背景
                     //}
-                    ColorDrawable background = new ColorDrawable();
-                    background .setColor(Color.parseColor("#FF0000"));
-                    background.setBounds(itemView.getLeft() , itemView.getTop(), (int)dX, itemView.getBottom());
-                    background.draw(c);
+
                     //background.setBounds(itemView.getRight() + (int) dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
                     //background.draw(c);
                 }

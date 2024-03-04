@@ -21,9 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 
 import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
@@ -72,133 +76,145 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         if(!cd.checkClassData())cd.resetClassData();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            Log.d("aaa","check2");
+
+            Log.d("aaa","授業スクレーピング完了");
+            // Viewの初期化やイベントリスナーの設定などの処理を実装
+            taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
+
+            //課題の情報をtaskDataから取得
+            TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
+            taskRecyclerView.setAdapter(adapter);//listViewにadapterを設定
+
+            ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, 0) {
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                    return false;
+                }
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                }
+                @Override
+                public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
+                                        @NonNull RecyclerView.ViewHolder viewHolder,
+                                        float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+                    if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+                        Log.d("aaa","スワイプできてるやん");
+                        View itemView = viewHolder.itemView;
+                        ColorDrawable background = new ColorDrawable();
+                        background .setColor(Color.parseColor("#FF0000"));
+                        background.setBounds(itemView.getLeft() , itemView.getTop(), (int)dX, itemView.getBottom());
+                        background.draw(c);
+                    }
+                }
+
+            };
+            classGridView=findViewById(R.id.classTableGrid);
+            classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
+            classGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    // タップされたセルのPositionをログに表示
+                    Log.d("aaa", "Tapped Cell Position: " + position);
+                    // positionの計算
+                    int rowNum,columnNum,row,column;
+                    rowNum =4;
+                    columnNum =5;
+                    for(int  i=0;i<cd.getClassDataList().size();i++){
+                        if(!Objects.equals(cd.getClassDataList().get(i).getClassName(), "次は空きコマです。")){
+                            rowNum =Math.max(rowNum,(i%7)+1);
+                            columnNum =Math.max(columnNum,(i/7)+1);
+                        }
+                    }
+                    row=position%(columnNum+1);
+                    column=position/(columnNum+1);
+                    if(row!=0&&column!=0){
+                        String className,classRoom,professorName,classURL;
+                        ClassData classData =cd.getClassDataList().get((row-1)*7+column-1);
+                        className=classData.getClassName();
+                        classRoom=classData.getClassRoom();
+                        professorName=classData.getProfessorName();
+                        classURL=classData.getClassURL();
+                        Log.d("aaa", "今押した授業情報は"+className+"   "+professorName+"MainActivity 166");
+                        if(!Objects.equals(className, "次は空きコマです。")){
+                            if(classData.getClassIdChangeable()==0){
+                                UnChangeableClassDialog unChangeableClassDialog =new UnChangeableClassDialog(MainActivity.this,className,classRoom,professorName,classURL);
+                                unChangeableClassDialog.show();
+                            }else{
+                                ChangeableClassDialog changeableClassDialog =new ChangeableClassDialog(MainActivity.this,(row-1)*7+column,className,classRoom,professorName,classURL);
+                                changeableClassDialog.show();
+                            }
+                        }
+                    }
+
+                    // ここで必要な処理を追加
+                }
+            });
+
+            ClassGridAdapter classGridAdapter =new ClassGridAdapter(context,cd.getClassDataList());
+            classGridAdapter.customGridSize();
+            classGridView.setAdapter(classGridAdapter);
+
+            AddTaskCustomDialog.setGridAdapter(classGridAdapter);
+            RegisterClassDialog.setClassGridAdapter(classGridAdapter);
+            ChangeableClassDialog.setClassGridAdapter(classGridAdapter);
+            ChangeableClassDialog.setClassGridView(classGridView);
+
+            Button addButton = MainActivity.this.findViewById(R.id.AddButton);//課題追加の画面を呼び出すボタンの設定
+            addButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
+                @Override
+                public void onClick(View v) {//ボタンが押されたら
+                    Log.d("aaa","課題追加ボタンちゃんと押せてるよー！! MainActivity 217");
+                    // ダイアログクラスのインスタンスを作成
+                    AddTaskCustomDialog dialog = new AddTaskCustomDialog(MainActivity.this,adapter,taskDataManager);//追加課題の画面のインスタンスを生成
+                    // ダイアログを表示
+                    for(TaskData taskData:taskDataManager.getAllTaskDataList())Log.d("aaa",taskData.getTaskName());
+                    dialog.show();//追加課題の画面を表示
+                }
+
+            });
+            Button LogOffButton = MainActivity.this.findViewById(R.id.LogOff);//課題追加の画面を呼び出すボタンの設定
+            LogOffButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
+                @Override
+                public void onClick(View v) {//ボタンが押されたら
+                    cookieManager.removeAllCookie();
+                }
+            });
+
+            className = findViewById(R.id.classnameView);
+            AtomicReference<Boolean> flag= new AtomicReference<>(false);
+            CompletableFuture<Void> existingFuture = CompletableFuture.runAsync(() -> {
+                flag.set(isNetworkAvailable("https://ct.ritsumei.ac.jp/ct/home", 80));
+            });
+
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.d("aaa","授業スクレーピング完了");
-                        // Viewの初期化やイベントリスナーの設定などの処理を実装
-                        taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
-
-                        //課題の情報をtaskDataから取得
-                        TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
-                        taskRecyclerView.setAdapter(adapter);//listViewにadapterを設定
-
-                        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, 0) {
-                            @Override
-                            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                                return false;
-                            }
-                            @Override
-                            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                            }
-                            @Override
-                            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView,
-                                                    @NonNull RecyclerView.ViewHolder viewHolder,
-                                                    float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-                                if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
-                                    Log.d("aaa","スワイプできてるやん");
-                                    View itemView = viewHolder.itemView;
-                                    ColorDrawable background = new ColorDrawable();
-                                    background .setColor(Color.parseColor("#FF0000"));
-                                    background.setBounds(itemView.getLeft() , itemView.getTop(), (int)dX, itemView.getBottom());
-                                    background.draw(c);
-                                }
-                            }
-
-                        };
-                        classGridView=findViewById(R.id.classTableGrid);
-                        classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
-                        classGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                // タップされたセルのPositionをログに表示
-                                Log.d("aaa", "Tapped Cell Position: " + position);
-                                // positionの計算
-                                int rowNum,columnNum,row,column;
-                                rowNum =4;
-                                columnNum =5;
-                                for(int  i=0;i<cd.getClassDataList().size();i++){
-                                    if(!Objects.equals(cd.getClassDataList().get(i).getClassName(), "次は空きコマです。")){
-                                        rowNum =Math.max(rowNum,(i%7)+1);
-                                        columnNum =Math.max(columnNum,(i/7)+1);
-                                    }
-                                }
-                                row=position%(columnNum+1);
-                                column=position/(columnNum+1);
-                                if(row!=0&&column!=0){
-                                    String className,classRoom,professorName,classURL;
-                                    ClassData classData =cd.getClassDataList().get((row-1)*7+column-1);
-                                    className=classData.getClassName();
-                                    classRoom=classData.getClassRoom();
-                                    professorName=classData.getProfessorName();
-                                    classURL=classData.getClassURL();
-                                    Log.d("aaa", "今押した授業情報は"+className+"   "+professorName+"MainActivity 166");
-                                    if(!Objects.equals(className, "次は空きコマです。")){
-                                        if(classData.getClassIdChangeable()==0){
-                                            UnChangeableClassDialog unChangeableClassDialog =new UnChangeableClassDialog(MainActivity.this,className,classRoom,professorName,classURL);
-                                            unChangeableClassDialog.show();
-                                        }else{
-                                            ChangeableClassDialog changeableClassDialog =new ChangeableClassDialog(MainActivity.this,(row-1)*7+column,className,classRoom,professorName,classURL);
-                                            changeableClassDialog.show();
-                                        }
-                                    }
-                                }
-
-                                // ここで必要な処理を追加
-                            }
-                        });
-
-                        ClassGridAdapter classGridAdapter =new ClassGridAdapter(context,cd.getClassDataList());
-                        classGridAdapter.customGridSize();
-                        classGridView.setAdapter(classGridAdapter);
-
-                        AddTaskCustomDialog.setGridAdapter(classGridAdapter);
-                        RegisterClassDialog.setClassGridAdapter(classGridAdapter);
-                        ChangeableClassDialog.setClassGridAdapter(classGridAdapter);
-                        ChangeableClassDialog.setClassGridView(classGridView);
-
-                        Button addButton = MainActivity.this.findViewById(R.id.AddButton);//課題追加の画面を呼び出すボタンの設定
-                        addButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
-                            @Override
-                            public void onClick(View v) {//ボタンが押されたら
-                                Log.d("aaa","課題追加ボタンちゃんと押せてるよー！! MainActivity 217");
-                                // ダイアログクラスのインスタンスを作成
-                                AddTaskCustomDialog dialog = new AddTaskCustomDialog(MainActivity.this,adapter,taskDataManager);//追加課題の画面のインスタンスを生成
-                                // ダイアログを表示
-                                for(TaskData taskData:taskDataManager.getAllTaskDataList())Log.d("aaa",taskData.getTaskName());
-                                dialog.show();//追加課題の画面を表示
-                            }
-
-                        });
-                        Button LogOffButton = MainActivity.this.findViewById(R.id.LogOff);//課題追加の画面を呼び出すボタンの設定
-                        LogOffButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
-                            @Override
-                            public void onClick(View v) {//ボタンが押されたら
-                                cookieManager.removeAllCookie();
-                            }
-                        });
-
-                        className = findViewById(R.id.classnameView);
-
+                        if(flag.get())
                         if(!checkLogin()){
                             LoginDialog dialog = new LoginDialog(context,"https://ct.ritsumei.ac.jp/ct/home_summary_report",cookieBag,cookieManager,taskDataManager,cd,adapter, (ClassUpdateListener) context, classGridAdapter,classGridView);//追加課題の画面のインスタンスを生成
                             // ダイアログを表示
                             dialog.show();//追加課題の画面を表示
                         }else{
+                            Log.d("aaa","check3");
                             ManabaScraper.setCookie(cookieBag);
                             cd.eraseUnchangeableClass();
                             cd.getChangeableClassDataFromManaba();
+                            Log.d("aaa","check4");
                             cd.eraseNotExistChangeableClass();
+                            Log.d("aaa","check5");
                             cd.eraseRegisteredChangeableClass();
+                            Log.d("aaa","check6");
                             cd.getUnChangeableClassDataFromManaba();
                             cd.getProfessorNameFromManaba();
-
+                            Log.d("aaa","check7");
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
                             taskDataManager.getTaskDataFromManaba();
+                            Log.d("aaa","check8");
                             taskDataManager.sortAllTaskDataList();
                             taskDataManager.setTaskDataIntoRegisteredClassData();
                             taskDataManager.setTaskDataIntoUnRegisteredClassData();
@@ -234,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         }
     }
     public boolean checkLogin(){
+        Log.d("aaa","ログインてチェック");
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
         if (cookies != null) {//取ってきたクッキーが空でなければ
             cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
@@ -251,5 +268,14 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
             return false;
         }
         return false;
+    }
+
+    public static boolean isNetworkAvailable(String host, int port) {
+        try (Socket socket = new Socket()) {
+            socket.connect(new InetSocketAddress(host, port), 1000); // タイムアウトは1秒
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 }
