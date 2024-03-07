@@ -55,7 +55,7 @@ public class ChangeableClassDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.custom_changeable_class_dialog);
+        setContentView(R.layout.custom_changeable_class_dialog_layout);
 
         TextView nameText,professorNameText;
         EditText classRoomEdit,dayEdit,numEdit;

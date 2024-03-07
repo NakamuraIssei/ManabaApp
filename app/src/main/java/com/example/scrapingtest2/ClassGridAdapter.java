@@ -1,8 +1,6 @@
 package com.example.scrapingtest2;
 
 import android.content.Context;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,7 +62,7 @@ public class ClassGridAdapter extends BaseAdapter {
         int col = position / (columnNum+1);
             // レイアウトをインフレートして新しいセルを作成
             LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(R.layout.class_table_cell, null);
+            convertView = inflater.inflate(R.layout.class_table_cell_layout, null);
             holder = new ViewHolder();
             holder.dateText = convertView.findViewById(R.id.dateText);
             convertView.setBackgroundResource(R.drawable.empty_class_grid);

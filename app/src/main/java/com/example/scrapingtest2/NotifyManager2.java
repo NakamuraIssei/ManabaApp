@@ -2,8 +2,6 @@ package com.example.scrapingtest2;
 
 import static android.content.Context.ALARM_SERVICE;
 
-import static androidx.core.content.ContextCompat.registerReceiver;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -48,7 +46,7 @@ public class NotifyManager2 {
         notificationIntent.putExtra("NOTIFICATIONID",dataCount);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         pendingIntentBag.put(dataCount,notificationPendingIntent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
@@ -79,7 +77,7 @@ public class NotifyManager2 {
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
@@ -98,7 +96,7 @@ public class NotifyManager2 {
             Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
             notificationIntent.setAction(String.valueOf(dataCount));
             notificationIntent.putExtra("DATANAME","BackScraping");
-            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
 
             LocalDateTime now = LocalDateTime.now();
@@ -127,7 +125,7 @@ public class NotifyManager2 {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME","ClassRegistration");
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得

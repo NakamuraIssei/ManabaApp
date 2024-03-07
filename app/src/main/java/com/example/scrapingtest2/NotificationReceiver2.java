@@ -14,8 +14,6 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 import android.webkit.CookieManager;
-import android.widget.Button;
-import android.widget.RemoteViews;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;

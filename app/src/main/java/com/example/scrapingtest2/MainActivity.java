@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Objects.requireNonNull(getSupportActionBar()).hide();
-        setContentView(R.layout.activity_taskwork);
+        setContentView(R.layout.main_activity_layout);
 
         cookieManager=CookieManager.getInstance();
         cookieBag=new HashMap<>();

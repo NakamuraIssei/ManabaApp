@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
@@ -41,7 +40,7 @@ public class LoginDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.login_dialog_layout);
 
         myWebView=findViewById(R.id.webView);
         cookieManager.setAcceptCookie(true);//クッキーマネージャにアクセスできるようにしておく

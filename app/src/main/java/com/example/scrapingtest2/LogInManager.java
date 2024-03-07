@@ -1,15 +1,14 @@
 package com.example.scrapingtest2;
 
 
-
 import android.os.Build;
-import android.util.Log;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.HashMap;
 import java.util.Objects;
 

@@ -1,19 +1,12 @@
 package com.example.scrapingtest2;
 
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
-import android.util.Log;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
 import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 public class DataManager {
 

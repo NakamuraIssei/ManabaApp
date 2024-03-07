@@ -22,9 +22,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
-    private Button cancelButton,saveButton;
-    private CalendarView calendarView;
-    private TimePicker timePicker;
     private TextView selectedTimeView,selectedDateView;
     private int taskId,editNotificationNum,operationMode;//新規追加0、編集1
     private NotificationCustomAdapter adapter;
@@ -58,12 +55,12 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.add_notification_dialog2_layout);
+        setContentView(R.layout.add_notification_dialog_layout);
 
-        cancelButton=findViewById(R.id.cancelButton);
-        saveButton=findViewById(R.id.saveButton);
-        calendarView=findViewById(R.id.calendarView);
-        timePicker=findViewById(R.id.time_picker);
+        Button cancelButton = findViewById(R.id.cancelButton);
+        Button saveButton = findViewById(R.id.saveButton);
+        CalendarView calendarView = findViewById(R.id.calendarView);
+        TimePicker timePicker = findViewById(R.id.time_picker);
         timePicker.setIs24HourView(true);
         selectedTimeView =findViewById(R.id.selectedTimeView);
         selectedDateView=findViewById(R.id.selectedDateView);

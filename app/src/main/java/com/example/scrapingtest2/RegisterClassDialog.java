@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,7 +52,7 @@ public class RegisterClassDialog extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.register_class_dialog);
+        setContentView(R.layout.changeable_class_dialog_layout);
 
         TextView nameText,professorNameText;
         EditText classRoomEdit,dayEdit,numEdit;

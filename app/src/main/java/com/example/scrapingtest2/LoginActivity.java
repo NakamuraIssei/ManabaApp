@@ -3,7 +3,6 @@ package com.example.scrapingtest2;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,11 +12,11 @@ public class LoginActivity extends AppCompatActivity {
     // 変数の初期化
     private String loginUrl = "https://ct.ritsumei.ac.jp/ct/home_summary_report";
     private LogInManager logInManager;
-    private Button logoutButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.login_dialog_layout);
 
         logInManager = new LogInManager(this);
         logInManager.setListener(new LogInManager.Listener() {
@@ -31,11 +30,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        logoutButton = findViewById(R.id.clear);
-        logoutButton.setOnClickListener(v->logInManager.clearCookies());
-
         logInManager.checkLogin(loginUrl);
-
     }
 }
 
