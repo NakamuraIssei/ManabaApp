@@ -1,4 +1,4 @@
-package com.example.scrapingtest2;
+package com.example.manabaApp;
 
 import static android.content.Context.ALARM_SERVICE;
 

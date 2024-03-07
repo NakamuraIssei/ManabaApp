@@ -1,4 +1,4 @@
-package com.example.scrapingtest2;
+package com.example.manabaApp;
 
 import android.app.Dialog;
 import android.content.Context;
