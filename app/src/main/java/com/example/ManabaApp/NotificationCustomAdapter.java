@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,7 +22,7 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
     private ArrayList<LocalDateTime> notificationTiming;
     private int taskDataId;
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        AppCompatImageButton editButton;
+        ImageButton editButton;
         TextView text1;
 
         public ViewHolder(@NonNull View itemView) {
@@ -45,8 +46,9 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
     public void onBindViewHolder(@NonNull NotificationCustomAdapter.ViewHolder holder, int position) {
         DateTimeFormatter formatter = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM/dd　HH:mm");
             String time = notificationTiming.get(position).format(formatter);
+            time=time.substring(5);
             holder.text1.setText(String.valueOf(time));
         }
         else holder.text1.setText("アンドロイドのバージョンが小さいです");

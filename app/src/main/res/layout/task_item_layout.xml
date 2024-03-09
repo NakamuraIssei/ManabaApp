@@ -4,12 +4,12 @@
 
     <ImageButton
         android:id="@+id/button2"
-        android:layout_width="27dp"
+        android:layout_width="17dp"
         android:layout_height="27dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="11dp"
-        android:layout_marginEnd="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
         android:background="@drawable/icon"
         android:padding="5dp" />
 
@@ -30,6 +30,7 @@
                 android:id="@android:id/text1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="#000000"
                 android:textSize="14sp" />
 
             <TextView
@@ -49,5 +50,12 @@
             android:layout_gravity="bottom"/>
 
     </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="32dp"
+        android:background="@android:color/darker_gray"
+        android:layout_below="@+id/button2" />
+
 
 </RelativeLayout>

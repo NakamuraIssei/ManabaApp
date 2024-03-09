@@ -69,7 +69,7 @@ public class ClassGridAdapter extends BaseAdapter {
 
             // セルのテキスト設定および余白の設定
             if(row == 0 && col == 0) {
-                holder.dateText.setText(""); // セル(0, 0)のテキストは空
+                holder.dateText.setText("　"); // セル(0, 0)のテキストは空
             } else if (row == 0) {
                 holder.dateText.setText(String.valueOf(col));
             } else if (col == 0) {

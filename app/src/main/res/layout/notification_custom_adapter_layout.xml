@@ -1,32 +1,38 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    android:background="@drawable/white_background">
 
 
     <ImageButton
         android:id="@+id/button2"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:padding="5dp"
         android:background="@drawable/edit_img" />
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_toStartOf="@id/button2"
-        android:orientation="vertical">
+        android:layout_alignParentBottom="true"
+        android:layout_toStartOf="@+id/button2"
+        android:layout_toEndOf="@id/imageView"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:textColor="#000000"/>
 
-        <TextView
-            android:id="@android:id/text1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp" />
-
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        app:srcCompat="@drawable/clock" />
 
 </RelativeLayout>

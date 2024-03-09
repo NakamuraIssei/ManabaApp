@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -39,7 +40,7 @@ public class NotificationCustomDialog extends Dialog {
         // 例: ダイアログ内のボタンをクリックしたらダイアログを閉じる
         RecyclerView recyclerView= findViewById(R.id.notifyRecyclerView);
 
-        Button addNotifyButton = findViewById(R.id.addNotifyButton);
+        ImageButton addNotifyButton = findViewById(R.id.addNotifyButton);
         TextView selectedTaskNameText= findViewById(R.id.selectedTaskNameText);
         selectedTaskNameText.setText(taskDataManager.getAllTaskDataList().get(position).getTaskName());
 

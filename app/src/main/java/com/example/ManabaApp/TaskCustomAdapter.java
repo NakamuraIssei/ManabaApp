@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,7 +27,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     private TaskDataManager taskDataManager;
     private LayoutInflater mInflater;
     private ArrayList<String> sectionTitle = new ArrayList<>(Arrays.asList(
-            "提出済み",
+            "提出した課題",
             "今日",
             "明日",
             "明後日以降"
@@ -51,7 +52,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
             holder = (HeaderViewHolder) view.getTag();
         }
         holder.sectionText.setText(sectionTitle.get(taskDataManager.getTaskGroupId(i)));
-
+        holder.sectionText.setTextColor(ContextCompat.getColor(context, R.color.black));
         return view;
     }
     @Override
@@ -158,7 +159,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     }
 
     public static class ItemViewHolder {
-        AppCompatImageButton pushButton;
+        ImageButton pushButton;
         TextView taskNameText;
         TextView taskDeadlineText;
         TextView remainingTimeText;
