@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

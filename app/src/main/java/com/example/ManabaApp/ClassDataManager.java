@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;

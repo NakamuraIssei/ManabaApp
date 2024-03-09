@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

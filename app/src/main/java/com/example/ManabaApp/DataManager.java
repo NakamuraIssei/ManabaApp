@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;

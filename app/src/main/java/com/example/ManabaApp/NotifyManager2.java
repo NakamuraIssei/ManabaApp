@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import static android.content.Context.ALARM_SERVICE;
 

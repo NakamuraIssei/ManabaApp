@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.scrapingtest2'
+    namespace 'com.example.ManabaApp'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.scrapingtest2"
+        applicationId 'com.example.ManabaApp'
         minSdk 21
         targetSdk 33
         versionCode 1

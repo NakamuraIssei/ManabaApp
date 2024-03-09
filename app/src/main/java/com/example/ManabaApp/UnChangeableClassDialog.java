@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
 public class UnChangeableClassDialog extends Dialog{
     private String className;
     private String classRoom;

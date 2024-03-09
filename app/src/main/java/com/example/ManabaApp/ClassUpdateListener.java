@@ -1,4 +1,4 @@
-package com.example.manabaApp;
+package com.example.ManabaApp;
 
 public interface ClassUpdateListener {
     void onNotificationReceived(int dataId);
