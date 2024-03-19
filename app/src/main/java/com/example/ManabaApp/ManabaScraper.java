@@ -2,6 +2,7 @@ package com.example.ManabaApp;
 
 import android.os.Build;
 import android.util.Log;
+import android.util.Pair;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -31,7 +32,7 @@ public class ManabaScraper {
                 "https://ct.ritsumei.ac.jp/ct/home_summary_survey",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_report"));
         classURL=new ArrayList<>(Arrays.asList(
-                "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=timetable",
+                "https://ct.ritsumei.ac.jp/ct/home_course_past?chglistformat=timetable",
                 "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=list"));
     }
     public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {//ここのメゾッドで未提出課題、小テスト、アンケートの欄からスクレーピング
@@ -77,34 +78,48 @@ public class ManabaScraper {
     }
     public static ArrayList<String> getRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
         classInfor=new ArrayList<>();
+        HashMap<Pair<Integer, Integer>, Integer>shiftBag = new HashMap<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
                     Document doc = Jsoup.connect(classURL.get(0)).cookies(cookiebag).get();//jsoupでHTMLを取得する。
                     //System.err.println(doc);
                     Elements doc2 = doc.select("#courselistweekly > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
                     Elements rows = doc2.select("tr");
-
                     classInfor.clear();
                     for (int i = 1; i < rows.size(); i++) {
+                        int shiftNum = 0;
                         Element row = rows.get(i);
                         Elements cells = row.select("td"); // <td>要素を取得
                         for (int j = 1; j < cells.size(); j++) {
+                            shiftNum += shiftBag.getOrDefault(new Pair<>(i, j), 0);
+
                             //Log.d("aaa",j+"曜日目の"+i+"時間目");
                             Element cell = cells.get(j);
-                            Elements divs = cell.select("div.couraselocationinfo.couraselocationinfoV2");
-                            Elements divs2 = cell.select("div.courselistweekly-nonborder.courselistweekly-c");
-                            Element divs3 = cell.select("div.courselistweekly-nonborder.courselistweekly-c a[href]").first();
+                            Elements divs = cell.select("div > div > div");
+                            Elements divs2 = cell.select("div > a:nth-child(1)");
+                            Element divs3 = cell.select("div > a:nth-child(1)").first();
 
+                            int rowspanNum = 0;
+                            if(!cell.attr("rowspan").isEmpty())
+                                rowspanNum=Integer.parseInt(cell.attr("rowspan"));
+                            if(rowspanNum>1){
+                                for(int k=0;k<rowspanNum-1;k++){
+                                    Pair<Integer, Integer> key = new Pair<>(i+k+1, j);
+                                    shiftBag.put(key, shiftBag.getOrDefault(key, 0) + 1);
+                                }
+                            }
                             String classRoom="",className="次は空きコマです",classURL="";
                             if(!divs.isEmpty()&&!divs2.isEmpty()){
                                 classRoom = Objects.requireNonNull(divs.first()).text();
                                 className = Objects.requireNonNull(Objects.requireNonNull(divs2.first()).select("a")).text();
-                                className = className.substring(0, className.length() - 1);//最後に空白が入ってるから、それを消す。
                                 assert divs3 != null;
                                 classURL= Objects.requireNonNull(divs3.attr("href"));
-                                classInfor.add((7*(j-1)+i)-1+"???"+className+"???"+classRoom+"???"+classURL);//番号、授業名、教室名、URLの順番
+
+                                classInfor.add((7*(j-1+shiftNum)+i-1)+"???"+className+"???"+classRoom+"???"+classURL);
+                                for(int k=1;k<rowspanNum;k++)
+                                classInfor.add((7*(j-1+shiftNum)+i-1+k)+"???"+className+"???"+classRoom+"???"+classURL);//番号、授業名、教室名、URLの順番
                             }
                         }
                     }
