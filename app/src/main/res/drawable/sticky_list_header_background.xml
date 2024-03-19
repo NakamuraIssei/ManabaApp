@@ -1,0 +1,9 @@
+<!-- sticky_list_header__background.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/manaba_Green" />
+    <stroke
+        android:width="2dp"
+    android:color="#000000" />
+    <corners android:radius="0dp" />
+</shape>
