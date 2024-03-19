@@ -1,0 +1,4 @@
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="32dp" /> <!-- Adjust the radius as per your requirement -->
+    <solid android:color="#ffffff" /> <!-- Dialog background color -->
+</shape>

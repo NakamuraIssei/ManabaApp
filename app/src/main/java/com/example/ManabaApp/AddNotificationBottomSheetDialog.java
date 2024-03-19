@@ -22,17 +22,17 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
-    private TextView selectedTimeView,selectedDateView;
-    private int taskId,editNotificationNum,operationMode;//新規追加0、編集1
+    private TextView selectedTimeView, selectedDateView;
+    private int taskId, editNotificationNum, operationMode;//新規追加0、編集1
     private NotificationCustomAdapter adapter;
     private static TaskDataManager taskDataManager;
 
 
-    public AddNotificationBottomSheetDialog(@NonNull Context context,int operationMode,int taskId,NotificationCustomAdapter adapter) {
+    public AddNotificationBottomSheetDialog(@NonNull Context context, int operationMode, int taskId, NotificationCustomAdapter adapter) {
         super(context);
-        this.operationMode=operationMode;
-        this.taskId=taskId;
-        this.adapter=adapter;
+        this.operationMode = operationMode;
+        this.taskId = taskId;
+        this.adapter = adapter;
 
         setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -47,10 +47,15 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
             }
         });
     }
-    public void setEditNotificationNum(int editNotificationNum){this.editNotificationNum=editNotificationNum;}
-    public static void setTaskDataManager(TaskDataManager taskDataManager){
-        AddNotificationBottomSheetDialog.taskDataManager=taskDataManager;
+
+    public void setEditNotificationNum(int editNotificationNum) {
+        this.editNotificationNum = editNotificationNum;
     }
+
+    public static void setTaskDataManager(TaskDataManager taskDataManager) {
+        AddNotificationBottomSheetDialog.taskDataManager = taskDataManager;
+    }
+
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +67,8 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
         CalendarView calendarView = findViewById(R.id.calendarView);
         TimePicker timePicker = findViewById(R.id.time_picker);
         timePicker.setIs24HourView(true);
-        selectedTimeView =findViewById(R.id.selectedTimeView);
-        selectedDateView=findViewById(R.id.selectedDateView);
+        selectedTimeView = findViewById(R.id.selectedTimeView);
+        selectedDateView = findViewById(R.id.selectedDateView);
 
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +82,7 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 selectedDateView.setText("");
-                selectedDateView.setText(year+"年"+(month+1)+"月"+dayOfMonth+"日");
+                selectedDateView.setText(year + "年" + (month + 1) + "月" + dayOfMonth + "日");
             }
         });
 
@@ -85,7 +90,7 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
             @Override
             public void onTimeChanged(TimePicker view, int hourOfDay, int minute) {
-                selectedTimeView.setText(hourOfDay+"時"+minute+"分");
+                selectedTimeView.setText(hourOfDay + "時" + minute + "分");
             }
         });
 
@@ -110,10 +115,10 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
 
                     // 選択された日付と時刻を日本のLocalDateTime型に変換
                     LocalDateTime selectedDateTime = LocalDateTime.of(year, month, dayOfMonth, hourOfDay, minute);
-                    if(operationMode==1){//新規通知追加の処理
-                        taskDataManager.deleteTaskNotification(taskId,editNotificationNum);
+                    if (operationMode == 1) {//新規通知追加の処理
+                        taskDataManager.deleteTaskNotification(taskId, editNotificationNum);
                     }
-                    taskDataManager.addNotificationTiming(taskId,selectedDateTime);
+                    taskDataManager.addNotificationTiming(taskId, selectedDateTime);
 
                     adapter.notifyDataSetChanged();
                 }
@@ -125,7 +130,7 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
             ZonedDateTime japanTime = ZonedDateTime.now(ZoneId.of("Asia/Tokyo"));
 
             // 選択された日付を表示
-            selectedDateView.setText(japanTime.getYear() + "年" +japanTime.getMonthValue() + "月" + japanTime.getDayOfMonth() + "日");
+            selectedDateView.setText(japanTime.getYear() + "年" + japanTime.getMonthValue() + "月" + japanTime.getDayOfMonth() + "日");
 
             // 選択された時刻を表示
             selectedTimeView.setText(japanTime.getHour() + "時" + japanTime.getMinute() + "分");

@@ -16,11 +16,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
-public class NotificationCustomAdapter extends RecyclerView.Adapter<NotificationCustomAdapter.ViewHolder>{
+public class NotificationCustomAdapter extends RecyclerView.Adapter<NotificationCustomAdapter.ViewHolder> {
 
     private Context context;
     private ArrayList<LocalDateTime> notificationTiming;
     private int taskDataId;
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageButton editButton;
         TextView text1;
@@ -31,34 +32,37 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
             text1 = itemView.findViewById(android.R.id.text1);
         }
     }
+
     public NotificationCustomAdapter(Context context, ArrayList<LocalDateTime> notificationTiming, int taskDataId) {
         this.context = context;
         this.notificationTiming = notificationTiming;
         this.taskDataId = taskDataId;
     }
+
     @NonNull
     @Override
     public NotificationCustomAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.notification_custom_adapter_layout, parent, false);
         return new ViewHolder(view);
     }
+
     @Override
     public void onBindViewHolder(@NonNull NotificationCustomAdapter.ViewHolder holder, int position) {
         DateTimeFormatter formatter = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM/dd　HH:mm");
             String time = notificationTiming.get(position).format(formatter);
-            time=time.substring(5);
+            time = time.substring(5);
             holder.text1.setText(String.valueOf(time));
-        }
-        else holder.text1.setText("アンドロイドのバージョンが小さいです");
+        } else holder.text1.setText("アンドロイドのバージョンが小さいです");
         holder.editButton.setOnClickListener(v -> {
-            Log.d("aaa","通知編集ボタン押せてるよー");
-            AddNotificationBottomSheetDialog dialog=new AddNotificationBottomSheetDialog(context,1,taskDataId,this);
+            Log.d("aaa", "通知編集ボタン押せてるよー");
+            AddNotificationBottomSheetDialog dialog = new AddNotificationBottomSheetDialog(context, 1, taskDataId, this);
             dialog.setEditNotificationNum(position);
             dialog.show();
         });
     }
+
     @Override
     public int getItemCount() {
         //リサイクルビューに表示されるデータの数

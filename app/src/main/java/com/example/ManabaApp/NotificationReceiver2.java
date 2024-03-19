@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class NotificationReceiver2  extends BroadcastReceiver {
+public class NotificationReceiver2 extends BroadcastReceiver {
     public NotificationManager notificationManager;
     public SQLiteDatabase db;
     public Cursor cursor;
@@ -37,19 +37,19 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
             String title = intent.getStringExtra("TITLE");
             String subTitle = intent.getStringExtra("SUBTITLE");
-            Log.d("className",title+"///NotificationReceiver2 ");
+            Log.d("className", title + "///NotificationReceiver2 ");
             //DB処理作業
             MyDBHelper myDBHelper = new MyDBHelper(context);
             db = myDBHelper.getWritableDatabase();
 
             switch (Objects.requireNonNull(dataName)) {
                 case "TaskData":
-                    pushNotification(title,subTitle,context,notificationId);
-                    taskDataWork(title,subTitle,dataId);
+                    pushNotification(title, subTitle, context, notificationId);
+                    taskDataWork(title, subTitle, dataId);
                     break;
                 case "ClassData":
-                    pushNotification(title,subTitle,context,notificationId);
-                    classDataWork(context,dataId);
+                    pushNotification(title, subTitle, context, notificationId);
+                    classDataWork(context, dataId);
                     break;
                 case "BackScraping":
                     backScraping(context);
@@ -64,16 +64,19 @@ public class NotificationReceiver2  extends BroadcastReceiver {
         }
 
     }
+
     static void setNotificationListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
-    static void setTaskDataManager(TaskDataManager taskDataManager){
-        NotificationReceiver2.taskDataManager=taskDataManager;
+
+    static void setTaskDataManager(TaskDataManager taskDataManager) {
+        NotificationReceiver2.taskDataManager = taskDataManager;
     }
-    private void pushNotification(String title,String subTitle,Context context,int notificationId){
+
+    private void pushNotification(String title, String subTitle, Context context, int notificationId) {
         //通知作業
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Log.d("classname",title+"NotificationReceiver2 pushNotification");
+            Log.d("classname", title + "NotificationReceiver2 pushNotification");
             if (notificationManager == null)
                 notificationManager = context.getSystemService(NotificationManager.class);
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -110,7 +113,8 @@ public class NotificationReceiver2  extends BroadcastReceiver {
             wakeLock.release();
         }
     }
-    private void taskDataWork(String title,String subTitle,int dataId){
+
+    private void taskDataWork(String title, String subTitle, int dataId) {
         String[] tdColumns = {"notificationTiming"}; // 取り出したいカラム
         String tdSelection = "taskId = ?"; // WHERE句
         String[] tdSelectionArgs = {String.valueOf(dataId)}; // WHERE句の引数
@@ -142,7 +146,8 @@ public class NotificationReceiver2  extends BroadcastReceiver {
         if (taskDataManager != null)
             taskDataManager.deleteFinishedTaskNotification(title, subTitle);
     }
-    private void classDataWork(Context context,int dataId){
+
+    private void classDataWork(Context context, int dataId) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             // 次の授業の行を取得するクエリ
             String selectQuery = "SELECT * FROM ClassData WHERE classId = " + (dataId + 1) % 49;
@@ -153,7 +158,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 @SuppressLint("Range") int classId = cursor.getInt(cursor.getColumnIndex("classId"));
                 @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("className"));
                 @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
-                                // 今日の0時0分を取得
+                // 今日の0時0分を取得
                 LocalDateTime nextTiming = null;
 
                 nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
@@ -184,18 +189,19 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                 // カーソルを閉じる
                 cursor.close();
 
-               NotifyManager2.setContext(context);
-               NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
+                NotifyManager2.setContext(context);
+                NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
             }
         }
     }
-    private void backScraping(Context context){
+
+    private void backScraping(Context context) {
         NotifyManager2.prepareForNotificationWork(context);
         NotifyManager2.setBackScrapingAlarm();
 
-        CookieManager ck=CookieManager.getInstance();
-        String cookies=ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
-        HashMap<String, String> cookieBag=new HashMap<>();
+        CookieManager ck = CookieManager.getInstance();
+        String cookies = ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
+        HashMap<String, String> cookieBag = new HashMap<>();
 
         if (cookies != null) {//取ってきたクッキーが空でなければ
             //クッキーバッグになんか残ってたら嫌やから空っぽにしておく
@@ -207,22 +213,22 @@ public class NotificationReceiver2  extends BroadcastReceiver {
         }
         ManabaScraper.setCookie(cookieBag);
         Log.d("aaa", "今からバックグラウンドでのスクレイピングします。　NotificationReceiver2 209");
-            TaskDataManager taskDataManager=new TaskDataManager("TaskData");
-            ClassDataManager classDataManager=new ClassDataManager("ClassData");
-            cursor = db.query("TaskData", null, null, null, null, null, "taskId");
-            taskDataManager.setDB(db,cursor);
-            cursor = db.query("ClassData", null, null, null, null, null, "classId");
-            classDataManager.setDB(db,cursor);
-            classDataManager.loadClassData();
+        TaskDataManager taskDataManager = new TaskDataManager("TaskData");
+        ClassDataManager classDataManager = new ClassDataManager("ClassData");
+        cursor = db.query("TaskData", null, null, null, null, null, "taskId");
+        taskDataManager.setDB(db, cursor);
+        cursor = db.query("ClassData", null, null, null, null, null, "classId");
+        classDataManager.setDB(db, cursor);
+        classDataManager.loadClassData();
 
-            taskDataManager.loadTaskData();
-            taskDataManager.setTaskDataIntoRegisteredClassData();
-            taskDataManager.sortAllTaskDataList();
-            taskDataManager.makeAllTasksSubmitted();
-            taskDataManager.getTaskDataFromManaba();
+        taskDataManager.loadTaskData();
+        taskDataManager.setTaskDataIntoRegisteredClassData();
+        taskDataManager.sortAllTaskDataList();
+        taskDataManager.makeAllTasksSubmitted();
+        taskDataManager.getTaskDataFromManaba();
     }
 
-    private void urgeClassRegistration(Context context){
+    private void urgeClassRegistration(Context context) {
         //通知作業
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (notificationManager == null)
@@ -243,7 +249,7 @@ public class NotificationReceiver2  extends BroadcastReceiver {
 
             Intent intent = new Intent(context, NotificationReceiver2.class);
             intent.setAction("REGISTER_CLASS"); // 呼び出したいメソッドを指定するアクションをセット
-            intent.putExtra("DATANAME","REGISTER_CLASS");
+            intent.putExtra("DATANAME", "REGISTER_CLASS");
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -3, intent, PendingIntent.FLAG_MUTABLE);
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(context, String.valueOf(999999999))
@@ -264,7 +270,8 @@ public class NotificationReceiver2  extends BroadcastReceiver {
                     "MyApp::MyWakelockTag"
             );
             wakeLock.acquire();
-            if(this.notificationManager==null)Log.d("aaa","notificationManagerがありません NotificationReceiver2");
+            if (this.notificationManager == null)
+                Log.d("aaa", "notificationManagerがありません NotificationReceiver2");
             this.notificationManager.notify((int) 999999999, builder.build());
             wakeLock.release();
         }

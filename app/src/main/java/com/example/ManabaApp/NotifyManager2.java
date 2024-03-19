@@ -16,46 +16,50 @@ import java.util.HashMap;
 
 public class NotifyManager2 {
     private static int dataCount;
-    private static HashMap<NotificationData,Integer> dataBag;
-    private static HashMap<Integer,PendingIntent> pendingIntentBag;
+    private static HashMap<NotificationData, Integer> dataBag;
+    private static HashMap<Integer, PendingIntent> pendingIntentBag;
     private static AlarmManager notificationAlarmManager;
     private static ClassUpdateListener classUpdateListener;
     private static Context context;
 
-    static void prepareForNotificationWork(Context context){
-        NotifyManager2.context =context;
-        dataCount=1;
-        dataBag=new HashMap<NotificationData,Integer>();
-        pendingIntentBag=new HashMap<Integer,PendingIntent>();
-        notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
+    static void prepareForNotificationWork(Context context) {
+        NotifyManager2.context = context;
+        dataCount = 1;
+        dataBag = new HashMap<NotificationData, Integer>();
+        pendingIntentBag = new HashMap<Integer, PendingIntent>();
+        notificationAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
-    static void setContext(Context context){
-        NotifyManager2.context =context;
-       if(notificationAlarmManager==null)
-          notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
+
+    static void setContext(Context context) {
+        NotifyManager2.context = context;
+        if (notificationAlarmManager == null)
+            notificationAlarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
+
     static void setNotificationListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
-    static void setTaskNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
-        dataBag.put(new NotificationData(dataName,title,subTitle,notificationTiming),dataCount);
+
+    static void setTaskNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming) {
+        dataBag.put(new NotificationData(dataName, title, subTitle, notificationTiming), dataCount);
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
-        notificationIntent.putExtra("DATANAME",dataName);
-        notificationIntent.putExtra("DATAID",dataId);
-        notificationIntent.putExtra("NOTIFICATIONID",dataCount);
-        notificationIntent.putExtra("TITLE",title);
-        notificationIntent.putExtra("SUBTITLE",subTitle);
+        notificationIntent.putExtra("DATANAME", dataName);
+        notificationIntent.putExtra("DATAID", dataId);
+        notificationIntent.putExtra("NOTIFICATIONID", dataCount);
+        notificationIntent.putExtra("TITLE", title);
+        notificationIntent.putExtra("SUBTITLE", subTitle);
         PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
-        pendingIntentBag.put(dataCount,notificationPendingIntent);
+        pendingIntentBag.put(dataCount, notificationPendingIntent);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
             Instant japanInstant = notificationTiming.atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
             long japanEpochMilli = japanInstant.toEpochMilli();
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
-        dataCount=(dataCount+1)%99999999;
+        dataCount = (dataCount + 1) % 99999999;
     }
+
     static void cancelTaskNotificationAlarm(String dataName, String title, String subTitle, LocalDateTime notificationTiming) {
         NotificationData nt = new NotificationData(dataName, title, subTitle, notificationTiming);
         Integer notificationId = dataBag.get(nt);
@@ -69,14 +73,15 @@ public class NotifyManager2 {
         dataBag.remove(nt);
         pendingIntentBag.remove(notificationId);
     }
+
     static void setClassNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming) {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
-        notificationIntent.putExtra("DATANAME",dataName);
-        notificationIntent.putExtra("DATAID",dataId);
-        notificationIntent.putExtra("NOTIFICATIONID",-1);
-        notificationIntent.putExtra("TITLE",title);
-        notificationIntent.putExtra("SUBTITLE",subTitle);
+        notificationIntent.putExtra("DATANAME", dataName);
+        notificationIntent.putExtra("DATAID", dataId);
+        notificationIntent.putExtra("NOTIFICATIONID", -1);
+        notificationIntent.putExtra("TITLE", title);
+        notificationIntent.putExtra("SUBTITLE", subTitle);
         PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -86,21 +91,22 @@ public class NotifyManager2 {
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
         if (classUpdateListener != null) {
-            classUpdateListener.onNotificationReceived(dataId-1);
+            classUpdateListener.onNotificationReceived(dataId - 1);
         }
-        dataCount=(dataCount+1)%99999999;
+        dataCount = (dataCount + 1) % 99999999;
     }
-    static void setBackScrapingAlarm(){
+
+    static void setBackScrapingAlarm() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
             notificationIntent.setAction(String.valueOf(dataCount));
-            notificationIntent.putExtra("DATANAME","BackScraping");
+            notificationIntent.putExtra("DATANAME", "BackScraping");
             PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
 
 
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime nextTiming=LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+            LocalDateTime nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
 
             int currentHour = now.getHour();
             int targetHour = 12;
@@ -119,12 +125,13 @@ public class NotifyManager2 {
 
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
-        dataCount=(dataCount+1)%99999999;
+        dataCount = (dataCount + 1) % 99999999;
     }
-    static void setClassRegistrationAlarm(){
+
+    static void setClassRegistrationAlarm() {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
-        notificationIntent.putExtra("DATANAME","ClassRegistration");
+        notificationIntent.putExtra("DATANAME", "ClassRegistration");
         PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
@@ -132,6 +139,6 @@ public class NotifyManager2 {
             long japanEpochMilli = japanInstant.toEpochMilli();
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
-        dataCount=(dataCount+1)%99999999;
+        dataCount = (dataCount + 1) % 99999999;
     }
 }

@@ -34,12 +34,12 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     ));
 
 
-
-    public TaskCustomAdapter(Context context,TaskDataManager taskDataManager) {
+    public TaskCustomAdapter(Context context, TaskDataManager taskDataManager) {
         this.context = context;
-        this.taskDataManager=taskDataManager;
+        this.taskDataManager = taskDataManager;
         this.mInflater = LayoutInflater.from(context);
     }
+
     @Override
     public View getHeaderView(int i, View view, ViewGroup viewGroup) {
         HeaderViewHolder holder;
@@ -55,6 +55,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
         holder.sectionText.setTextColor(ContextCompat.getColor(context, R.color.black));
         return view;
     }
+
     @Override
     public long getHeaderId(int i) {
         return getHeaderItem(i);
@@ -63,10 +64,11 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     public int getHeaderItem(int position) {
         return taskDataManager.getTaskGroupId(position);
     }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ItemViewHolder holder;
-        TaskData taskData=taskDataManager.getAllTaskDataList().get(position);
+        TaskData taskData = taskDataManager.getAllTaskDataList().get(position);
 
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.task_item_layout, parent, false);
@@ -78,7 +80,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
                 holder.countDownTimer.cancel();
             }
         }
-        String before=String.valueOf(taskData.getDueDate());
+        String before = String.valueOf(taskData.getDueDate());
         char[] charArray = before.toCharArray();
         charArray[10] = ' ';
         String deadline = new String(charArray);
@@ -86,7 +88,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
         holder.taskNameText.setText(taskData.getTaskName());
         holder.taskDeadlineText.setText(deadline);
 
-        if(taskDataManager.getTaskGroupId(position)==1&&android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
+        if (taskDataManager.getTaskGroupId(position) == 1 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             LocalDateTime currentTime = LocalDateTime.now();
             LocalDateTime dueDateTime = taskData.getDueDate();
 
@@ -95,7 +97,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
                 Duration duration = Duration.between(currentTime, dueDateTime);
                 long millisecondsLeft = duration.toMillis();
 
-                holder.countDownTimer=new CountDownTimer(millisecondsLeft, 1000) {
+                holder.countDownTimer = new CountDownTimer(millisecondsLeft, 1000) {
                     public void onTick(long millisUntilFinished) {
                         long hoursLeft = (millisUntilFinished / (1000 * 60 * 60)) % 24;
                         long minutesLeft = (millisUntilFinished / (1000 * 60)) % 60;
@@ -118,21 +120,23 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
                 holder.remainingTimeText.setText("");
                 holder.remainingTimeText.setVisibility(View.VISIBLE);
             }
-        }else holder.remainingTimeText.setText("");
+        } else holder.remainingTimeText.setText("");
 
         //if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
 
         holder.pushButton.setOnClickListener(v -> {
-            Log.d("aaa","ベルボタン押せてるよー！TaskCustomAdapter 65");
+            Log.d("aaa", "ベルボタン押せてるよー！TaskCustomAdapter 65");
             // ダイアログクラスのインスタンスを作成
-            NotificationCustomDialog dialog = new NotificationCustomDialog(context,position,taskDataManager);//追加課題の画面のインスタンスを生成
+            NotificationCustomDialog dialog = new NotificationCustomDialog(context, position, taskDataManager);//追加課題の画面のインスタンスを生成
             // ダイアログを表示
             dialog.show();//追加課題の画面を表示
 
         });
 
-        if(taskDataManager.getTaskGroupId(position)==0)convertView.setBackgroundColor(ContextCompat.getColor(context, androidx.cardview.R.color.cardview_dark_background));
-        else convertView.setBackgroundColor(ContextCompat.getColor(context, androidx.cardview.R.color.cardview_light_background));
+        if (taskDataManager.getTaskGroupId(position) == 0)
+            convertView.setBackgroundColor(ContextCompat.getColor(context, androidx.cardview.R.color.cardview_dark_background));
+        else
+            convertView.setBackgroundColor(ContextCompat.getColor(context, androidx.cardview.R.color.cardview_light_background));
 
         holder.remainingTimeText.setText("");
         return convertView;
@@ -142,10 +146,12 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     public int getCount() {
         return taskDataManager.getAllTaskDataList().size();
     }
+
     @Override
     public Object getItem(int position) {
         return null;
     }
+
     @Override
     public long getItemId(int position) {
         return position;
@@ -153,6 +159,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
 
     public static class HeaderViewHolder {
         TextView sectionText;
+
         public HeaderViewHolder(@NonNull View itemView) {
             sectionText = itemView.findViewById(android.R.id.text1);
         }
@@ -170,7 +177,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
             pushButton = itemView.findViewById(R.id.button2);
             taskNameText = itemView.findViewById(android.R.id.text1);
             taskDeadlineText = itemView.findViewById(android.R.id.text2);
-            remainingTimeText= itemView.findViewById(R.id.remainingTime);
+            remainingTimeText = itemView.findViewById(R.id.remainingTime);
         }
     }
 }
