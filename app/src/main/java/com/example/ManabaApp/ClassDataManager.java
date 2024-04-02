@@ -16,11 +16,9 @@ public class ClassDataManager extends DataManager {
         unRegisteredClassDataList = new ArrayList<ClassData>();
         prepareForWork(dataName);
     }
-
     public ArrayList<ClassData> getClassDataList() {
         return classDataList;
     }
-
     public void loadClassData() {//データベースからデータを読み込んで、dataListに追加
         while (cursor.moveToNext()) {
             @SuppressLint("Range") int dataCount = cursor.getInt(cursor.getColumnIndex("classId"));
@@ -34,11 +32,9 @@ public class ClassDataManager extends DataManager {
             classDataList.add(classData);
         }
     }
-
     public Boolean checkClassData() {
         return classDataList.size() == 49;
     }
-
     public void resetClassData() {
         classDataList.clear();
         db.execSQL("DELETE FROM " + dataName);
@@ -49,7 +45,6 @@ public class ClassDataManager extends DataManager {
         }
         dataCount = 49;
     }
-
     public ClassData getClassInfor() {
         LocalDateTime now = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -112,31 +107,10 @@ public class ClassDataManager extends DataManager {
         }
         return new ClassData(0, "次は空きコマです。", "", "", "", 0);
     }
-
-    public void getUnChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
-        try {
-            ArrayList<String> classList;
-            classList = ManabaScraper.getRegisteredClassDataFromManaba();
-            for (String k : classList) {
-                String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                replaceClassDataIntoDB(Integer.parseInt(str[0]), str[1], str[2], str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
-                replaceClassDataIntoClassList(Integer.parseInt(str[0]), str[1], str[2], "", str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL 時間割表から取ってきたデータなのでclassIdChangeableは0
-            }
-        } catch (ExecutionException e) {
-            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　132");
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　135");
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public void getChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
             ArrayList<String> classList;
-            classList = ManabaScraper.getUnRegisteredClassDataFromManaba();
+            classList = ManabaScraper.scrapeUnRegisteredClassDataFromManaba();
             for (String k : classList) {
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
                 unRegisteredClassDataList.add(new ClassData(-1, str[0], "", str[1], str[2], 1));
@@ -148,29 +122,29 @@ public class ClassDataManager extends DataManager {
             Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　156");
             throw new RuntimeException(e);
         } catch (IOException e) {
-            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　143" + e.toString());
+            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　143" + e);
             throw new RuntimeException(e);
         }
     }
-
-    public void getProfessorNameFromManaba() {
-        ArrayList<String> professorInfor;
+    public void getUnChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
-            professorInfor = ManabaScraper.getProfessorNameFromManaba();
-            for (String k : professorInfor) {
+            ArrayList<String> classList;
+            classList = ManabaScraper.scrapeRegisteredClassDataFromManaba();
+            for (String k : classList) {
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                for (int i = 0; i < classDataList.size(); i++) {
-                    if (Objects.equals(classDataList.get(i).getClassName(), str[0])) {//str[0] 授業名
-                        classDataList.get(i).setProfessorName(str[1]);//str[1] 教授名
-                    }
-                }
+                replaceClassDataIntoDB(Integer.parseInt(str[0]), str[1], str[2], str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
+                replaceClassDataIntoClassList(Integer.parseInt(str[0]), str[1], str[2], str[4], str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL 時間割表から取ってきたデータなのでclassIdChangeableは0
             }
-        } catch (IOException | ExecutionException | InterruptedException e) {
-            Log.d("aaa", "教授名スクレーピングみすった！　ClassDataManager　148");
+        } catch (ExecutionException e) {
+            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　132");
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　135");
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-
     public void eraseUnchangeableClass() {
         for (int i = 0; i < classDataList.size(); i++) {
             if (classDataList.get(i).getClassIdChangeable() == 0) {
@@ -180,7 +154,6 @@ public class ClassDataManager extends DataManager {
             }
         }
     }
-
     public void eraseNotExistChangeableClass() {
         for (int i = 0; i < classDataList.size(); i++) {
             if (!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。") && !isExistInUnRegisteredClassDataList(classDataList.get(i).getClassName())) {
@@ -189,7 +162,6 @@ public class ClassDataManager extends DataManager {
             }
         }
     }
-
     public void eraseRegisteredChangeableClass() {
         ArrayList<String> eraseClassName = new ArrayList<String>();
         for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
@@ -201,14 +173,12 @@ public class ClassDataManager extends DataManager {
             eraseClassFromUnRegisteredClassDataList(className);
         }
     }
-
     public Boolean isExistInClassDataList(String className) {
         for (int i = 0; i < classDataList.size(); i++) {
             if (Objects.equals(classDataList.get(i).getClassName(), className)) return true;
         }
         return false;
     }
-
     public Boolean isExistInUnRegisteredClassDataList(String className) {
         for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
             if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className))
@@ -216,7 +186,6 @@ public class ClassDataManager extends DataManager {
         }
         return false;
     }
-
     public void eraseClassFromUnRegisteredClassDataList(String className) {
         for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
             if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)) {
@@ -225,7 +194,15 @@ public class ClassDataManager extends DataManager {
             }
         }
     }
-
+    public static int getMaxColumnNum() {
+        int column = 5;
+        for (int i = 0; i < classDataList.size(); i++) {
+            if (!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。")) {
+                column = Math.max(column, (i / 7) + 1);
+            }
+        }
+        return column;
+    }
     public void registerUnRegisteredClass(String className, int num, String classRoom, int classIdChangeable) {
         for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
             if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)) {
@@ -237,22 +214,10 @@ public class ClassDataManager extends DataManager {
             break;
         }
     }
-
-    public static int getMaxColumnNum() {
-        int column = 5;
-        for (int i = 0; i < classDataList.size(); i++) {
-            if (!Objects.equals(classDataList.get(i).getClassName(), "次は空きコマです。")) {
-                column = Math.max(column, (i / 7) + 1);
-            }
-        }
-        return column;
-    }
-
     public void replaceClassDataIntoClassList(int classId, String className, String classRoom, String professorName, String classURL, int classIdChangeable) {
         ClassData classData = new ClassData(classId, className, classRoom, professorName, classURL, classIdChangeable);
         classDataList.set(classId, classData);
     }
-
     public void replaceClassDataIntoDB(int classId, String className, String classRoom, String classURL, int classIdChangeable) {
         classDataList.get(classId).setClassName(className);
         classDataList.get(classId).setClassRoom(classRoom);
@@ -275,7 +240,6 @@ public class ClassDataManager extends DataManager {
             Log.d("aaa", dataName + "の" + classId + "時間目を" + classRoom + "に更新できませんでした。ClassDataManager 67");
         }
     }
-
     public void insertClassDataIntoDB(ClassData classData) {
         if (db == null) {
             Log.d("aaa", "db空っぽです。(ClassDataManager 152)");

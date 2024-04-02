@@ -197,7 +197,6 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             cd.eraseNotExistChangeableClass();
                             cd.eraseRegisteredChangeableClass();
                             cd.getUnChangeableClassDataFromManaba();
-                            cd.getProfessorNameFromManaba();
 
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
@@ -208,6 +207,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
                             ClassData now = cd.getClassInfor();
                             className.setText(now.getClassName());
+
+                            classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
+                            classGridAdapter.customGridSize();
 
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
@@ -225,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     @Override
     public void onNotificationReceived(int dataId) {
         dataId = (dataId + 49) % 49;
-        className.setText(cd.classDataList.get(dataId).getClassName());
+        className.setText(DataManager.classDataList.get(dataId).getClassName());
     }
 
     @Override

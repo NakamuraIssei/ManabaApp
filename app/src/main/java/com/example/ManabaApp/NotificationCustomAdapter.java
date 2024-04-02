@@ -9,7 +9,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.time.LocalDateTime;
@@ -18,20 +17,9 @@ import java.util.ArrayList;
 
 public class NotificationCustomAdapter extends RecyclerView.Adapter<NotificationCustomAdapter.ViewHolder> {
 
-    private Context context;
-    private ArrayList<LocalDateTime> notificationTiming;
-    private int taskDataId;
-
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageButton editButton;
-        TextView text1;
-
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            editButton = itemView.findViewById(R.id.button2);
-            text1 = itemView.findViewById(android.R.id.text1);
-        }
-    }
+    private final Context context;
+    private final ArrayList<LocalDateTime> notificationTiming;
+    private final int taskDataId;
 
     public NotificationCustomAdapter(Context context, ArrayList<LocalDateTime> notificationTiming, int taskDataId) {
         this.context = context;
@@ -53,7 +41,7 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
             formatter = DateTimeFormatter.ofPattern("yyyy-MM/dd　HH:mm");
             String time = notificationTiming.get(position).format(formatter);
             time = time.substring(5);
-            holder.text1.setText(String.valueOf(time));
+            holder.text1.setText(time);
         } else holder.text1.setText("アンドロイドのバージョンが小さいです");
         holder.editButton.setOnClickListener(v -> {
             Log.d("aaa", "通知編集ボタン押せてるよー");
@@ -67,5 +55,16 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
     public int getItemCount() {
         //リサイクルビューに表示されるデータの数
         return notificationTiming.size();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageButton editButton;
+        TextView text1;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            editButton = itemView.findViewById(R.id.button2);
+            text1 = itemView.findViewById(android.R.id.text1);
+        }
     }
 }

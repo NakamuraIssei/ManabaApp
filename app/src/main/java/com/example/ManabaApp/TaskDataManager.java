@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutionException;
 
 public class TaskDataManager extends DataManager {
 
-    private HashMap<Integer, NotificationCustomAdapter> notificationAdapterBag;
-    private ArrayList<TaskData> allTaskDataList;
+    private final HashMap<Integer, NotificationCustomAdapter> notificationAdapterBag;
+    private final ArrayList<TaskData> allTaskDataList;
     private DateTimeFormatter formatter;
 
     TaskDataManager(String dataName) {
@@ -227,7 +227,7 @@ public class TaskDataManager extends DataManager {
     public void makeAllTasksSubmitted() {//ここでDBのhasSubmittedも更新
         for (int i = 0; i < allTaskDataList.size(); i++) {
             allTaskDataList.get(i).changeSubmitted(1);
-            //changeHassubmitttedIntoDB(allTaskDataList.get(i).getTaskId(),true);
+            changeHassubmitttedIntoDB(allTaskDataList.get(i).getTaskId(),true);
         }
     }
 
@@ -325,7 +325,7 @@ public class TaskDataManager extends DataManager {
             db.update(dataName, values, whereClause, whereArgs);
             Cursor cursor = db.query(dataName, new String[]{"notificationTiming"}, whereClause, whereArgs, null, null, null);
             if (cursor == null)
-                Log.d("aaa", "taskId=" + String.valueOf(taskData.getTaskId()) + "のやつが見つかりませんでした(TaskDataManager 301)");
+                Log.d("aaa", "taskId=" + taskData.getTaskId() + "のやつが見つかりませんでした(TaskDataManager 301)");
             String result = null;
             assert cursor != null;
             if (cursor.moveToFirst()) { // カーソルを最初の位置に移動

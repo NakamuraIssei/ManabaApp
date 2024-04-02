@@ -14,10 +14,10 @@ import java.util.Objects;
 
 public class LogInManager extends AppCompatActivity {
 
-    private AppCompatActivity loginActivity;
-    private WebView myWebView;
-    private static CookieManager cookieManager;
     static HashMap<String, String> cookieBag;
+    private static CookieManager cookieManager;
+    private final AppCompatActivity loginActivity;
+    private WebView myWebView;
     private Listener listener;
     private boolean flag = false;
 

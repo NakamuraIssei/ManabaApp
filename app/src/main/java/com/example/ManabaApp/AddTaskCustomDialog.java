@@ -12,9 +12,9 @@ import android.widget.EditText;
 
 public class AddTaskCustomDialog extends Dialog {
 
-    private TaskCustomAdapter adapter;
-    private TaskDataManager taskDataManager;
     static ClassGridAdapter classGridAdapter;
+    private final TaskCustomAdapter adapter;
+    private final TaskDataManager taskDataManager;
 
     public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter, TaskDataManager taskDataManager) {
         super(context);
@@ -69,7 +69,7 @@ public class AddTaskCustomDialog extends Dialog {
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
                 classGridAdapter.notifyDataSetChanged();
-                Log.d("aaa", String.valueOf(Thread.currentThread()) + "AddTaskCustomDialog 56");
+                Log.d("aaa", Thread.currentThread() + "AddTaskCustomDialog 56");
                 dismiss();  // ダイアログを閉じる
             }
         });

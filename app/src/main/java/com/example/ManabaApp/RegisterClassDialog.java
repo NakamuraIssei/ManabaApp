@@ -15,16 +15,16 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 public class RegisterClassDialog extends Dialog {
-    private String className;
+    private static ClassDataManager classDataManager;
+    private static ClassGridAdapter classGridAdapter;
+    private final String className;
     private String classRoom;
     private String classDay;
     private int classNum;
-    private String professorName;
-    private String classURL;
-    private HashMap<String, Integer> bag;
-    private GridView gridView;
-    private static ClassDataManager classDataManager;
-    private static ClassGridAdapter classGridAdapter;
+    private final String professorName;
+    private final String classURL;
+    private final HashMap<String, Integer> bag;
+    private final GridView gridView;
 
     public RegisterClassDialog(Context context, String className, String professorName, String classURL, GridView gridView) {
         super(context);

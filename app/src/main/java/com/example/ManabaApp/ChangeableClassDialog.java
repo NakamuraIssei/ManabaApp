@@ -13,19 +13,18 @@ import android.widget.GridView;
 import android.widget.TextView;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 public class ChangeableClassDialog extends Dialog {
-    private String className;
-    private String classRoom;
-    private String professorName;
-    private String classURL;
-    private String classDay; //ここまではclassNumがあれば十分やから削除
-    private int classNum;
-    private HashMap<String, Integer> dayBag;
     private static ClassDataManager classDataManager;
     private static GridView classGridView;
     private static ClassGridAdapter classGridAdapter;
+    private final String className;
+    private String classRoom;
+    private final String professorName;
+    private final String classURL;
+    private String classDay; //ここまではclassNumがあれば十分やから削除
+    private int classNum;
+    private final HashMap<String, Integer> dayBag;
 
     public ChangeableClassDialog(Context context, int classNum, String className, String classRoom, String professorName, String classURL) {
         super(context);
@@ -61,7 +60,6 @@ public class ChangeableClassDialog extends Dialog {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_changeable_class_dialog_layout);
-        Objects.requireNonNull(getWindow()).setBackgroundDrawableResource(R.drawable.dialog_background);
 
         TextView nameText, professorNameText;
         EditText classRoomEdit, dayEdit, numEdit;
@@ -69,7 +67,7 @@ public class ChangeableClassDialog extends Dialog {
 
         nameText = findViewById(R.id.selectedClassName);
         classRoomEdit = findViewById(R.id.RoomEdit);
-        classRoomEdit.setText(String.valueOf(classRoom.substring(3)));
+        classRoomEdit.setText(classRoom.substring(3));
         dayEdit = findViewById(R.id.DayEdit);
         dayEdit.setText(String.valueOf(classRoom.charAt(0)));
         numEdit = findViewById(R.id.NumEdit);

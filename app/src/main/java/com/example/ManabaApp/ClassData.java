@@ -3,13 +3,13 @@ package com.example.ManabaApp;
 import java.util.ArrayList;
 
 public class ClassData {
-    private int classId;
+    private final int classId;
     private String className;
     private String classRoom;
     private String professorName;
     private String classURL;
     private int classIdChangeable;
-    private ArrayList<TaskData> taskList;
+    private final ArrayList<TaskData> taskList;
 
     ClassData(int classId, String className, String classRoom, String professorName, String classURL, int classIdChangeable) {
         this.classId = classId;
@@ -29,36 +29,36 @@ public class ClassData {
         return this.className;
     }
 
-    public String getClassRoom() {
-        return this.classRoom;
-    }
-
-    public String getProfessorName() {
-        return this.professorName;
-    }
-
-    public String getClassURL() {
-        return this.classURL;
-    }
-
-    public int getClassIdChangeable() {
-        return this.classIdChangeable;
-    }
-
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public String getClassRoom() {
+        return this.classRoom;
     }
 
     public void setClassRoom(String classRoom) {
         this.classRoom = classRoom;
     }
 
+    public String getProfessorName() {
+        return this.professorName;
+    }
+
     public void setProfessorName(String professorName) {
         this.professorName = professorName;
     }
 
+    public String getClassURL() {
+        return this.classURL;
+    }
+
     public void setClassURL(String classURL) {
         this.classURL = classURL;
+    }
+
+    public int getClassIdChangeable() {
+        return this.classIdChangeable;
     }
 
     public void setClassIdChangeable(int classIdChangeable) {

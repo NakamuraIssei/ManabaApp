@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class ClassGridAdapter extends BaseAdapter {
-    private Context context;
-    private ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
-    private ArrayList<String> Day;
+    private final Context context;
+    private final ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
+    private final ArrayList<String> Day;
     private int rowNum;
     private int columnNum;
 
@@ -103,4 +103,3 @@ public class ClassGridAdapter extends BaseAdapter {
     }
 
 }
-

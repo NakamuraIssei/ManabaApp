@@ -23,12 +23,19 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class NotificationReceiver2 extends BroadcastReceiver {
+    public static TaskDataManager taskDataManager;
+    private static ClassUpdateListener classUpdateListener;
     public NotificationManager notificationManager;
     public SQLiteDatabase db;
     public Cursor cursor;
-    public static TaskDataManager taskDataManager;
-    private static ClassUpdateListener classUpdateListener;
 
+    static void setNotificationListener(ClassUpdateListener listener) {
+        classUpdateListener = listener;
+    }
+
+    static void setTaskDataManager(TaskDataManager taskDataManager) {
+        NotificationReceiver2.taskDataManager = taskDataManager;
+    }
 
     public void onReceive(Context context, Intent intent) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -63,14 +70,6 @@ public class NotificationReceiver2 extends BroadcastReceiver {
             }
         }
 
-    }
-
-    static void setNotificationListener(ClassUpdateListener listener) {
-        classUpdateListener = listener;
-    }
-
-    static void setTaskDataManager(TaskDataManager taskDataManager) {
-        NotificationReceiver2.taskDataManager = taskDataManager;
     }
 
     private void pushNotification(String title, String subTitle, Context context, int notificationId) {
@@ -277,4 +276,3 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         }
     }
 }
-

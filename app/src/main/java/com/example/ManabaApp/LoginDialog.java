@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public class LoginDialog extends Dialog {
 
+    public static ClassUpdateListener classUpdateListener;
     public WebView myWebView;
     public String url;
     public HashMap<String, String> cookieBag;
@@ -24,7 +25,6 @@ public class LoginDialog extends Dialog {
     public TaskCustomAdapter adapter;
     public ClassGridAdapter classGridAdapter;
     public GridView classGridView;
-    public static ClassUpdateListener classUpdateListener;
 
     public LoginDialog(Context context, String url, HashMap<String, String> cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter, GridView classGridView) {
         super(context);
@@ -76,7 +76,6 @@ public class LoginDialog extends Dialog {
                             classDataManager.eraseNotExistChangeableClass();
                             classDataManager.eraseRegisteredChangeableClass();
                             classDataManager.getUnChangeableClassDataFromManaba();
-                            classDataManager.getProfessorNameFromManaba();
 
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
