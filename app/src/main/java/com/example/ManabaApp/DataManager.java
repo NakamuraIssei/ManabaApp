@@ -18,19 +18,16 @@ public class DataManager {
     protected Cursor cursor;
     protected DateTimeFormatter formatter;
 
-    public void prepareForWork(String DataName) {//インスタンスを生成した時に使う初期化用のメゾッド
-        dataName = DataName;
-        dataCount = 0;
-        classDataList = new ArrayList<ClassData>();
+    public void prepareForWork(String DataName){//インスタンスを生成した時に使う初期化用のメゾッド
+        dataName=DataName;
+        dataCount =0;
+        classDataList =new ArrayList<ClassData>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
-    }
-
-    ;
-
-    public void setDB(SQLiteDatabase DB, Cursor Cursor) {// データベースを渡す
-        db = DB;
-        cursor = Cursor;
+    };
+    public void setDB(SQLiteDatabase DB, Cursor Cursor){// データベースを渡す
+        db=DB;
+        cursor=Cursor;
     }
 }

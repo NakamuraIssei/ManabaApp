@@ -11,7 +11,6 @@ public class MyDBHelper extends SQLiteOpenHelper {
     public MyDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         // テーブルを作成するクエリをここに記述します
@@ -34,7 +33,6 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + "hasSubmitted INTEGER)";
         db.execSQL(createClassDataTableQuery);
     }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // データベースのバージョンが変更された場合の処理をここに記述します

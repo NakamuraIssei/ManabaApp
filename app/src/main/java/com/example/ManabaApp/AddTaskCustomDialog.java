@@ -16,16 +16,14 @@ public class AddTaskCustomDialog extends Dialog {
     private TaskDataManager taskDataManager;
     static ClassGridAdapter classGridAdapter;
 
-    public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter, TaskDataManager taskDataManager) {
+    public AddTaskCustomDialog(Context context, TaskCustomAdapter adapter,TaskDataManager taskDataManager) {
         super(context);
-        this.adapter = adapter;
-        this.taskDataManager = taskDataManager;
+        this.adapter=adapter;
+        this.taskDataManager=taskDataManager;
     }
-
-    static void setGridAdapter(ClassGridAdapter classGridAdapter) {
+    static void setGridAdapter(ClassGridAdapter classGridAdapter){
         AddTaskCustomDialog.classGridAdapter = classGridAdapter;
     }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,29 +45,29 @@ public class AddTaskCustomDialog extends Dialog {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String yearvalue = year.getText().toString();
-                String monthvalue = month.getText().toString();
-                String dayvalue = day.getText().toString();
-                String hourvalue = hour.getText().toString();
-                String minutevalue = minute.getText().toString();
-                String className = name.getText().toString();
-                String taskURL = URL.getText().toString();
+                String yearvalue=year.getText().toString();
+                String monthvalue=month.getText().toString();
+                String dayvalue=day.getText().toString();
+                String hourvalue=hour.getText().toString();
+                String minutevalue=minute.getText().toString();
+                String className=name.getText().toString();
+                String taskURL=URL.getText().toString();
 
-                if (monthvalue.length() < 2) monthvalue = '0' + monthvalue;
-                if (dayvalue.length() < 2) dayvalue = '0' + dayvalue;
-                if (hourvalue.length() < 2) hourvalue = '0' + hourvalue;
-                if (minutevalue.length() < 2) minutevalue = '0' + minutevalue;
+                if(monthvalue.length()<2)monthvalue='0'+monthvalue;
+                if(dayvalue.length()<2)dayvalue='0'+dayvalue;
+                if(hourvalue.length()<2)hourvalue='0'+hourvalue;
+                if(minutevalue.length()<2)minutevalue='0'+minutevalue;
 
-                final String deadline = yearvalue + '-' + monthvalue + '-' + dayvalue + ' ' + hourvalue + ':' + minutevalue;
-                Log.d("aaa", deadline + "AddTaskCustomDialog 52");
+                final String deadline =yearvalue+'-'+monthvalue+'-'+dayvalue+' '+hourvalue+':'+minutevalue;
+                Log.d("aaa", deadline+"AddTaskCustomDialog 52");
                 //TaskData context=new TaskData(title2.getText().toString(),1,"hoeghoge",deadline);
-                Log.d("aaa", title2.getText().toString() + "を追加します。AddTaskCustomDialog 54");
-                taskDataManager.addTaskData(title2.getText().toString(), deadline, className, taskURL);
+                Log.d("aaa", title2.getText().toString()+"を追加します。AddTaskCustomDialog 54");
+                taskDataManager.addTaskData(title2.getText().toString(),deadline,className,taskURL);
                 taskDataManager.sortAllTaskDataList();
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
                 classGridAdapter.notifyDataSetChanged();
-                Log.d("aaa", String.valueOf(Thread.currentThread()) + "AddTaskCustomDialog 56");
+                Log.d("aaa", String.valueOf(Thread.currentThread())+"AddTaskCustomDialog 56");
                 dismiss();  // ダイアログを閉じる
             }
         });

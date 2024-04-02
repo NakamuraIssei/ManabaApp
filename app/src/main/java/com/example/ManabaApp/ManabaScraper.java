@@ -18,10 +18,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class ManabaScraper {
+    public static ArrayList<String> taskInfor;
     private static ArrayList<String> urlList;
     private static ArrayList<String> classURL;
     private static HashMap<String, String> cookiebag;
-    public static ArrayList<String> taskInfor;
     private static ArrayList<String> classInfor;
 
 
@@ -32,8 +32,8 @@ public class ManabaScraper {
                 "https://ct.ritsumei.ac.jp/ct/home_summary_survey",
                 "https://ct.ritsumei.ac.jp/ct/home_summary_report"));
         classURL = new ArrayList<>(Arrays.asList(
-                "https://ct.ritsumei.ac.jp/ct/home_course_past?chglistformat=timetable",
-                "https://ct.ritsumei.ac.jp/ct/home_course_past?chglistformat=list"));
+                "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=timetable",
+                "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=list"));
     }
 
     public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {//ここのメゾッドで未提出課題、小テスト、アンケートの欄からスクレーピング
@@ -197,6 +197,7 @@ public class ManabaScraper {
                     Elements doc2 = doc.select("#container > div.pagebody > div > div.contentbody-left > div.my-infolist.my-infolist-mycourses > div.mycourses-body > div > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
                     Elements rows = doc2.select("tr");
                     classInfor.clear();
+                    Log.d("pname", String.valueOf(rows.size()));
                     for (int i = 1; i < rows.size(); i++) {
                         Element row = rows.get(i);
                         Elements div1, div2;
@@ -208,7 +209,6 @@ public class ManabaScraper {
 
                         className = Objects.requireNonNull(Objects.requireNonNull(div1.text()));
                         professorName = Objects.requireNonNull(Objects.requireNonNull(div2.text()));
-                        Log.d("aaa",professorName);
 
                         classInfor.add(className + "???" + professorName);
                     }

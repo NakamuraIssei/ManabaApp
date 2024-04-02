@@ -16,64 +16,52 @@ public class TaskData {
     private String taskURL;//提出締め切り、教室名
     public int hasSubmitted;//課題が提出済みかのフラグ 未提出なら0、提出済みなら1
 
-    public TaskData(int taskId, String belongedClassName, String taskName, LocalDateTime dueDate, String taskURL, int hasSubmitted) {
+    public TaskData(int taskId, String belongedClassName, String taskName, LocalDateTime dueDate, String taskURL, int hasSubmitted){
         this.taskId = taskId;
         this.belongedClassName = belongedClassName;
         this.taskName = taskName;
         this.dueDate = dueDate;
-        this.taskURL = taskURL;
-        this.notificationTiming = new ArrayList<LocalDateTime>();
-        this.hasSubmitted = hasSubmitted;
+        this.taskURL=taskURL;
+        this.notificationTiming=new ArrayList<LocalDateTime>();
+        this.hasSubmitted =hasSubmitted;
     }
-
-    public int getTaskId() {
+    public int getTaskId(){
         return this.taskId;
     }
-
-    public String getBelongedClassName() {
+    public String getBelongedClassName(){
         return this.belongedClassName;
     }
-
-    public String getTaskName() {
+    public String getTaskName(){
         return this.taskName;
     }
-
-    public LocalDateTime getDueDate() {
+    public LocalDateTime getDueDate(){
         return this.dueDate;
     }
-
-    public ArrayList<LocalDateTime> getNotificationTiming() {
+    public ArrayList<LocalDateTime> getNotificationTiming(){
         return this.notificationTiming;
     }
-
-    public String getTaskURL() {
+    public String getTaskURL(){
         return this.taskURL;
     }
-
-    public int getHasSubmitted() {
+    public int getHasSubmitted(){
         return this.hasSubmitted;
     }
-
-    public void changeSubmitted(int hasSubmitted) {
-        this.hasSubmitted = hasSubmitted;
+    public void changeSubmitted(int hasSubmitted){
+        this.hasSubmitted =hasSubmitted;
     }
-
-    public void addNotificationTiming(LocalDateTime newTiming) {
+    public void addNotificationTiming(LocalDateTime newTiming){
         this.notificationTiming.add(newTiming);
         reorderNotificationTiming();
     }
-
-    public void deleteNotificationTiming(int notificationNum) {
+    public void deleteNotificationTiming(int notificationNum){
         this.notificationTiming.remove(notificationNum);
         reorderNotificationTiming();
     }
-
-    public void deleteFinishedNotification() {
+    public void deleteFinishedNotification(){
         notificationTiming.remove(0);
         reorderNotificationTiming();
     }
-
-    public void reorderNotificationTiming() {
+    public void reorderNotificationTiming(){
         Comparator<LocalDateTime> longComparator = new Comparator<LocalDateTime>() {
             @Override
             public int compare(LocalDateTime p1, LocalDateTime p2) {

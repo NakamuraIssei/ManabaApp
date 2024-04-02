@@ -24,7 +24,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onSuccess() {
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable("cookiebag", logInManager.cookieBag);
+                bundle.putSerializable("cookiebag",logInManager.cookieBag);
                 intent.putExtra("BUNDLE", bundle);
                 startActivity(intent);
             }
@@ -33,5 +33,3 @@ public class LoginActivity extends AppCompatActivity {
         logInManager.checkLogin(loginUrl);
     }
 }
-
-
