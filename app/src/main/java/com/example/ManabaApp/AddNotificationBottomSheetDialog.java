@@ -22,10 +22,12 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
-    private TextView selectedTimeView, selectedDateView;
-    private int taskId, editNotificationNum, operationMode;//新規追加0、編集1
-    private NotificationCustomAdapter adapter;
     private static TaskDataManager taskDataManager;
+    private TextView selectedTimeView, selectedDateView;
+    private final int taskId;
+    private int editNotificationNum;
+    private final int operationMode;//新規追加0、編集1
+    private final NotificationCustomAdapter adapter;
 
 
     public AddNotificationBottomSheetDialog(@NonNull Context context, int operationMode, int taskId, NotificationCustomAdapter adapter) {
@@ -48,12 +50,12 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
         });
     }
 
-    public void setEditNotificationNum(int editNotificationNum) {
-        this.editNotificationNum = editNotificationNum;
-    }
-
     public static void setTaskDataManager(TaskDataManager taskDataManager) {
         AddNotificationBottomSheetDialog.taskDataManager = taskDataManager;
+    }
+
+    public void setEditNotificationNum(int editNotificationNum) {
+        this.editNotificationNum = editNotificationNum;
     }
 
     @SuppressLint("SetTextI18n")

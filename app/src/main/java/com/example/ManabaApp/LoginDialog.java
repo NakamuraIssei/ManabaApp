@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public class LoginDialog extends Dialog {
 
+    public static ClassUpdateListener classUpdateListener;
     public WebView myWebView;
     public String url;
     public HashMap<String, String> cookieBag;
@@ -24,25 +25,26 @@ public class LoginDialog extends Dialog {
     public TaskCustomAdapter adapter;
     public ClassGridAdapter classGridAdapter;
     public GridView classGridView;
-    public static ClassUpdateListener classUpdateListener;
-    public LoginDialog(Context context, String url, HashMap<String,String>cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter,GridView classGridView) {
+
+    public LoginDialog(Context context, String url, HashMap<String, String> cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter, GridView classGridView) {
         super(context);
-        this.url=url;
-        this.cookieBag=cookieBag;
+        this.url = url;
+        this.cookieBag = cookieBag;
         this.cookieManager = cookieManager;
-        taskDataManager=td;
-        classDataManager=cd;
-        this.adapter=adapter;
+        taskDataManager = td;
+        classDataManager = cd;
+        this.adapter = adapter;
         this.classGridAdapter = classGridAdapter;
-        this.classGridView=classGridView;
-        classUpdateListener=listener;
+        this.classGridView = classGridView;
+        classUpdateListener = listener;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login_dialog_layout);
 
-        myWebView=findViewById(R.id.webView);
+        myWebView = findViewById(R.id.webView);
         cookieManager.setAcceptCookie(true);//クッキーマネージャにアクセスできるようにしておく
         final int[] flag = {0};//多分、swiftなら無くても大丈夫！
         myWebView.setVisibility(View.VISIBLE);//webViewを見えるようにする
@@ -52,6 +54,7 @@ public class LoginDialog extends Dialog {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return false;
             }//webView内で画面遷移？（他のページに飛ぶとか）できるようにする
+
             @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onPageFinished(WebView view, String url) {//webViewがページを読み込み終えたら
@@ -64,8 +67,8 @@ public class LoginDialog extends Dialog {
                         String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
                         cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
                     }
-                    for(String cookie : cookieBag.keySet()){
-                        if(Objects.equals(cookie, " sessionid")){//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
+                    for (String cookie : cookieBag.keySet()) {
+                        if (Objects.equals(cookie, " sessionid")) {//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
                             classDataManager.eraseUnchangeableClass();
@@ -73,7 +76,6 @@ public class LoginDialog extends Dialog {
                             classDataManager.eraseNotExistChangeableClass();
                             classDataManager.eraseRegisteredChangeableClass();
                             classDataManager.getUnChangeableClassDataFromManaba();
-                            classDataManager.getProfessorNameFromManaba();
 
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
@@ -82,12 +84,13 @@ public class LoginDialog extends Dialog {
                             taskDataManager.setTaskDataIntoRegisteredClassData();
                             taskDataManager.setTaskDataIntoUnRegisteredClassData();
 
-                            classGridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
+                            classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
                             classGridAdapter.customGridSize();
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
-                            if(DataManager.unRegisteredClassDataList.size()>0)NotifyManager2.setClassRegistrationAlarm();
+                            if (DataManager.unRegisteredClassDataList.size() > 0)
+                                NotifyManager2.setClassRegistrationAlarm();
                             dismiss();
                         }
                     }

@@ -11,7 +11,6 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.content.ContextCompat;
 
 import java.time.Duration;
@@ -23,10 +22,10 @@ import java.util.Locale;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersAdapter {
-    private Context context;
-    private TaskDataManager taskDataManager;
-    private LayoutInflater mInflater;
-    private ArrayList<String> sectionTitle = new ArrayList<>(Arrays.asList(
+    private final Context context;
+    private final TaskDataManager taskDataManager;
+    private final LayoutInflater mInflater;
+    private final ArrayList<String> sectionTitle = new ArrayList<>(Arrays.asList(
             "提出した課題",
             "今日",
             "明日",

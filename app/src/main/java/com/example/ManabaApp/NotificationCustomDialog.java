@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -20,9 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class NotificationCustomDialog extends Dialog {
-    private int position;
-    private Context context;
-    private TaskDataManager taskDataManager;
+    private final int position;
+    private final Context context;
+    private final TaskDataManager taskDataManager;
 
     public NotificationCustomDialog(Context context, int position,TaskDataManager taskDataManager) {
         super(context);
