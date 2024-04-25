@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -128,12 +130,16 @@ public class ClassDataManager extends DataManager {
     }
     public void getUnChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
-            ArrayList<String> classList;
+            HashMap<Integer, String> classList;
             classList = ManabaScraper.scrapeRegisteredClassDataFromManaba();
-            for (String k : classList) {
-                String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                replaceClassDataIntoDB(Integer.parseInt(str[0]), str[1], str[2], str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
-                replaceClassDataIntoClassList(Integer.parseInt(str[0]), str[1], str[2], str[4], str[3], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL 時間割表から取ってきたデータなのでclassIdChangeableは0
+            // HashMapのエントリセットを取得し、それを使って反復処理する
+            for (Map.Entry<Integer, String> entry : classList.entrySet()) {
+                int k = entry.getKey(); // エントリのキー（授業番号）を取得
+                String value = entry.getValue(); // エントリの値（文字列データ）を取得
+                String[] str = value.split("\\?\\?\\?"); // 値を分割
+
+                replaceClassDataIntoDB(k, str[0], str[1], str[2], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
+                replaceClassDataIntoClassList(k, str[0], str[1], str[3], str[2], 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL 時間割表から取ってきたデータなのでclassIdChangeableは0
             }
         } catch (ExecutionException e) {
             Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　132");

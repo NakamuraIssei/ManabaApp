@@ -86,7 +86,9 @@ public class ClassGridAdapter extends BaseAdapter {
             // 特定の条件を満たす場合に背景色を設定
             if (Objects.equals(classData.getClassRoom(), "")) {
                 convertView.setBackgroundResource(R.drawable.empty_class_grid);
-            } else {
+            } else if(Objects.equals(classData.getClassName(), "授業が重複しています。")){
+                convertView.setBackgroundResource(R.drawable.duplication_class_grid);
+            } else{
                 if (classData.hasTask()) {
                     convertView.setBackgroundResource(R.drawable.hastask_class_grid);
                 } else {

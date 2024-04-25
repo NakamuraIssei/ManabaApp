@@ -17,7 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class ManabaScraper {
-    private static ArrayList<String> taskURL,classURL,taskInfor,classInfor;
+    private static ArrayList<String> taskURL,classURL,taskInfor,unRegisteredclassInfor;
+    private static HashMap<Integer,String> registerdClassInfor;
     private static HashMap<String, String> cookiebag;
 
     public static void setCookie(HashMap<String, String> cookiebag) {
@@ -70,8 +71,9 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    public static ArrayList<String> scrapeRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
-        classInfor = new ArrayList<>();
+    public static HashMap<Integer,String> scrapeRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
+        String message="授業が重複しています。??? ??? ??? ";
+        registerdClassInfor = new HashMap<>();
         ArrayList<Character>days;
         days=new ArrayList<>(Arrays.asList(
                 '月',
@@ -81,7 +83,7 @@ public class ManabaScraper {
                 '金',
                 '土',
                 '日'));
-        CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
+        CompletableFuture<HashMap<Integer,String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 Document doc = null;//jsoupでHTMLを取得する。
@@ -92,7 +94,8 @@ public class ManabaScraper {
 
                     Elements rows = doc2.select("tr");
 
-                    classInfor.clear();
+                    registerdClassInfor.clear();
+
                     Log.d("yyyyy","時間割分析します。getRegisteredClassDataFromManabaaaaaaa"+rows.size());
                     for (int i = 1; i < rows.size(); i++) {
                         Element row = rows.get(i);
@@ -122,12 +125,22 @@ public class ManabaScraper {
                                         if(dayNum.charAt(j)== days.get(k)){
                                             if(dayNum.charAt(j+2)=='('){
                                                 int num=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+1)))-1;
-                                                classInfor.add(num + "???" + className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                if (registerdClassInfor.containsKey(num)) {
+                                                    registerdClassInfor.remove(num);
+                                                    registerdClassInfor.put(num,message);
+                                                }else{
+                                                    registerdClassInfor.put(num,className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                }
                                             }else{
                                                 int startNum=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+1)))-1;
                                                 int endNum=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+3)))-1;
                                                 for(int l = startNum; l<=endNum;l++){
-                                                    classInfor.add(l + "???" + className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                    if (registerdClassInfor.containsKey(l)) {
+                                                        registerdClassInfor.remove(l);
+                                                        registerdClassInfor.put(l,message);
+                                                    }else{
+                                                        registerdClassInfor.put(l,className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                    }
                                                 }
                                             }
                                         }
@@ -137,17 +150,17 @@ public class ManabaScraper {
                             Log.d("yyyyy",className+"//"+classRoom+"aaaaaaaaaa");
                         }
                     }
-                    return classInfor;
+                    return registerdClassInfor;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
             return scrapingTask.get();
         }
-        return classInfor;
+        return registerdClassInfor;
     }
     public static ArrayList<String> scrapeUnRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にない時間割(卒研とか)をスクレーピング
-        classInfor = new ArrayList<>();
+        unRegisteredclassInfor = new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
@@ -158,7 +171,7 @@ public class ManabaScraper {
 
                     Elements rows = doc2.select("tr");
 
-                    classInfor.clear();
+                    unRegisteredclassInfor.clear();
                     for (int i = 1; i < rows.size(); i++) {
                         Element row = rows.get(i);
                         Elements cells = row.select("td"); // <td>要素を取得
@@ -181,17 +194,17 @@ public class ManabaScraper {
                         if (!className.equals("") && !classRoom.equals("") && !classRoom.equals("") && !professorName.equals("") && !classURL.equals("")) {
                             classRoom=classRoom.substring(classNum.length());
                             if(classRoom.contains("--")){
-                                classInfor.add(className+ "???" + professorName + "???" + classURL);
+                                unRegisteredclassInfor.add(className+ "???" + professorName + "???" + classURL);
                             }
                         }
                     }
-                    return classInfor;
+                    return unRegisteredclassInfor;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
             return scrapingTask.get();
         }
-        return classInfor;
+        return unRegisteredclassInfor;
     }
 }
