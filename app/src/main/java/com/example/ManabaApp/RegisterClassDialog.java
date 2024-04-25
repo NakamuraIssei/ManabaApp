@@ -15,56 +15,59 @@ import android.widget.TextView;
 import java.util.HashMap;
 
 public class RegisterClassDialog extends Dialog {
-    private String className;
+    private static ClassDataManager classDataManager;
+    private static ClassGridAdapter classGridAdapter;
+    private final String className;
     private String classRoom;
     private String classDay;
     private int classNum;
-    private String professorName;
-    private String classURL;
-    private HashMap<String, Integer>bag;
-    private GridView gridView;
-    private static ClassDataManager classDataManager;
-    private static ClassGridAdapter classGridAdapter;
+    private final String professorName;
+    private final String classURL;
+    private final HashMap<String, Integer> bag;
+    private final GridView gridView;
 
-    public RegisterClassDialog(Context context, String className,String professorName, String classURL,GridView gridView) {
+    public RegisterClassDialog(Context context, String className, String professorName, String classURL, GridView gridView) {
         super(context);
-        this.className=className;
-        this.classRoom="";
-        this.professorName=professorName;
-        this.classURL="https://ct.ritsumei.ac.jp/ct/"+classURL;
-        this.gridView=gridView;
-        bag=new HashMap<>();
-        bag.put("月",0);
-        bag.put("火",1);
-        bag.put("水",2);
-        bag.put("木",3);
-        bag.put("金",4);
-        bag.put("土",5);
-        bag.put("日",6);
+        this.className = className;
+        this.classRoom = "";
+        this.professorName = professorName;
+        this.classURL = "https://ct.ritsumei.ac.jp/ct/" + classURL;
+        this.gridView = gridView;
+        bag = new HashMap<>();
+        bag.put("月", 0);
+        bag.put("火", 1);
+        bag.put("水", 2);
+        bag.put("木", 3);
+        bag.put("金", 4);
+        bag.put("土", 5);
+        bag.put("日", 6);
     }
-    static void setClassDataManager(ClassDataManager classDataManager){
-        RegisterClassDialog.classDataManager=classDataManager;
+
+    static void setClassDataManager(ClassDataManager classDataManager) {
+        RegisterClassDialog.classDataManager = classDataManager;
     }
-    static void setClassGridAdapter(ClassGridAdapter classGridAdapter){
-        RegisterClassDialog.classGridAdapter=classGridAdapter;
+
+    static void setClassGridAdapter(ClassGridAdapter classGridAdapter) {
+        RegisterClassDialog.classGridAdapter = classGridAdapter;
     }
+
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.changeable_class_dialog_layout);
 
-        TextView nameText,professorNameText;
-        EditText classRoomEdit,dayEdit,numEdit;
-        Button classPageButton,registerButton;
+        TextView nameText, professorNameText;
+        EditText classRoomEdit, dayEdit, numEdit;
+        Button classPageButton, registerButton;
 
-        nameText=findViewById(R.id.selectedClassName);
-        classRoomEdit=findViewById(R.id.RoomEdit);
-        dayEdit=findViewById(R.id.DayEdit);
-        numEdit=findViewById(R.id.NumEdit);
-        professorNameText=findViewById(R.id.selectedProfessorName);
-        classPageButton=findViewById(R.id.classPageButton);
-        registerButton=findViewById(R.id.Register_Button);
+        nameText = findViewById(R.id.selectedClassName);
+        classRoomEdit = findViewById(R.id.RoomEdit);
+        dayEdit = findViewById(R.id.DayEdit);
+        numEdit = findViewById(R.id.NumEdit);
+        professorNameText = findViewById(R.id.selectedProfessorName);
+        classPageButton = findViewById(R.id.classPageButton);
+        registerButton = findViewById(R.id.Register_Button);
 
         nameText.setText(className);
 
@@ -83,15 +86,15 @@ public class RegisterClassDialog extends Dialog {
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-                classRoom=classRoomEdit.getText().toString();
-                classDay=dayEdit.getText().toString();
-                classNum= Integer.parseInt(numEdit.getText().toString());
-                if (!classDay.isEmpty() && (classNum<=7&&0<=classNum)) {
-                    classRoom=dayEdit.getText().toString()+numEdit.getText().toString()+":"+classRoom;
-                    classDataManager.registerUnRegisteredClass(className, (bag.get(classDay)*7)+classNum-1,classRoom,1);
+                classRoom = classRoomEdit.getText().toString();
+                classDay = dayEdit.getText().toString();
+                classNum = Integer.parseInt(numEdit.getText().toString());
+                if (!classDay.isEmpty() && (classNum <= 7 && 0 <= classNum)) {
+                    classRoom = dayEdit.getText().toString() + numEdit.getText().toString() + ":" + classRoom;
+                    classDataManager.registerUnRegisteredClass(className, (bag.get(classDay) * 7) + classNum - 1, classRoom, 1);
                 }
                 classGridAdapter.customGridSize();
-                gridView.setNumColumns(ClassDataManager.getMaxColumnNum()+1);
+                gridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
                 classGridAdapter.notifyDataSetChanged();
                 dismiss();
             }

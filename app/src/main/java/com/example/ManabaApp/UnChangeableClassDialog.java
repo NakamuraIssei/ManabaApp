@@ -10,32 +10,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class UnChangeableClassDialog extends Dialog{
-    private String className;
-    private String classRoom;
-    private String professorName;
-    private String classURL;
+public class UnChangeableClassDialog extends Dialog {
+    private final String className;
+    private final String classRoom;
+    private final String professorName;
+    private final String classURL;
 
     public UnChangeableClassDialog(Context context, String className, String classRoom, String professorName, String classURL) {
         super(context);
-        this.className=className;
-        this.classRoom=classRoom;
-        this.professorName=professorName;
-        this.classURL="https://ct.ritsumei.ac.jp/ct/"+classURL;
+        this.className = className;
+        this.classRoom = classRoom;
+        this.professorName = professorName;
+        this.classURL = "https://ct.ritsumei.ac.jp/ct/" + classURL;
     }
+
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unchangeable_class_dialog_layout);
 
-        TextView nameText,roomText,professorNameText;
+        TextView nameText, roomText, professorNameText;
         Button classPageButton;
 
-        nameText=findViewById(R.id.selectedClassName);
-        roomText=findViewById(R.id.selectedClassRoom);
-        professorNameText=findViewById(R.id.selectedProfessorName);
-        classPageButton=findViewById(R.id.classPageButton);
+        nameText = findViewById(R.id.selectedClassName);
+        roomText = findViewById(R.id.selectedClassRoom);
+        professorNameText = findViewById(R.id.selectedProfessorName);
+        classPageButton = findViewById(R.id.classPageButton);
 
         nameText.setText(className);
         roomText.setText(classRoom);
