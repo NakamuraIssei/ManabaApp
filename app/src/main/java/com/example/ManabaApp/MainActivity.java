@@ -1,5 +1,6 @@
 package com.example.ManabaApp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,10 +11,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -78,6 +82,16 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                     public void run() {
                         Log.d("aaa", "授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
+                        ImageButton imageButton = findViewById(R.id.exclamationButton);
+                        imageButton.setOnClickListener(v -> {
+                            for(ClassData classData:DataManager.unRegisteredClassDataList){
+                                // ダイアログクラスのインスタンスを作成
+                                EncourageRegistrationDialog dialog = new EncourageRegistrationDialog(context,classData.getClassName());//追加課題の画面のインスタンスを生成
+                                // ダイアログを表示
+                                dialog.show();//追加課題の画面を表示
+                            }
+                        });
+
                         taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
 
                         //課題の情報をtaskDataから取得
@@ -213,8 +227,15 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
                             adapter.notifyDataSetChanged();
                             classGridAdapter.notifyDataSetChanged();
-                            if (DataManager.unRegisteredClassDataList.size() > 0)
+                            if (DataManager.unRegisteredClassDataList.size() > 0) {
                                 NotifyManager2.setClassRegistrationAlarm();
+                                // 点滅アニメーションをロード
+                                Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+                                // ImageButtonにアニメーションをセット
+                                imageButton.startAnimation(blinkAnimation);
+                            }else{
+                                imageButton.setVisibility(View.GONE); // ImageViewを非表示
+                            }
                         }
                     }
 

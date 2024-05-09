@@ -61,6 +61,11 @@ public class ChangeableClassDialog extends Dialog {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.custom_changeable_class_dialog_layout);
 
+        // ダイアログの背景に角丸を適用する
+        if (getWindow() != null) {
+            getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
+        }
+
         TextView nameText, professorNameText;
         EditText classRoomEdit, dayEdit, numEdit;
         Button classPageButton, registerButton;
