@@ -32,6 +32,19 @@ public class ClassGridAdapter extends BaseAdapter {
         this.Day.add("日");
     }
 
+    public int getRowNum(){
+        return rowNum;
+    }
+    public int getColumnNum(){
+        return columnNum;
+    }
+    public void setRowNum(int rowNum){
+        this.rowNum=rowNum;
+    }
+    public void setColumnNum(int columnNum){
+        this.columnNum=columnNum;
+    }
+
     public void customGridSize() {
         rowNum = 4;
         columnNum = 5;

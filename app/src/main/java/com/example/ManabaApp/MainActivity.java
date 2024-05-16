@@ -1,6 +1,5 @@
 package com.example.ManabaApp;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -86,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         imageButton.setOnClickListener(v -> {
                             for(ClassData classData:DataManager.unRegisteredClassDataList){
                                 // ダイアログクラスのインスタンスを作成
-                                EncourageRegistrationDialog dialog = new EncourageRegistrationDialog(context,classData.getClassName());//追加課題の画面のインスタンスを生成
+                                EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,classData);//追加課題の画面のインスタンスを生成
                                 // ダイアログを表示
                                 dialog.show();//追加課題の画面を表示
                             }
