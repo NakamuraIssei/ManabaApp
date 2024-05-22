@@ -12,7 +12,7 @@ import android.widget.EditText;
 
 public class AddTaskCustomDialog extends Dialog {
 
-    static ClassGridAdapter classGridAdapter;
+    static MainClassGridAdapter mainClassGridAdapter;
     private final TaskCustomAdapter adapter;
     private final TaskDataManager taskDataManager;
 
@@ -22,8 +22,8 @@ public class AddTaskCustomDialog extends Dialog {
         this.taskDataManager = taskDataManager;
     }
 
-    static void setGridAdapter(ClassGridAdapter classGridAdapter) {
-        AddTaskCustomDialog.classGridAdapter = classGridAdapter;
+    static void setGridAdapter(MainClassGridAdapter mainClassGridAdapter) {
+        AddTaskCustomDialog.mainClassGridAdapter = mainClassGridAdapter;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class AddTaskCustomDialog extends Dialog {
                 taskDataManager.sortAllTaskDataList();
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();
-                classGridAdapter.notifyDataSetChanged();
+                mainClassGridAdapter.notifyDataSetChanged();
                 Log.d("aaa", Thread.currentThread() + "AddTaskCustomDialog 56");
                 dismiss();  // ダイアログを閉じる
             }

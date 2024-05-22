@@ -10,8 +10,6 @@ import java.util.Locale;
 
 public class DataManager {
 
-    protected static ArrayList<ClassData> classDataList;
-    protected static ArrayList<ClassData> unRegisteredClassDataList;
     protected String dataName;//継承先クラスのコンストラクタで設定！
     protected int dataCount;
     protected SQLiteDatabase db;
@@ -21,7 +19,6 @@ public class DataManager {
     public void prepareForWork(String DataName) {//インスタンスを生成した時に使う初期化用のメゾッド
         dataName = DataName;
         dataCount = 0;
-        classDataList = new ArrayList<ClassData>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }

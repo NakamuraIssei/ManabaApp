@@ -10,15 +10,16 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class ClassGridAdapter extends BaseAdapter {
+public class MainClassGridAdapter extends BaseAdapter {
     private final Context context;
     private final ArrayList<ClassData> classDataList;  // 表示するデータに合わせて変更
     private final ArrayList<String> Day;
     private int rowNum;
     private int columnNum;
+    static String emptyClassName="次は空きコマです。";
 
     //private int columns
-    public ClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
+    public MainClassGridAdapter(Context context, ArrayList<ClassData> classDataList) {
         this.context = context;
         this.classDataList = classDataList;
         this.Day = new ArrayList<String>();
@@ -31,21 +32,7 @@ public class ClassGridAdapter extends BaseAdapter {
         this.Day.add("土");
         this.Day.add("日");
     }
-
-    public int getRowNum(){
-        return rowNum;
-    }
-    public int getColumnNum(){
-        return columnNum;
-    }
-    public void setRowNum(int rowNum){
-        this.rowNum=rowNum;
-    }
-    public void setColumnNum(int columnNum){
-        this.columnNum=columnNum;
-    }
-
-    public void customGridSize() {
+    public void optimizeGridSize() {
         rowNum = 4;
         columnNum = 5;
         for (int i = 0; i < classDataList.size(); i++) {
@@ -97,7 +84,7 @@ public class ClassGridAdapter extends BaseAdapter {
             ClassData classData = classDataList.get((row - 1) * 7 + (col - 1));
 
             // 特定の条件を満たす場合に背景色を設定
-            if (Objects.equals(classData.getClassRoom(), "")) {
+            if (Objects.equals(classData.getClassName(), emptyClassName)) {
                 convertView.setBackgroundResource(R.drawable.empty_class_grid);
             } else if(Objects.equals(classData.getClassName(), "授業が重複しています。")){
                 convertView.setBackgroundResource(R.drawable.duplication_class_grid);

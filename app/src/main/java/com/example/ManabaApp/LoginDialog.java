@@ -5,16 +5,20 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.GridView;
+import android.widget.ImageButton;
 
 import java.util.HashMap;
 import java.util.Objects;
 
 public class LoginDialog extends Dialog {
 
+    private Context context;
     public static ClassUpdateListener classUpdateListener;
     public WebView myWebView;
     public String url;
@@ -23,19 +27,22 @@ public class LoginDialog extends Dialog {
     public TaskDataManager taskDataManager;
     public ClassDataManager classDataManager;
     public TaskCustomAdapter adapter;
-    public ClassGridAdapter classGridAdapter;
+    public MainClassGridAdapter mainClassGridAdapter;
     public GridView classGridView;
+    private ImageButton imageButton;
 
-    public LoginDialog(Context context, String url, HashMap<String, String> cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, ClassGridAdapter classGridAdapter, GridView classGridView) {
+    public LoginDialog(Context context, String url, HashMap<String, String> cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, MainClassGridAdapter mainClassGridAdapter, GridView classGridView, ImageButton imageButton) {
         super(context);
+        this.context=context;
         this.url = url;
         this.cookieBag = cookieBag;
         this.cookieManager = cookieManager;
         taskDataManager = td;
         classDataManager = cd;
         this.adapter = adapter;
-        this.classGridAdapter = classGridAdapter;
+        this.mainClassGridAdapter = mainClassGridAdapter;
         this.classGridView = classGridView;
+        this.imageButton=imageButton;
         classUpdateListener = listener;
     }
 
@@ -85,12 +92,19 @@ public class LoginDialog extends Dialog {
                             taskDataManager.setTaskDataIntoUnRegisteredClassData();
 
                             classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
-                            classGridAdapter.customGridSize();
+                            mainClassGridAdapter.optimizeGridSize();
                             adapter.notifyDataSetChanged();
-                            classGridAdapter.notifyDataSetChanged();
+                            mainClassGridAdapter.notifyDataSetChanged();
                             classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
-                            if (DataManager.unRegisteredClassDataList.size() > 0)
-                                NotifyManager2.setClassRegistrationAlarm();
+                            if (ClassDataManager.unRegisteredClassDataList.size() > 0) {
+                                // 点滅アニメーションをロード
+                                Animation blinkAnimation = AnimationUtils.loadAnimation(context, R.anim.blink);
+                                // ImageButtonにアニメーションをセット
+                                imageButton.startAnimation(blinkAnimation);
+                            }else{
+                                imageButton.setVisibility(View.GONE); // ImageViewを非表示
+                            }
+
                             dismiss();
                         }
                     }

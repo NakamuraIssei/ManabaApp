@@ -30,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="@+id/classnameView"
         app:layout_constraintTop_toTopOf="@+id/classnameView" />
     <GridView
-        android:id="@+id/classTableGrid"
+        android:id="@+id/mainClassGridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:numColumns="8"
@@ -53,7 +53,7 @@
         android:textSize="26sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/classTableGrid" />
+        app:layout_constraintTop_toBottomOf="@+id/mainClassGridView" />
 
     <se.emilsjolander.stickylistheaders.StickyListHeadersListView
         android:id="@+id/sticky_list"

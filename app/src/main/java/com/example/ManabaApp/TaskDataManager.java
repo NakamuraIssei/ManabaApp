@@ -89,9 +89,9 @@ public class TaskDataManager extends DataManager {
     public void setTaskDataIntoRegisteredClassData() {
         for (TaskData taskData : allTaskDataList) {
             if (taskData.getHasSubmitted() == 0) {
-                for (int i = 0; i < classDataList.size(); i++) {
-                    if (Objects.equals(classDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
-                        classDataList.get(i).addTaskData(taskData);
+                for (int i = 0; i < ClassDataManager.classDataList.size(); i++) {
+                    if (Objects.equals(ClassDataManager.classDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
+                        ClassDataManager.classDataList.get(i).addTaskData(taskData);
                         break;
                     }
                 }
@@ -102,9 +102,9 @@ public class TaskDataManager extends DataManager {
     public void setTaskDataIntoUnRegisteredClassData() {
         for (TaskData taskData : allTaskDataList) {
             if (taskData.getHasSubmitted() == 0) {
-                for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
-                    if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
-                        unRegisteredClassDataList.get(i).addTaskData(taskData);
+                for (int i = 0; i < ClassDataManager.unRegisteredClassDataList.size(); i++) {
+                    if (Objects.equals(ClassDataManager.unRegisteredClassDataList.get(i).getClassName(), taskData.getBelongedClassName())) {
+                        ClassDataManager.unRegisteredClassDataList.get(i).addTaskData(taskData);
                         break;
                     }
                 }
@@ -364,14 +364,14 @@ public class TaskDataManager extends DataManager {
     }
 
     public Boolean isExistInClassDataList(String className) {
-        for (ClassData classData : classDataList) {
+        for (ClassData classData : ClassDataManager.classDataList) {
             if (Objects.equals(className, classData.getClassName())) return true;
         }
         return false;
     }
 
     public Boolean isExistInUnRegisteredClassDataList(String className) {
-        for (ClassData classData : unRegisteredClassDataList) {
+        for (ClassData classData : ClassDataManager.unRegisteredClassDataList) {
             if (Objects.equals(className, classData.getClassName())) return true;
         }
         return false;

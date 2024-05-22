@@ -11,5 +11,6 @@
     <color name="normal_class">#DBF6BD</color>
     <color name="hasTsk_class">#F88F6F</color>
     <color name="duplication_class">#FFFF00</color>
+    <color name="UnSelectable_class">#939292</color>
     <color name="manaba_Green">#57A200</color>
 </resources>

@@ -61,12 +61,6 @@ public class NotificationReceiver2 extends BroadcastReceiver {
                 case "BackScraping":
                     backScraping(context);
                     break;
-                case "ClassRegistration":
-                    urgeClassRegistration(context);
-                    break;
-                case "REGISTER_CLASS":
-                    classUpdateListener.showRegisterClassDialog();
-                    break;
             }
         }
 
@@ -225,54 +219,5 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         taskDataManager.sortAllTaskDataList();
         taskDataManager.makeAllTasksSubmitted();
         taskDataManager.getTaskDataFromManaba();
-    }
-
-    private void urgeClassRegistration(Context context) {
-        //通知作業
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (notificationManager == null)
-                notificationManager = context.getSystemService(NotificationManager.class);
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-
-            NotificationChannel channel                              // ・・・(2)
-                    = null;
-
-            channel = new NotificationChannel(String.valueOf(999999999), "サンプルアプリ", importance);
-
-
-            channel.setDescription("説明・説明 ここに通知の説明を書くことができます");
-
-
-            notificationManager.createNotificationChannel(channel);
-
-
-            Intent intent = new Intent(context, NotificationReceiver2.class);
-            intent.setAction("REGISTER_CLASS"); // 呼び出したいメソッドを指定するアクションをセット
-            intent.putExtra("DATANAME", "REGISTER_CLASS");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, -3, intent, PendingIntent.FLAG_MUTABLE);
-
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(context, String.valueOf(999999999))
-                    .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                    .setContentTitle("未登録授業があります。")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH)
-                    .setCategory(NotificationCompat.CATEGORY_REMINDER)
-                    .setFullScreenIntent(pendingIntent, true)
-                    .setTimeoutAfter(6000L);
-
-
-            NotificationManagerCompat notificationManager
-                    = NotificationManagerCompat.from(context);
-
-            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
-                    PowerManager.PARTIAL_WAKE_LOCK,
-                    "MyApp::MyWakelockTag"
-            );
-            wakeLock.acquire();
-            if (this.notificationManager == null)
-                Log.d("aaa", "notificationManagerがありません NotificationReceiver2");
-            this.notificationManager.notify((int) 999999999, builder.build());
-            wakeLock.release();
-        }
     }
 }

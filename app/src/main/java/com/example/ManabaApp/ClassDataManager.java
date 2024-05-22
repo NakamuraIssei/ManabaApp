@@ -14,8 +14,11 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 public class ClassDataManager extends DataManager {
+    protected static ArrayList<ClassData> classDataList;
+    protected static ArrayList<ClassData> unRegisteredClassDataList;
     static String emptyClassName="次は空きコマです。";
     ClassDataManager(String dataName) {
+        classDataList = new ArrayList<ClassData>();
         unRegisteredClassDataList = new ArrayList<ClassData>();
         prepareForWork(dataName);
     }
@@ -33,7 +36,6 @@ public class ClassDataManager extends DataManager {
             @SuppressLint("Range") int classIdChangeable = cursor.getInt(cursor.getColumnIndex("isChangeable"));
             @SuppressLint("Range") int isNotifying = cursor.getInt(cursor.getColumnIndex("isNotifying"));
             ClassData classData = new ClassData(dataId,dayAndPeriod, className, classRoom, professorName, classURL, classIdChangeable,isNotifying);
-            //this.dataCount = (dataCount + 1) % 99999999;
             classDataList.add(classData);
         }
     }
@@ -52,7 +54,7 @@ public class ClassDataManager extends DataManager {
         //指定された時限を空きコマにする
         ClassData classData = new ClassData("000000",num,emptyClassName, "", "", "", 0,1);//classIdは000000、授業時間変更不可(classIdChangeableを0)で登録。
         classDataList.add(classData);
-        replaceClassDataIntoDB(classData);//ここでデータベースの中身を書く
+        insertClassDataIntoDB(classData);//ここでデータベースの中身を書く
     }
     public ClassData getClassInfor() {
         LocalDateTime now = null;
@@ -122,7 +124,7 @@ public class ClassDataManager extends DataManager {
             classList = ManabaScraper.scrapeChangableClassDataFromManaba();
             for (String k : classList) {
                 String[] str = k.split("\\?\\?\\?");// classId,className,professorName,classURL順に切り分ける
-                unRegisteredClassDataList.add(new ClassData(str[0], -1, str[1],"",str[2], str[2],1,1));
+                unRegisteredClassDataList.add(new ClassData(str[0], -1, str[1],"",str[2], str[3],1,1));
             }
         } catch (ExecutionException e) {
             Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　154");
@@ -162,7 +164,7 @@ public class ClassDataManager extends DataManager {
         for (int i = 0; i < classDataList.size(); i++) {
             if (classDataList.get(i).getIsChangeable() == 0) {
                 ClassData newData = new ClassData("000000", classDataList.get(i).getDayAndPeriod(), emptyClassName, "", "","",0,1);
-                Log.d("aaa", classDataList.get(i).getClassName() + "は登録済み授業なので一回削除します。");
+                Log.d("aaa", classDataList.get(i).getClassName() + "は登録済み授業なので一回空きコマにします。");
                 replaceClassDataIntoDB(newData);
                 replaceClassDataIntoClassList(newData);
             }
@@ -210,24 +212,28 @@ public class ClassDataManager extends DataManager {
             }
         }
     }
+    public void updateClassDataList(ArrayList<ClassData> newClassDataList){
+        for(int i=0;i<newClassDataList.size();i++){
+            if(!Objects.equals(newClassDataList.get(i).getClassName(), classDataList.get(i).getClassName())){
+                Log.d("aaa",newClassDataList.get(i).getClassName()+"ClassDataManger updateClassDataList");
+                replaceClassDataIntoClassList(newClassDataList.get(i));
+                replaceClassDataIntoDB(newClassDataList.get(i));
+            }
+        }
+    }
     public static int getMaxColumnNum() {
         int column = 5;
         for (int i = 0; i < classDataList.size(); i++) {
             if (!Objects.equals(classDataList.get(i).getClassName(), emptyClassName)) {
-                //Log.d("aaa",classDataList.get(i).getClassName()+" "+i+"ClassDataManager getMaxColumnNUm");
                 column = Math.max(column, (i / 7) + 1);
             }
         }
-        //Log.d("aaa",column+"ClassDataManager getMaxColumnNUm");
         return column;
     }
-    public void registerUnRegisteredClass(String className, int num, String classRoom) {
+    public void registerUnRegisteredClass(String className) {
         for (int i = 0; i < unRegisteredClassDataList.size(); i++) {
             if (Objects.equals(unRegisteredClassDataList.get(i).getClassName(), className)) {
-                ClassData classData = unRegisteredClassDataList.get(i);
-                ClassData newData = new ClassData(classData.getClassId(),num,classData.getClassName(),classRoom,classData.getProfessorName(),classData.getClassURL(),1,1);
-                replaceClassDataIntoDB(newData);
-                replaceClassDataIntoClassList(newData);
+                unRegisteredClassDataList.remove(i);
             }
             break;
         }
@@ -238,6 +244,7 @@ public class ClassDataManager extends DataManager {
     public void replaceClassDataIntoDB(ClassData classData) {
         ContentValues values = new ContentValues();
         values.put("classId", classData.getClassId());
+        values.put("dayAndPeriod", classData.getDayAndPeriod());
         values.put("className", classData.getClassName());
         values.put("classRoom", classData.getClassRoom());
         values.put("professorName", classData.getProfessorName());
@@ -250,6 +257,7 @@ public class ClassDataManager extends DataManager {
         int affectedRows = db.update(dataName, values, selection, selectionArgs);
 
         if (affectedRows > 0) {
+            Log.d("aaa", String.valueOf(affectedRows));
             Log.d("aaa", dataName + "の" + classData.getDayAndPeriod() + "時間目を" + classData.getClassName() + "に更新しました。ClassDataManager 65");
         } else {
             Log.d("aaa", dataName + "の" + classData.getDayAndPeriod() + "時間目を" + classData.getClassName() + "に更新できませんでした。ClassDataManager 67");
