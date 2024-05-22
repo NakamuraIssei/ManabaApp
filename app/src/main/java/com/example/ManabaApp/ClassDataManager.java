@@ -52,7 +52,7 @@ public class ClassDataManager extends DataManager {
         //指定された時限を空きコマにする
         ClassData classData = new ClassData("000000",num,emptyClassName, "", "", "", 0,1);//classIdは000000、授業時間変更不可(classIdChangeableを0)で登録。
         classDataList.add(classData);
-        insertClassDataIntoDB(classData);//ここでデータベースの中身を書く
+        replaceClassDataIntoDB(classData);//ここでデータベースの中身を書く
     }
     public ClassData getClassInfor() {
         LocalDateTime now = null;
