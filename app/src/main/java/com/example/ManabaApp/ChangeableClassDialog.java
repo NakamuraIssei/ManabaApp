@@ -105,12 +105,12 @@ public class ChangeableClassDialog extends Dialog {
                 if (row != 0 && column != 0) {
                     String pushedClassName;
                     int pushedClassNum;
-                    ClassData classData = classDataManager.getClassDataList().get((row - 1) * 7 + column - 1);
-                    pushedClassName = classData.getClassName();
+                    ClassData pushedclassData = classDataManager.getClassDataList().get((row - 1) * 7 + column - 1);
+                    pushedClassName = pushedclassData.getClassName();
                     pushedClassNum= row*7+column;
                     Log.d("aaa","今押した授業は"+column+"時限"+row+"曜日");
-                    if(Objects.equals(pushedClassName, className)){
-                        Log.d("aaa","今押した授業は既に登録済みの授業ChangeableClassDialog");
+                    if(Objects.equals(pushedClassName, classData.getClassName())){
+                        Log.d("aaa","今押した授業は既に登録済みの授業"+pushedClassName+classData.getClassName()+"ChangeableClassDialog");
 //                        classDataManager.replaceClassDataIntoDB(pushedClassNum, "次は空きコマです。", "", "", 0);
 //                        classDataManager.replaceClassDataIntoClassList(pushedClassNum, "次は空きコマです。", "", "", "", 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
 //                        editClassGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);

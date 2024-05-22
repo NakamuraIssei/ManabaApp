@@ -40,7 +40,7 @@ public class EncourageRegistringDialog extends Dialog {
         button.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
                     @Override
                     public void onClick(View v) {//ボタンが押されたら
-                        ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(getContext(), 0, classData.getClassName(), classData.getClassRoom(), classData.getProfessorName(), classData.getClassURL());
+                        ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(getContext(), classData);
                         changeableClassDialog.show();
                     }
                 }
