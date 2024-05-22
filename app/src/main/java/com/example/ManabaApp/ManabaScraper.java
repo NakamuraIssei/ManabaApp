@@ -71,7 +71,7 @@ public class ManabaScraper {
         }
         return taskInfor;
     }
-    public static HashMap<Integer,String> scrapeRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
+    public static HashMap<Integer,String> scrapeUnChangableClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
         String message="授業が重複しています。??? ??? ??? ";
         registerdClassInfor = new HashMap<>();
         ArrayList<Character>days;
@@ -107,7 +107,7 @@ public class ManabaScraper {
                         Elements divs4 = cells.select("td:nth-child(3) > span");
                         Elements divs5 = cells.select("td:nth-child(4)");
 
-                        String className = "", classURL = "", classNum = "", classRoom="", professorName = "";
+                        String classId="",className = "", classURL = "", classNum = "", classRoom="", professorName = "";
 
                         className = Objects.requireNonNull(divs.first()).text();
                         classURL = Objects.requireNonNull(divs2.attr("href"));
@@ -117,6 +117,15 @@ public class ManabaScraper {
 
 
                         if (!className.equals("") && !classRoom.equals("") && !classRoom.equals("") && !professorName.equals("") && !classURL.equals("")) {
+                            String[] urlParts=classURL.split("_");
+                            for (String urlPart : urlParts) {
+                                // urlPart が数字のみで構成されているかをチェックする正規表現
+                                if (urlPart.matches("\\d+")) {
+                                    classId=urlPart;
+                                    break;  // classIdが見つかったらループを終了
+                                }
+                            }
+
                             classRoom=classRoom.substring(classNum.length());
                             String[] parts = classNum.split(" / ");
                             for(String dayNum:parts){
@@ -124,12 +133,12 @@ public class ManabaScraper {
                                     for(int k=0;k< days.size();k++){
                                         if(dayNum.charAt(j)== days.get(k)){
                                             if(dayNum.charAt(j+2)=='('){
-                                                int num=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+1)))-1;
-                                                if (registerdClassInfor.containsKey(num)) {
-                                                    registerdClassInfor.remove(num);
-                                                    registerdClassInfor.put(num,message);
+                                                int dayAndPeriod=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+1)))-1;
+                                                if (registerdClassInfor.containsKey(dayAndPeriod)) {
+                                                    registerdClassInfor.remove(dayAndPeriod);
+                                                    registerdClassInfor.put(dayAndPeriod,message);
                                                 }else{
-                                                    registerdClassInfor.put(num,className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                    registerdClassInfor.put(dayAndPeriod,classId+"???"+className + "???" + classRoom + "???" + professorName + "???" + classURL);
                                                 }
                                             }else{
                                                 int startNum=(7*k)+Integer.parseInt(String.valueOf(dayNum.charAt(j+1)))-1;
@@ -139,7 +148,7 @@ public class ManabaScraper {
                                                         registerdClassInfor.remove(l);
                                                         registerdClassInfor.put(l,message);
                                                     }else{
-                                                        registerdClassInfor.put(l,className + "???" + classRoom + "???" + classURL + "???" + professorName);
+                                                        registerdClassInfor.put(l,classId+"???"+className + "???" + classRoom + "???" + professorName + "???" + classURL);
                                                     }
                                                 }
                                             }
@@ -159,7 +168,7 @@ public class ManabaScraper {
         }
         return registerdClassInfor;
     }
-    public static ArrayList<String> scrapeUnRegisteredClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にない時間割(卒研とか)をスクレーピング
+    public static ArrayList<String> scrapeChangableClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にない時間割(卒研とか)をスクレーピング
         unRegisteredclassInfor = new ArrayList<>();
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
@@ -182,7 +191,7 @@ public class ManabaScraper {
                         Elements divs4 = cells.select("td:nth-child(3) > span");
                         Elements divs5 = cells.select("td:nth-child(4)");
 
-                        String className = "", classURL = "", classNum = "", classRoom="", professorName = "";
+                        String classId="",className = "", classURL = "", classNum = "", classRoom="", professorName = "";
 
                         className = Objects.requireNonNull(divs.first()).text();
                         classURL = Objects.requireNonNull(divs2.attr("href"));
@@ -192,9 +201,17 @@ public class ManabaScraper {
 
 
                         if (!className.equals("") && !classRoom.equals("") && !classRoom.equals("") && !professorName.equals("") && !classURL.equals("")) {
+                            String[] urlParts=classURL.split("_");
+                            for (String urlPart : urlParts) {
+                                // urlPart が数字のみで構成されているかをチェックする正規表現
+                                if (urlPart.matches("\\d+")) {
+                                    classId=urlPart;
+                                    break;  // classIdが見つかったらループを終了
+                                }
+                            }
                             classRoom=classRoom.substring(classNum.length());
                             if(classRoom.contains("--")){
-                                unRegisteredclassInfor.add(className+ "???" + professorName + "???" + classURL);
+                                unRegisteredclassInfor.add(classId+"???"+className+ "???" + professorName + "???" + classURL);
                             }
                         }
                     }

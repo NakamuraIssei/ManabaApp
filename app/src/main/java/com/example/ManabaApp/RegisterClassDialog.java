@@ -91,7 +91,7 @@ public class RegisterClassDialog extends Dialog {
                 classNum = Integer.parseInt(numEdit.getText().toString());
                 if (!classDay.isEmpty() && (classNum <= 7 && 0 <= classNum)) {
                     classRoom = dayEdit.getText().toString() + numEdit.getText().toString() + ":" + classRoom;
-                    classDataManager.registerUnRegisteredClass(className, (bag.get(classDay) * 7) + classNum - 1, classRoom, 1);
+                    classDataManager.registerUnRegisteredClass(className, (bag.get(classDay) * 7) + classNum - 1, classRoom);
                 }
                 classGridAdapter.customGridSize();
                 gridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);

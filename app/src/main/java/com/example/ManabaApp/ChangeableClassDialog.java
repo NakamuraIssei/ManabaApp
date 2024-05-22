@@ -18,21 +18,15 @@ public class ChangeableClassDialog extends Dialog {
     private static ClassDataManager classDataManager;
     private static GridView classGridView;
     private static ClassGridAdapter classGridAdapter;
-    private final String className;
+    private ClassData classData;
     private String classRoom;
-    private final String professorName;
-    private final String classURL;
     private String classDay; //ここまではclassNumがあれば十分やから削除
     private int classNum;
     private final HashMap<String, Integer> dayBag;
 
-    public ChangeableClassDialog(Context context, int classNum, String className, String classRoom, String professorName, String classURL) {
+    public ChangeableClassDialog(Context context, ClassData classData) {
         super(context);
-        this.classNum = classNum;
-        this.className = className;
-        this.classRoom = classRoom;
-        this.professorName = professorName;
-        this.classURL = classURL;
+        this.classData=classData;
         dayBag = new HashMap<>();
         dayBag.put("月", 0);
         dayBag.put("火", 1);
@@ -72,20 +66,20 @@ public class ChangeableClassDialog extends Dialog {
 
         nameText = findViewById(R.id.selectedClassName);
         classRoomEdit = findViewById(R.id.RoomEdit);
-        classRoomEdit.setText(classRoom.substring(3));
+        classRoomEdit.setText(classRoom);
         dayEdit = findViewById(R.id.DayEdit);
-        dayEdit.setText(String.valueOf(classRoom.charAt(0)));
+        dayEdit.setText(String.valueOf(classRoom));
         numEdit = findViewById(R.id.NumEdit);
-        numEdit.setText(String.valueOf(classRoom.charAt(1)));
+        numEdit.setText(String.valueOf(classRoom));
         professorNameText = findViewById(R.id.selectedProfessorName);
         classPageButton = findViewById(R.id.classPageButton);
         registerButton = findViewById(R.id.Register_Button);
 
-        nameText.setText(className);
+        nameText.setText(classData.getClassName());
 
-        professorNameText.setText((professorName));
+        professorNameText.setText((classData.getProfessorName()));
 
-        Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ct.ritsumei.ac.jp/ct/" + classURL));
+        Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ct.ritsumei.ac.jp/ct/" + classData.getClassURL()));
         chromeIntent.setPackage("com.android.chrome");  // Chromeのパッケージ名を指定
         classPageButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
             @SuppressLint("QueryPermissionsNeeded")
@@ -98,16 +92,16 @@ public class ChangeableClassDialog extends Dialog {
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-                classDataManager.replaceClassDataIntoDB(classNum - 1, "次は空きコマです。", "", "", 0);
-                classDataManager.replaceClassDataIntoClassList(classNum - 1, "次は空きコマです。", "", "", "", 0);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL
+                classDataManager.makeClassEmpty(classNum-1);
                 classRoom = classRoomEdit.getText().toString();
                 classDay = dayEdit.getText().toString();
                 classNum = Integer.parseInt(numEdit.getText().toString());
                 if (!classDay.isEmpty() && (classNum <= 7 && 0 <= classNum)) {
                     classRoom = dayEdit.getText().toString() + numEdit.getText().toString() + ":" + classRoom;
                     classNum = (dayBag.get(classDay) * 7) + classNum - 1;
-                    classDataManager.replaceClassDataIntoDB(classNum, className, classRoom, classURL, 1);
-                    classDataManager.replaceClassDataIntoClassList(classNum, className, classRoom, professorName, classURL, 1);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
+                    ClassData newData =new ClassData(classData.getClassId(),classNum,classData.getClassName(),classRoom,classData.getProfessorName(),classData.getClassURL(),1,1);
+                    classDataManager.replaceClassDataIntoDB(newData);
+                    classDataManager.replaceClassDataIntoClassList(newData);//str[0] 授業番号、str[1] 授業名、str[2] 教室名、str[3] 授業URL ユーザーが登録したデータなのでclassIdChangeableは1
                     classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
                     classGridAdapter.customGridSize();
                     classGridAdapter.notifyDataSetChanged();

@@ -14,16 +14,18 @@ public class MyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // テーブルを作成するクエリをここに記述します
-        String createTaskDataTableQuery = "CREATE TABLE IF NOT EXISTS ClassData ("
-                + "classId INTEGER PRIMARY KEY,"
+        String createClassDataTableQuery = "CREATE TABLE IF NOT EXISTS ClassData ("
+                + "classId TEXT,"
+                + "dayAndPeriod INTEGER PRIMARY KEY,"
                 + "className TEXT,"
                 + "classRoom TEXT,"
                 + "professorName TEXT,"
-                + "classURL Boolern,"
-                + "classIdChangeable Boolern)";
-        db.execSQL(createTaskDataTableQuery);
+                + "classURL TEXT,"
+                + "isChangeable INTEGER,"
+                + "isNotifying INTEGER)";
+        db.execSQL(createClassDataTableQuery);
 
-        String createClassDataTableQuery = "CREATE TABLE IF NOT EXISTS TaskData ("
+        String createTaskDataTableQuery = "CREATE TABLE IF NOT EXISTS TaskData ("
                 + "taskId INTEGER PRIMARY KEY,"
                 + "belongedClassName TEXT,"
                 + "taskName TEXT,"
@@ -31,7 +33,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
                 + "notificationTiming TEXT,"
                 + "taskURL TEXT,"
                 + "hasSubmitted INTEGER)";
-        db.execSQL(createClassDataTableQuery);
+        db.execSQL(createTaskDataTableQuery);
     }
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

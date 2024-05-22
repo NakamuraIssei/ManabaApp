@@ -3,72 +3,57 @@ package com.example.ManabaApp;
 import java.util.ArrayList;
 
 public class ClassData {
-    private final int classId;
+    private final String classId;//空きコマは000000
+    private int dayAndPeriod;
     private String className;
     private String classRoom;
     private String professorName;
     private String classURL;
-    private int classIdChangeable;
+    private int isChangeable;//0の時、unChangeable,1の時、changeable　空きコマは0
+    private int isNotifying;//0の時、通知しない、1の時、通知する　空きコマは1
     private final ArrayList<TaskData> taskList;
 
-    ClassData(int classId, String className, String classRoom, String professorName, String classURL, int classIdChangeable) {
+    ClassData(String classId, int dayAndPeriod, String className, String classRoom, String professorName, String classURL, int isChangeable, int isNotifying) {
         this.classId = classId;
+        this.dayAndPeriod=dayAndPeriod;
         this.className = className;
         this.classRoom = classRoom;
         this.professorName = professorName;
         this.classURL = classURL;
-        this.classIdChangeable = classIdChangeable;
+        this.isChangeable = isChangeable;
+        this.isNotifying=isNotifying;
         this.taskList = new ArrayList<TaskData>();
     }
 
-    public int getClassId() {
+    public String getClassId() {
         return this.classId;
     }
-
+    public int getDayAndPeriod() {
+        return this.dayAndPeriod;
+    }
     public String getClassName() {
         return this.className;
     }
-
-    public void setClassName(String className) {
-        this.className = className;
-    }
-
     public String getClassRoom() {
         return this.classRoom;
     }
-
-    public void setClassRoom(String classRoom) {
-        this.classRoom = classRoom;
-    }
-
     public String getProfessorName() {
         return this.professorName;
     }
-
-    public void setProfessorName(String professorName) {
-        this.professorName = professorName;
-    }
-
     public String getClassURL() {
         return this.classURL;
     }
-
-    public void setClassURL(String classURL) {
-        this.classURL = classURL;
+    public int getIsChangeable() {
+        return this.isChangeable;
+    }
+    public int getIsNotifying() {
+        return this.isNotifying;
     }
 
-    public int getClassIdChangeable() {
-        return this.classIdChangeable;
-    }
-
-    public void setClassIdChangeable(int classIdChangeable) {
-        this.classIdChangeable = classIdChangeable;
-    }
 
     public void addTaskData(TaskData taskData) {
         taskList.add(taskData);
     }
-
     public Boolean hasTask() {
         return taskList.size() > 0;
     }

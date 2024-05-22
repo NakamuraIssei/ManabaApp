@@ -1,6 +1,5 @@
 package com.example.ManabaApp;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -153,11 +152,11 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                     classURL = classData.getClassURL();
                                     Log.d("aaa", "今押した授業情報は" + className + "   " + professorName + "MainActivity 166");
                                     if (!Objects.equals(className, "次は空きコマです。")) {
-                                        if (classData.getClassIdChangeable() == 0) {
+                                        if (classData.getIsChangeable() == 0) {
                                             UnChangeableClassDialog unChangeableClassDialog = new UnChangeableClassDialog(MainActivity.this, className, classRoom, professorName, classURL);
                                             unChangeableClassDialog.show();
                                         } else {
-                                            ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(MainActivity.this, (row - 1) * 7 + column, className, classRoom, professorName, classURL);
+                                            ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(MainActivity.this, classData);
                                             changeableClassDialog.show();
                                         }
                                     }
