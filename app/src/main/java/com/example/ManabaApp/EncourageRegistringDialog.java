@@ -4,18 +4,16 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.annotation.DrawableRes;
+public class EncourageRegistringDialog extends Dialog {
+    private ClassData classData;
 
-public class EncourageRegistrationDialog extends Dialog {
-    private final String className;
-
-    public EncourageRegistrationDialog(Context context, String className) {
+    public EncourageRegistringDialog(Context context, ClassData classData) {
         super(context);
-        this.className = className;
+        this.classData=classData;
     }
 
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
@@ -36,7 +34,16 @@ public class EncourageRegistrationDialog extends Dialog {
 
         classNameText = findViewById(R.id.textView2);
 
-        classNameText.setText(className);
+        classNameText.setText(classData.getClassName());
 
+
+        button.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
+                    @Override
+                    public void onClick(View v) {//ボタンが押されたら
+                        ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(getContext(), 0, classData.getClassName(), classData.getClassRoom(), classData.getProfessorName(), classData.getClassURL());
+                        changeableClassDialog.show();
+                    }
+                }
+        );
     }
 }
