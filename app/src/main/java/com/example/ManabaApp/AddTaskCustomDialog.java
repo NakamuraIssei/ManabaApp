@@ -64,7 +64,8 @@ public class AddTaskCustomDialog extends Dialog {
                 Log.d("aaa", deadline + "AddTaskCustomDialog 52");
                 //TaskData context=new TaskData(title2.getText().toString(),1,"hoeghoge",deadline);
                 Log.d("aaa", title2.getText().toString() + "を追加します。AddTaskCustomDialog 54");
-                taskDataManager.addTaskData(title2.getText().toString(), deadline, className, taskURL);
+                //ユーザーの手入力の課題IDは一旦"00000"
+                taskDataManager.addTaskData("00000",title2.getText().toString(), deadline, className, taskURL);
                 taskDataManager.sortAllTaskDataList();
                 //TaskData.addTask(context,1);//第二引数はdbに書き込むから1。書き込まないなら0
                 adapter.notifyDataSetChanged();

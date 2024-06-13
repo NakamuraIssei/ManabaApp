@@ -29,16 +29,14 @@ public class TaskDataManager extends DataManager {
         notificationAdapterBag = new HashMap<>();
         allTaskDataList = new ArrayList<TaskData>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            //2024-01-19 13:30
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
-        //bellButtonList=new ArrayList<>();
     }
 
     public void loadTaskData() {//データベースからデータを読み込んで、allTaskDataListに入れる
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             while (cursor.moveToNext()) {
-                @SuppressLint("Range") int taskId = cursor.getInt(cursor.getColumnIndex("taskId"));
+                @SuppressLint("Range") String taskId = cursor.getString(cursor.getColumnIndex("taskId"));
                 @SuppressLint("Range") String belongedClassName = cursor.getString(cursor.getColumnIndex("belongedClassName"));
                 @SuppressLint("Range") String taskName = cursor.getString(cursor.getColumnIndex("taskName"));
                 @SuppressLint("Range") String dueDate = cursor.getString(cursor.getColumnIndex("dueDate"));
@@ -50,7 +48,6 @@ public class TaskDataManager extends DataManager {
                     //締め切りを過ぎていない、かつ、所属クラスが存在すれば、allTaskListに登録
 
                     TaskData taskData = new TaskData(taskId, belongedClassName, taskName, LocalDateTime.parse(dueDate, formatter), taskURL, hasSubmitted);
-                    dataCount = (taskId + 1) % 99999999;
                     if (!Objects.equals(notificationTiming, "")) {
                         String[] parts = notificationTiming.split("\\?"); // ? をエスケープして使用
                         for (String time : parts) {
@@ -72,7 +69,6 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
     public int getTaskGroupId(int position) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             TaskData task = allTaskDataList.get(position);
@@ -85,7 +81,6 @@ public class TaskDataManager extends DataManager {
         }
         return 3;
     }
-
     public void setTaskDataIntoRegisteredClassData() {
         for (TaskData taskData : allTaskDataList) {
             if (taskData.getHasSubmitted() == 0) {
@@ -98,7 +93,6 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
     public void setTaskDataIntoUnRegisteredClassData() {
         for (TaskData taskData : allTaskDataList) {
             if (taskData.getHasSubmitted() == 0) {
@@ -111,7 +105,6 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
     public void sortAllTaskDataList() {
         Comparator<TaskData> taskDataComparator = new Comparator<TaskData>() {
             @Override
@@ -133,16 +126,13 @@ public class TaskDataManager extends DataManager {
 
         Collections.sort(allTaskDataList, taskDataComparator);
     }
-
     public ArrayList<TaskData> getAllTaskDataList() {
         return allTaskDataList;
     }
-
     public void addAdapter(int num, NotificationCustomAdapter adapter) {
         notificationAdapterBag.put(num, adapter);
     }
-
-    public void addTaskData(String taskName, String dueDate, String belongedClassName, String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
+    public void addTaskData(String taskId,String taskName, String dueDate, String belongedClassName, String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (isExist(taskName)) {//既に持ってる場合は
                 makeTaskNotSubmitted(taskName);//未提出判定に
@@ -150,8 +140,7 @@ public class TaskDataManager extends DataManager {
                 if (LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))) {//提出期限が過ぎていなければ
                     try {
                         LocalDateTime deadLine = LocalDateTime.parse(dueDate, formatter);
-                        TaskData taskData = new TaskData(dataCount, belongedClassName, taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
-                        dataCount = (dataCount + 1) % 99999999;
+                        TaskData taskData = new TaskData(taskId, belongedClassName, taskName, deadLine, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         LocalDateTime defaultTiming = deadLine.plusHours(-1);
                         taskData.addNotificationTiming(defaultTiming);
                         requestSettingNotification(dataName, taskData.getTaskId(), taskName, dueDate, defaultTiming);
@@ -159,8 +148,7 @@ public class TaskDataManager extends DataManager {
                         insertTaskDataIntoDB(taskData);
                     } catch (DateTimeParseException e) {
                         Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
-                        TaskData taskData = new TaskData(dataCount, belongedClassName, taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
-                        dataCount = (dataCount + 1) % 99999999;
+                        TaskData taskData = new TaskData("000000", belongedClassName, taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         allTaskDataList.add(taskData);
                         insertTaskDataIntoDB(taskData);
                     }
@@ -204,7 +192,7 @@ public class TaskDataManager extends DataManager {
             for (String k : taskList) {
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
                 if (!isExist(str[0])) {//取得した課題を持っていなかったら追加する
-                    addTaskData(str[0], str[1], str[2], str[3]);//str[0]は課題名、str[1]は締め切り、str[2]は課題が出ている授業名、str[3]は課題提出URL
+                    addTaskData(str[0], str[1], str[2], str[3],str[4]);//str[0]はTAskId,str[1]は課題名、str[2]は締め切り、str[3]は課題が出ている授業名、str[4]は課題提出URL
                     Log.d("aaa", k + "追加したよー！TaskDataManager　112");
                 } else {//取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
                     for (int i = 0; i < allTaskDataList.size(); i++) {
@@ -227,7 +215,7 @@ public class TaskDataManager extends DataManager {
     public void makeAllTasksSubmitted() {//ここでDBのhasSubmittedも更新
         for (int i = 0; i < allTaskDataList.size(); i++) {
             allTaskDataList.get(i).changeSubmitted(1);
-            changeHassubmitttedIntoDB(allTaskDataList.get(i).getTaskId(),true);
+            changeHasSubmittedIntoDB(allTaskDataList.get(i).getTaskId(),true);
         }
     }
 
@@ -270,13 +258,13 @@ public class TaskDataManager extends DataManager {
         }
     }
 
-    public void changeHassubmitttedIntoDB(int taskId, Boolean flag) {
+    public void changeHasSubmittedIntoDB(String taskId, Boolean flag) {
         ContentValues values = new ContentValues();
         values.put("hasSubmitted", flag);
 
         // WHERE 句を設定（どのレコードを更新するか）
         String whereClause = "taskId=?";
-        String[] whereArgs = {String.valueOf(taskId)};
+        String[] whereArgs = {taskId};
 
         // レコードを更新
         db.update(dataName, values, whereClause, whereArgs);
@@ -319,7 +307,7 @@ public class TaskDataManager extends DataManager {
 
             // WHERE 句を設定（どのレコードを更新するか）
             String whereClause = "taskId=?";
-            String[] whereArgs = {String.valueOf(taskData.getTaskId())};
+            String[] whereArgs = {taskData.getTaskId()};
 
             // レコードを更新
             db.update(dataName, values, whereClause, whereArgs);
@@ -337,7 +325,7 @@ public class TaskDataManager extends DataManager {
         }
     }
 
-    public void requestSettingNotification(String dataName, int taskId, String taskName, String dueDate, LocalDateTime notificationTiming) {
+    public void requestSettingNotification(String dataName, String taskId, String taskName, String dueDate, LocalDateTime notificationTiming) {
         NotifyManager2.setTaskNotificationAlarm(dataName, taskId, taskName, dueDate, notificationTiming);
     }
 

@@ -38,11 +38,8 @@ public class ManabaScraper {
                 try {
                     // Jsoupで対象URLの情報を取得する
                     for (String url : taskURL) {//URLのArrayListの中身でループを回す
-                        //Log.d("Thread",Thread.currentThread().getName());
                         Document doc = Jsoup.connect(url).cookies(cookiebag).get();//jsoupでHTMLを取得する。
-                        //System.err.println(doc);
                         Elements doc2 = doc.select("#container > div.pagebody > div > table.stdlist tbody tr");//取得したHTMLから課題のテーブル部分を切り取る。
-                        //Log.d("bbb", String.valueOf(doc2));
                         for (Element row : doc2) {//切り取ったテーブルの中身でループを回す。
                             //Log.d("aaa", String.valueOf(row));
                             if (!row.text().equals("タイトル コース名 受付終了日時")) {//rowのHTMLのテキストが"タイトル コース名 受付終了日時"で無ければ
@@ -56,7 +53,8 @@ public class ManabaScraper {
                                     String deadLine = deadLineElement.text();//締め切りを文字列で取得。
                                     String belongedClassName = belongedClassElement.text();//締め切りを文字列で取得。
                                     String taskURL = taskURLElement.attr("href");
-                                    taskInfor.add(taskName + "???" + deadLine + "???" + belongedClassName + "???" + taskURL);//「課題名???締め切り」の形の文字列を作る。
+                                    String taskId = taskURL.split("_")[1]+taskURL.split("_")[3];
+                                    taskInfor.add(taskId+"???"+taskName + "???" + deadLine + "???" + belongedClassName + "???" + taskURL);//「課題名???締め切り」の形の文字列を作る。
                                 }
                             }
                         }

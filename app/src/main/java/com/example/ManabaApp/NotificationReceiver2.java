@@ -40,7 +40,7 @@ public class NotificationReceiver2 extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             String dataName = intent.getStringExtra("DATANAME");
-            int dataId = intent.getIntExtra("DATAID", 0);
+            String dataId = intent.getStringExtra("DATAID");
             int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
             String title = intent.getStringExtra("TITLE");
             String subTitle = intent.getStringExtra("SUBTITLE");
@@ -106,11 +106,10 @@ public class NotificationReceiver2 extends BroadcastReceiver {
             wakeLock.release();
         }
     }
-
-    private void taskDataWork(String title, String subTitle, int dataId) {
+    private void taskDataWork(String title, String subTitle, String dataId) {
         String[] tdColumns = {"notificationTiming"}; // 取り出したいカラム
         String tdSelection = "taskId = ?"; // WHERE句
-        String[] tdSelectionArgs = {String.valueOf(dataId)}; // WHERE句の引数
+        String[] tdSelectionArgs = {dataId}; // WHERE句の引数
         cursor = db.query("TaskData", tdColumns, tdSelection, tdSelectionArgs, null, null, null);
 
         if (cursor != null && cursor.moveToFirst()) {
@@ -139,11 +138,10 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         if (taskDataManager != null)
             taskDataManager.deleteFinishedTaskNotification(title, subTitle);
     }
-
-    private void classDataWork(Context context, int dataId) {
+    private void classDataWork(Context context, String dataId) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             // 次の授業の行を取得するクエリ
-            String selectQuery = "SELECT * FROM ClassData WHERE classId = " + (dataId + 1) % 49;
+            String selectQuery = "SELECT * FROM ClassData WHERE classId = " + (Integer.parseInt(dataId) + 1) % 49;
             cursor = db.rawQuery(selectQuery, null);
 
             // カーソルからデータを取得
@@ -187,7 +185,6 @@ public class NotificationReceiver2 extends BroadcastReceiver {
             }
         }
     }
-
     private void backScraping(Context context) {
         NotifyManager2.prepareForNotificationWork(context);
         NotifyManager2.setBackScrapingAlarm();

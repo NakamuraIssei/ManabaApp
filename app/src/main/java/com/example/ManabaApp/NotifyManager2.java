@@ -37,7 +37,7 @@ public class NotifyManager2 {
     static void setNotificationListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
-    static void setTaskNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming){
+    static void setTaskNotificationAlarm(String dataName, String dataId, String title, String subTitle, LocalDateTime notificationTiming){
         dataBag.put(new NotificationData(dataName,title,subTitle,notificationTiming),dataCount);
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
@@ -73,7 +73,7 @@ public class NotifyManager2 {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME",dataName);
-        notificationIntent.putExtra("DATAID",dataId);
+        notificationIntent.putExtra("DATAID", String.valueOf(dataId));
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
@@ -121,17 +121,17 @@ public class NotifyManager2 {
         }
         dataCount=(dataCount+1)%99999999;
     }
-    static void setClassRegistrationAlarm(){
-        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
-        notificationIntent.setAction(String.valueOf(dataCount));
-        notificationIntent.putExtra("DATANAME","ClassRegistration");
-        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
-            Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
-            long japanEpochMilli = japanInstant.toEpochMilli();
-            notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
-        }
-        dataCount=(dataCount+1)%99999999;
-    }
+//    static void setClassRegistrationAlarm(){
+//        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+//        notificationIntent.setAction(String.valueOf(dataCount));
+//        notificationIntent.putExtra("DATANAME","ClassRegistration");
+//        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
+//            Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
+//            long japanEpochMilli = japanInstant.toEpochMilli();
+//            notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
+//        }
+//        dataCount=(dataCount+1)%99999999;
+//    }
 }
