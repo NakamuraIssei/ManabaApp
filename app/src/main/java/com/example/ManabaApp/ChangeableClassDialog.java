@@ -54,6 +54,7 @@ public class ChangeableClassDialog extends Dialog {
     static void setMainClassGridView(GridView mainClassGridView) {
         ChangeableClassDialog.mainClassGridView = mainClassGridView;
     }
+
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
