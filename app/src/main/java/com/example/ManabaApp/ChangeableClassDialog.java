@@ -143,7 +143,7 @@ public class ChangeableClassDialog extends Dialog {
                     Log.d("aaa","今押した授業は"+column+"時限"+row+"曜日");
                     if(Objects.equals(pushedClassName, registerationClassData.getClassName())){
                         Log.d("aaa","今押した授業は既に登録済みの授業"+pushedClassName+ registerationClassData.getClassName()+"ChangeableClassDialog");
-                        classDataList.set(pushedClassNum,new ClassData("000000",pushedClassNum,emptyClassName, "", "", "", 0,1));
+                        classDataList.set(pushedClassNum,new ClassData(0,pushedClassNum,emptyClassName, "", "", "", 0,1));
                         customChangeableClassGridAdapter.notifyDataSetChanged();
                     }else if(Objects.equals(pushedClassName, "次は空きコマです。")){
                         Log.d("aaa","今押した授業は新たに登録しようとしている授業ChangeableClassDialog");

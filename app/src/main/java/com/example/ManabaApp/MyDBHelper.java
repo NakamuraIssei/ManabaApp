@@ -15,7 +15,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         // テーブルを作成するクエリをここに記述します
         String createClassDataTableQuery = "CREATE TABLE IF NOT EXISTS ClassData ("
-                + "classId TEXT,"
+                + "classId INTEGER,"
                 + "dayAndPeriod INTEGER PRIMARY KEY,"
                 + "className TEXT,"
                 + "classRoom TEXT,"

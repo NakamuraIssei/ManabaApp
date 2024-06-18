@@ -3,7 +3,7 @@ package com.example.ManabaApp;
 import java.util.ArrayList;
 
 public class ClassData {
-    private final String classId;//空きコマは000000
+    private final int classId;//空きコマは000000
     private int dayAndPeriod;
     private String className;
     private String classRoom;
@@ -13,7 +13,7 @@ public class ClassData {
     private int isNotifying;//0の時、通知しない、1の時、通知する　空きコマは1
     private final ArrayList<TaskData> taskList;
 
-    ClassData(String classId, int dayAndPeriod, String className, String classRoom, String professorName, String classURL, int isChangeable, int isNotifying) {
+    ClassData(int classId, int dayAndPeriod, String className, String classRoom, String professorName, String classURL, int isChangeable, int isNotifying) {
         this.classId = classId;
         this.dayAndPeriod=dayAndPeriod;
         this.className = className;
@@ -25,7 +25,7 @@ public class ClassData {
         this.taskList = new ArrayList<TaskData>();
     }
 
-    public String getClassId() {
+    public int getClassId() {
         return this.classId;
     }
     public int getDayAndPeriod() {
