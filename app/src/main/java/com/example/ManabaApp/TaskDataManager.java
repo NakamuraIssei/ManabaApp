@@ -23,7 +23,6 @@ public class TaskDataManager extends DataManager {
     private final HashMap<Integer, NotificationCustomAdapter> notificationAdapterBag;
     private final ArrayList<TaskData> allTaskDataList;
     private DateTimeFormatter formatter;
-
     TaskDataManager(String dataName) {
         prepareForWork(dataName);
         notificationAdapterBag = new HashMap<>();
@@ -32,18 +31,17 @@ public class TaskDataManager extends DataManager {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
     }
-
     public void loadTaskData() {//データベースからデータを読み込んで、allTaskDataListに入れる
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             while (cursor.moveToNext()) {
-                @SuppressLint("Range") String taskId = cursor.getString(cursor.getColumnIndex("taskId"));
+                @SuppressLint("Range") Long taskId = cursor.getLong(cursor.getColumnIndex("taskId"));
                 @SuppressLint("Range") String belongedClassName = cursor.getString(cursor.getColumnIndex("belongedClassName"));
                 @SuppressLint("Range") String taskName = cursor.getString(cursor.getColumnIndex("taskName"));
                 @SuppressLint("Range") String dueDate = cursor.getString(cursor.getColumnIndex("dueDate"));
                 @SuppressLint("Range") String notificationTiming = cursor.getString(cursor.getColumnIndex("notificationTiming"));
                 @SuppressLint("Range") String taskURL = cursor.getString(cursor.getColumnIndex("taskURL"));
                 @SuppressLint("Range") int hasSubmitted = cursor.getInt(cursor.getColumnIndex("hasSubmitted"));
-                LocalDateTime temp = LocalDateTime.parse(dueDate, formatter);
+                Log.d("taskId", String.valueOf(taskId));
                 if (LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo"))) && ((isExistInClassDataList(belongedClassName)) || isExistInUnRegisteredClassDataList(belongedClassName))) {
                     //締め切りを過ぎていない、かつ、所属クラスが存在すれば、allTaskListに登録
 
@@ -132,9 +130,9 @@ public class TaskDataManager extends DataManager {
     public void addAdapter(int num, NotificationCustomAdapter adapter) {
         notificationAdapterBag.put(num, adapter);
     }
-    public void addTaskData(String taskId,String taskName, String dueDate, String belongedClassName, String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
+    public void addTaskData(Long taskId,String taskName, String dueDate, String belongedClassName, String taskURL) {//ここではデータベース登録、allTaskDataListへの登録、classDataへの登録を行う、
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (isExist(taskName)) {//既に持ってる場合は
+            if (isExist(taskId)) {//既に持ってる場合は
                 makeTaskNotSubmitted(taskName);//未提出判定に
             } else {
                 if (LocalDateTime.parse(dueDate, formatter).isAfter(LocalDateTime.now(ZoneId.of("Asia/Tokyo")))) {//提出期限が過ぎていなければ
@@ -148,7 +146,7 @@ public class TaskDataManager extends DataManager {
                         insertTaskDataIntoDB(taskData);
                     } catch (DateTimeParseException e) {
                         Log.d("aaa", "デフォルトの通知タイミングを設定できませんでした。TaskDataManager 147");
-                        TaskData taskData = new TaskData("000000", belongedClassName, taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
+                        TaskData taskData = new TaskData(0L, belongedClassName, taskName, LocalDateTime.MAX, taskURL, 0);//スクレーピングしてきたデータだからhasSubmittedは0
                         allTaskDataList.add(taskData);
                         insertTaskDataIntoDB(taskData);
                     }
@@ -159,17 +157,15 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
-    public Boolean isExist(String name) {
+    public Boolean isExist(Long taskId) {
+        //既に持っている課題か判定
         for (TaskData taskData : allTaskDataList)
-            if (Objects.equals(taskData.getTaskName(), name)) return true;
+            if (Objects.equals(taskData.getTaskId(), taskId)) return true;
         return false;
     }
-
     public void deleteTaskNotification(int dataNum, int notificationNum) {
         deleteNotification(dataNum, notificationNum);
     }
-
     public void deleteFinishedTaskNotification(String title, String subTitle) {
         subTitle = subTitle.substring(0, 10) + " " + subTitle.substring(11);//2024-06-12T03:10のTを消す。
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -184,19 +180,18 @@ public class TaskDataManager extends DataManager {
 
         }
     }
-
     public void getTaskDataFromManaba() {//ここで課題の提出、未提出判定も行う。
         try {
             ArrayList<String> taskList;
             taskList = ManabaScraper.scrapeTaskDataFromManaba();
             for (String k : taskList) {
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                if (!isExist(str[0])) {//取得した課題を持っていなかったら追加する
-                    addTaskData(str[0], str[1], str[2], str[3],str[4]);//str[0]はTAskId,str[1]は課題名、str[2]は締め切り、str[3]は課題が出ている授業名、str[4]は課題提出URL
-                    Log.d("aaa", k + "追加したよー！TaskDataManager　112");
+                if (!isExist(Long.parseLong(str[0]))) {//取得した課題を持っていなかったら追加する
+                    addTaskData(Long.parseLong(str[0]), str[1], str[2], str[3],str[4]);//str[0]はTAskId,str[1]は課題名、str[2]は締め切り、str[3]は課題が出ている授業名、str[4]は課題提出URL
+                    Log.d("aaa", k + "追加したよー！TaskDataManager　getTaskDataFromManaba");
                 } else {//取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
                     for (int i = 0; i < allTaskDataList.size(); i++) {
-                        if (Objects.equals(allTaskDataList.get(i).getTaskName(), str[0])) {
+                        if (Objects.equals(allTaskDataList.get(i).getTaskId(), Long.parseLong(str[0]))) {
                             allTaskDataList.get(i).changeSubmitted(0);
                             break;
                         }
@@ -211,14 +206,12 @@ public class TaskDataManager extends DataManager {
             throw new RuntimeException(e);
         }
     }
-
     public void makeAllTasksSubmitted() {//ここでDBのhasSubmittedも更新
         for (int i = 0; i < allTaskDataList.size(); i++) {
             allTaskDataList.get(i).changeSubmitted(1);
             changeHasSubmittedIntoDB(allTaskDataList.get(i).getTaskId(),true);
         }
     }
-
     public void makeTaskNotSubmitted(String taskName) {
         for (int i = 0; i < allTaskDataList.size(); i++) {
             if (Objects.equals(taskName, allTaskDataList.get(i).getTaskName())) {
@@ -227,7 +220,6 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
     public void insertTaskDataIntoDB(TaskData taskData) {
         if (db == null) {
             Log.d("aaa", "db空っぽです。(TaskDataManager 239)");
@@ -257,14 +249,13 @@ public class TaskDataManager extends DataManager {
             Log.d("aaa", dataName + "に追加失敗。TaskDataManager 262");
         }
     }
-
-    public void changeHasSubmittedIntoDB(String taskId, Boolean flag) {
+    public void changeHasSubmittedIntoDB(Long taskId, Boolean flag) {
         ContentValues values = new ContentValues();
         values.put("hasSubmitted", flag);
 
         // WHERE 句を設定（どのレコードを更新するか）
         String whereClause = "taskId=?";
-        String[] whereArgs = {taskId};
+        String[] whereArgs = {String.valueOf(taskId)};
 
         // レコードを更新
         db.update(dataName, values, whereClause, whereArgs);
@@ -278,14 +269,12 @@ public class TaskDataManager extends DataManager {
             result = cursor.getString(columnIndex);
         }
     }
-
     public void addNotificationTiming(int num, LocalDateTime notificationTiming) {
         Log.d("aaa", num + "番目の課題のつうちを追加します。TaskdataManager addnotificationTioming");
         allTaskDataList.get(num).addNotificationTiming(notificationTiming);
         requestSettingNotification(dataName, allTaskDataList.get(num).getTaskId(), allTaskDataList.get(num).getTaskName(), allTaskDataList.get(num).getDueDate().toString(), notificationTiming);
         updateNotificationTimingFromDB(allTaskDataList.get(num));
     }
-
     public void updateNotificationTimingFromDB(TaskData taskData) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             StringBuilder sb = new StringBuilder();
@@ -307,7 +296,7 @@ public class TaskDataManager extends DataManager {
 
             // WHERE 句を設定（どのレコードを更新するか）
             String whereClause = "taskId=?";
-            String[] whereArgs = {taskData.getTaskId()};
+            String[] whereArgs = {String.valueOf(taskData.getTaskId())};
 
             // レコードを更新
             db.update(dataName, values, whereClause, whereArgs);
@@ -324,15 +313,12 @@ public class TaskDataManager extends DataManager {
             }
         }
     }
-
-    public void requestSettingNotification(String dataName, String taskId, String taskName, String dueDate, LocalDateTime notificationTiming) {
-        NotifyManager2.setTaskNotificationAlarm(dataName, taskId, taskName, dueDate, notificationTiming);
+    public void requestSettingNotification(String dataName, Long taskId, String taskName, String dueDate, LocalDateTime notificationTiming) {
+        NotifyManager2.setTaskNotificationAlarm(dataName, String.valueOf(taskId), taskName, dueDate, notificationTiming);
     }
-
     public void requestCancelNotification(String dataName, String taskName, LocalDateTime dueDate, LocalDateTime notificationTiming) {
         NotifyManager2.cancelTaskNotificationAlarm(dataName, taskName, dueDate.toString(), notificationTiming);
     }
-
     public int deleteFinishedNotification(String taskName, LocalDateTime subTitle) {
         //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。
         for (int i = 0; i < allTaskDataList.size(); i++) {
@@ -343,21 +329,18 @@ public class TaskDataManager extends DataManager {
         }
         return -1;
     }
-
     public void deleteNotification(int dataNum, int notificationNum) {
         //dbの更新もここで行う。
         requestCancelNotification(dataName, allTaskDataList.get(dataNum).getTaskName(), allTaskDataList.get(dataNum).getDueDate(), allTaskDataList.get(dataNum).getNotificationTiming().get(notificationNum));
         allTaskDataList.get(dataNum).deleteNotificationTiming(notificationNum);
         updateNotificationTimingFromDB(allTaskDataList.get(dataNum));
     }
-
     public Boolean isExistInClassDataList(String className) {
         for (ClassData classData : ClassDataManager.classDataList) {
             if (Objects.equals(className, classData.getClassName())) return true;
         }
         return false;
     }
-
     public Boolean isExistInUnRegisteredClassDataList(String className) {
         for (ClassData classData : ClassDataManager.unRegisteredClassDataList) {
             if (Objects.equals(className, classData.getClassName())) return true;

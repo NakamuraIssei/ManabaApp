@@ -8,12 +8,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class EncourageRegistringDialog extends Dialog {
-    private ClassData classData;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-    public EncourageRegistringDialog(Context context, ClassData classData) {
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+
+public class EncourageRegistringDialog extends Dialog {
+    private ArrayList<ClassData> unRegisteredClassDataList;
+    private Context context;
+
+    public EncourageRegistringDialog(Context context, ArrayList<ClassData> unRegisteredClassDataList) {
         super(context);
-        this.classData=classData;
+        this.unRegisteredClassDataList=unRegisteredClassDataList;
+        this.context=context;
     }
 
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
@@ -27,24 +35,13 @@ public class EncourageRegistringDialog extends Dialog {
             getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         }
 
-        TextView classNameText;
-        Button button;
+        RecyclerView unRegisteredClassRecyclerView= findViewById(R.id.unRegisteredClassRecyclerView);
 
-        button=findViewById(R.id.button);
+        // LinearLayoutManagerを設定する
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        unRegisteredClassRecyclerView.setLayoutManager(layoutManager);
+        UnRegisteredClassAdapter adapter = new UnRegisteredClassAdapter(context,unRegisteredClassDataList,this);//Listviewを表示するためのadapterを設定
+        unRegisteredClassRecyclerView.setAdapter(adapter);//listViewにadapterを設定
 
-        classNameText = findViewById(R.id.textView2);
-
-        classNameText.setText(classData.getClassName());
-
-
-        button.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
-                    @Override
-                    public void onClick(View v) {//ボタンが押されたら
-                        ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(getContext(), classData,true);
-                        changeableClassDialog.show();
-                        dismiss();
-                    }
-                }
-        );
     }
 }

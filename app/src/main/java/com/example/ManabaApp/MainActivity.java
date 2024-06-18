@@ -76,12 +76,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
                         ImageButton imageButton = findViewById(R.id.exclamationButton);
                         imageButton.setOnClickListener(v -> {
-                            for(ClassData classData:ClassDataManager.unRegisteredClassDataList){
                                 // ダイアログクラスのインスタンスを作成
-                                EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,classData);//追加課題の画面のインスタンスを生成
+                                EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,ClassDataManager.unRegisteredClassDataList);//追加課題の画面のインスタンスを生成
                                 // ダイアログを表示
                                 dialog.show();//追加課題の画面を表示
-                            }
                         });
 
                         taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定

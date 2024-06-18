@@ -26,7 +26,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
         db.execSQL(createClassDataTableQuery);
 
         String createTaskDataTableQuery = "CREATE TABLE IF NOT EXISTS TaskData ("
-                + "taskId TEXT PRIMARY KEY,"
+                + "taskId INTEGER PRIMARY KEY,"
                 + "belongedClassName TEXT,"
                 + "taskName TEXT,"
                 + "dueDate TEXT,"

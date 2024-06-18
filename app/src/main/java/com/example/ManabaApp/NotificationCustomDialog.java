@@ -73,7 +73,6 @@ public class NotificationCustomDialog extends Dialog {
                 NotificationCustomAdapter adapter = (NotificationCustomAdapter) notificationRecyclerView.getAdapter();
                 // 登録とかするんだったらなにかのリストから削除をする処理はここ
                 taskDataManager.deleteTaskNotification(position,swipedPosition);
-                //TaskData.taskData.get(position).cancelNotification(swipedPosition);
                 // 削除されたことを知らせて反映させる。
                 adapter.notifyItemRemoved(swipedPosition);
             }
@@ -87,19 +86,11 @@ public class NotificationCustomDialog extends Dialog {
                     View itemView = viewHolder.itemView;
                     //Drawable background;
                     if (dX < 0) {
-                        //background = new ColorDrawable(Color.RED); // 右にスワイプしたときの背景
                         ColorDrawable background = new ColorDrawable();
                         background .setColor(Color.parseColor("#FF0000"));
-                        //background.setBounds(itemView.getLeft() , itemView.getTop(), (int)dX, itemView.getBottom());
                         background.setBounds(itemView.getRight(), itemView.getTop(), itemView.getRight() + (int)dX, itemView.getBottom());
                         background.draw(c);
                     }
-                    //else {
-                    //background = new ColorDrawable(Color.GREEN); // 左にスワイプしたときの背景
-                    //}
-
-                    //background.setBounds(itemView.getRight() + (int) dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
-                    //background.draw(c);
                 }
             }
 
