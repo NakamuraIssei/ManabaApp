@@ -27,7 +27,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 public class MainActivity extends AppCompatActivity implements ClassUpdateListener {
 
     private HashMap<String, String> cookieBag;
-    private TextView className;
+    private TextView classNameTextView;
     private GridView classGridView;
     private StickyListHeadersListView taskRecyclerView;
     private ClassDataManager cd;
@@ -52,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         ChangeableClassDialog.setClassDataManager(cd);
 
         NotificationReceiver2.setTaskDataManager(taskDataManager);
-        NotifyManager2.setNotificationListener(this);
+        NotifyManager2.setClassUpdateListener(this);
+        NotificationReceiver2.setClassUpdateListener(this);
         NotifyManager2.setBackScrapingAlarm();
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
@@ -163,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             }
                         });
 
-                        className = findViewById(R.id.classnameView);
+                        classNameTextView = findViewById(R.id.classnameView);
 
                         if (!checkLogin()) {
                             LoginDialog dialog = new LoginDialog(context, "https://ct.ritsumei.ac.jp/ct/home_summary_report", cookieBag, cookieManager, taskDataManager, cd, adapter, (ClassUpdateListener) context, mainClassGridAdapter, classGridView,imageButton);//追加課題の画面のインスタンスを生成
@@ -176,6 +177,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             cd.eraseNotExistChangeableClass();
                             cd.eraseRegisteredChangeableClass();
                             cd.getUnChangeableClassDataFromManaba();
+                            cd.requestFirstClassNotification();
+                            cd.requestSettingAllClassNotification();
 
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
@@ -184,8 +187,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             taskDataManager.setTaskDataIntoRegisteredClassData();
                             taskDataManager.setTaskDataIntoUnRegisteredClassData();
 
-                            ClassData now = cd.getClassInfor();
-                            className.setText(now.getClassName());
+                            String className = cd.getClassInfor().getClassName();
+                            classNameTextView.setText(className);
 
                             classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
                             mainClassGridAdapter.optimizeGridSize();
@@ -210,14 +213,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     }
 
     @Override
-    public void onNotificationReceived(int dataId) {
-        dataId = (dataId + 49) % 49;
-        className.setText(ClassDataManager.classDataList.get(dataId).getClassName());
-    }
-
-    @Override
-    public void updateClassTextView(ClassData classData) {
-        className.setText(classData.getClassName());
+    public void onNotificationReceived(String className) {
+        classNameTextView.setText(className);
     }
     public boolean checkLogin() {
         String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう

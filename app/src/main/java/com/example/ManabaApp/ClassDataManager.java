@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.Calendar;
 
 public class ClassDataManager extends DataManager {
     protected static ArrayList<ClassData> classDataList;
@@ -108,15 +109,87 @@ public class ClassDataManager extends DataManager {
             if (classDataList.size() != 49)
                 return new ClassData("000000",0,"授業情報を取得できませんでした。", "", "", "", 0,1);
             if (line == 0 || line == 7) {
-                Log.d("className", "時間外アクセス　ClassDataManager");
-                NotifyManager2.setClassNotificationAlarm(dataName, 7 * row + 6, "次は空きコマです", "", now);
                 return new ClassData("000000",0,"次は空きコマです。", "", "", "", 0,1);
             } else {
-                NotifyManager2.setClassNotificationAlarm(dataName, 7 * row + line - 1, classDataList.get(7 * row + line - 1).getClassName(), classDataList.get(7 * row + line - 1).getClassRoom(), now);
                 return classDataList.get(7 * row + line - 1);
             }
         }
         return new ClassData("000000",0,"次は空きコマです。", "", "", "", 0,1);
+    }
+    public void requestSettingAllClassNotification(){
+        //通知onの授業の通知設定を行う。
+        Calendar calendar = Calendar.getInstance();
+        for(ClassData classData:classDataList) {
+            if(classData.getIsNotifying()==1) {
+                switch(classData.getDayAndPeriod()/7){
+                    case 0: // 月曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+                        break;
+                    case 1: // 火曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.TUESDAY);
+                        break;
+                    case 2: // 水曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
+                        break;
+                    case 3: // 木曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.THURSDAY);
+                        break;
+                    case 4: // 金曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+                        break;
+                    case 5: // 土曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SATURDAY);
+                        break;
+                    case 6: // 日曜日
+                        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                        break;
+                }
+                switch(classData.getDayAndPeriod()%7){
+                    case 0: // 1時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 8);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 30);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 1: // 2時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 10);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 10);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 2: // 3時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 12);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 30);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 3: // 4時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 14);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 10);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 4: // 5時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 15);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 50);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 5: // 6時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 17);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 30);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                    case 6: // 7時限目
+                        calendar.set(Calendar.HOUR_OF_DAY, 19);  // 時間を指定
+                        calendar.set(Calendar.MINUTE, 10);  // 分を指定
+                        calendar.set(Calendar.SECOND, 0);  // 秒を指定
+                        break;
+                }
+                NotifyManager2.setClassNotificationAlarm(classData.getClassName(),classData.getClassRoom(),classData.getDayAndPeriod(),calendar);
+            }
+        }
+
+    }
+    public void requestFirstClassNotification(){
+        //アプリを立ち上げたときの一番最初の次の授業を通知する作業
+        ClassData cd=getClassInfor();
+        NotifyManager2.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom());
     }
     public void getChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {

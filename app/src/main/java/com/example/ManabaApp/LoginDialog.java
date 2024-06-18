@@ -83,6 +83,8 @@ public class LoginDialog extends Dialog {
                             classDataManager.eraseNotExistChangeableClass();
                             classDataManager.eraseRegisteredChangeableClass();
                             classDataManager.getUnChangeableClassDataFromManaba();
+                            classDataManager.requestFirstClassNotification();
+                            classDataManager.requestSettingAllClassNotification();
 
                             taskDataManager.loadTaskData();
                             taskDataManager.makeAllTasksSubmitted();
@@ -95,7 +97,7 @@ public class LoginDialog extends Dialog {
                             mainClassGridAdapter.optimizeGridSize();
                             adapter.notifyDataSetChanged();
                             mainClassGridAdapter.notifyDataSetChanged();
-                            classUpdateListener.updateClassTextView(classDataManager.getClassInfor());
+                            classUpdateListener.onNotificationReceived(classDataManager.getClassInfor().getClassName());
                             if (ClassDataManager.unRegisteredClassDataList.size() > 0) {
                                 // 点滅アニメーションをロード
                                 Animation blinkAnimation = AnimationUtils.loadAnimation(context, R.anim.blink);

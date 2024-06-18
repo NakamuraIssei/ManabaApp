@@ -3,7 +3,6 @@ package com.example.ManabaApp;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -18,7 +17,6 @@ import android.webkit.CookieManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -29,7 +27,7 @@ public class NotificationReceiver2 extends BroadcastReceiver {
     public SQLiteDatabase db;
     public Cursor cursor;
 
-    static void setNotificationListener(ClassUpdateListener listener) {
+    static void setClassUpdateListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
 
@@ -40,7 +38,6 @@ public class NotificationReceiver2 extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             String dataName = intent.getStringExtra("DATANAME");
-            String dataId = intent.getStringExtra("DATAID");
             int notificationId = intent.getIntExtra("NOTIFICATIONID", 0);
             String title = intent.getStringExtra("TITLE");
             String subTitle = intent.getStringExtra("SUBTITLE");
@@ -52,11 +49,14 @@ public class NotificationReceiver2 extends BroadcastReceiver {
             switch (Objects.requireNonNull(dataName)) {
                 case "TaskData":
                     pushNotification(title, subTitle, context, notificationId);
+                    String dataId = intent.getStringExtra("DATAID");
                     taskDataWork(title, subTitle, dataId);
                     break;
                 case "ClassData":
                     pushNotification(title, subTitle, context, notificationId);
-                    classDataWork(context, dataId);
+                    if (classUpdateListener != null) {
+                        classUpdateListener.onNotificationReceived(title);
+                    }
                     break;
                 case "BackScraping":
                     backScraping(context);
@@ -137,53 +137,6 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         }
         if (taskDataManager != null)
             taskDataManager.deleteFinishedTaskNotification(title, subTitle);
-    }
-    private void classDataWork(Context context, String dataId) {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            // 次の授業の行を取得するクエリ
-            String selectQuery = "SELECT * FROM ClassData WHERE classId = " + (Integer.parseInt(dataId) + 1) % 49;
-            cursor = db.rawQuery(selectQuery, null);
-
-            // カーソルからデータを取得
-            if (cursor.moveToFirst()) {
-                @SuppressLint("Range") int classId = cursor.getInt(cursor.getColumnIndex("classId"));
-                @SuppressLint("Range") String nextClass = cursor.getString(cursor.getColumnIndex("className"));
-                @SuppressLint("Range") String nextRoom = cursor.getString(cursor.getColumnIndex("classRoom"));
-                // 今日の0時0分を取得
-                LocalDateTime nextTiming = null;
-
-                nextTiming = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-
-                switch (classId % 7) {
-                    case 0:
-                        nextTiming = nextTiming.plusDays(1).plusHours(8).plusMinutes(30);
-                        break;
-                    case 1:
-                        nextTiming = nextTiming.plusHours(10).plusMinutes(10);
-                        break;
-                    case 2:
-                        nextTiming = nextTiming.plusHours(12).plusMinutes(30);
-                        break;
-                    case 3:
-                        nextTiming = nextTiming.plusHours(14).plusMinutes(10);
-                        break;
-                    case 4:
-                        nextTiming = nextTiming.plusHours(15).plusMinutes(50);
-                        break;
-                    case 5:
-                        nextTiming = nextTiming.plusHours(17).plusMinutes(30);
-                        break;
-                    case 6:
-                        nextTiming = nextTiming.plusHours(19).plusMinutes(10);
-                        break;
-                }
-                // カーソルを閉じる
-                cursor.close();
-
-                NotifyManager2.setContext(context);
-                NotifyManager2.setClassNotificationAlarm("ClassData", classId, nextClass, nextRoom, nextTiming);
-            }
-        }
     }
     private void backScraping(Context context) {
         NotifyManager2.prepareForNotificationWork(context);

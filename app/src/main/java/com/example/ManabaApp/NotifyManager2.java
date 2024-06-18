@@ -12,11 +12,12 @@ import android.util.Log;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.HashMap;
 
 public class NotifyManager2 {
     private static int dataCount;
-    private static HashMap<NotificationData,Integer> dataBag;
+    private static HashMap<NotificationData,Integer> taskNotificationDataBag;
     private static HashMap<Integer,PendingIntent> pendingIntentBag;
     private static AlarmManager notificationAlarmManager;
     private static ClassUpdateListener classUpdateListener;
@@ -25,7 +26,7 @@ public class NotifyManager2 {
     static void prepareForNotificationWork(Context context){
         NotifyManager2.context =context;
         dataCount=1;
-        dataBag=new HashMap<NotificationData,Integer>();
+        taskNotificationDataBag =new HashMap<NotificationData,Integer>();
         pendingIntentBag=new HashMap<Integer,PendingIntent>();
         notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
@@ -34,11 +35,11 @@ public class NotifyManager2 {
         if(notificationAlarmManager==null)
             notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
-    static void setNotificationListener(ClassUpdateListener listener) {
+    static void setClassUpdateListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
     static void setTaskNotificationAlarm(String dataName, String dataId, String title, String subTitle, LocalDateTime notificationTiming){
-        dataBag.put(new NotificationData(dataName,title,subTitle,notificationTiming),dataCount);
+        taskNotificationDataBag.put(new NotificationData(dataName,title,subTitle,notificationTiming),dataCount);
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME",dataName);
@@ -58,37 +59,46 @@ public class NotifyManager2 {
     }
     static void cancelTaskNotificationAlarm(String dataName, String title, String subTitle, LocalDateTime notificationTiming) {
         NotificationData nt = new NotificationData(dataName, title, subTitle, notificationTiming);
-        Integer notificationId = dataBag.get(nt);
-        Log.d("aaa", dataBag.toString() + "キャンセルする通知番号は" + notificationId + "です。NotifyManager2 64");
+        Integer notificationId = taskNotificationDataBag.get(nt);
+        Log.d("aaa", taskNotificationDataBag.toString() + "キャンセルする通知番号は" + notificationId + "です。NotifyManager2 64");
         PendingIntent pendingIntent = pendingIntentBag.get(notificationId);
         if (pendingIntent != null) {
             notificationAlarmManager.cancel(pendingIntent); // アラームをキャンセル
         } else
             Log.d("aaa", title + "の通知設定" + notificationTiming.toString() + "をキャンセルできませんでした。NotifyManager2 71");
 
-        dataBag.remove(nt);
+        taskNotificationDataBag.remove(nt);
         pendingIntentBag.remove(notificationId);
     }
-    static void setClassNotificationAlarm(String dataName, int dataId, String title, String subTitle, LocalDateTime notificationTiming) {
+    static void setClassNotificationAlarm(String title, String subTitle, int dayAndPeriod,Calendar calendar) {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.setAction(String.valueOf(dataCount));
-        notificationIntent.putExtra("DATANAME",dataName);
-        notificationIntent.putExtra("DATAID", String.valueOf(dataId));
+        notificationIntent.putExtra("DATANAME","ClassData");
+        notificationIntent.putExtra("DAYANDPERIOD",dayAndPeriod);
+        notificationIntent.putExtra("TITLE",title);
+        notificationIntent.putExtra("SUBTITLE",subTitle);
+        notificationIntent.putExtra("NOTIFICATIONID",-1);//授業の通知番号は-1で固定
+        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY * 7, notificationPendingIntent);
+        }
+        dataCount=(dataCount+1)%99999999;
+    }
+    static void setFirstClassNotificationAlarm(String title, String subTitle) {
+        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+        notificationIntent.putExtra("DATANAME","ClassData");
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
         notificationIntent.putExtra("SUBTITLE",subTitle);
         PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
-            Instant japanInstant = notificationTiming.atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
+            Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
             long japanEpochMilli = japanInstant.toEpochMilli();
             notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
         }
-        if (classUpdateListener != null) {
-            classUpdateListener.onNotificationReceived(dataId-1);
-        }
-        dataCount=(dataCount+1)%99999999;
     }
     static void setBackScrapingAlarm(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -121,17 +131,4 @@ public class NotifyManager2 {
         }
         dataCount=(dataCount+1)%99999999;
     }
-//    static void setClassRegistrationAlarm(){
-//        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
-//        notificationIntent.setAction(String.valueOf(dataCount));
-//        notificationIntent.putExtra("DATANAME","ClassRegistration");
-//        PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            ZoneId japanZone = ZoneId.of("Asia/Tokyo");// notificationTiming を日本時間に変換
-//            Instant japanInstant = LocalDateTime.now().atZone(japanZone).toInstant();// 日本時間のエポックミリ秒を取得
-//            long japanEpochMilli = japanInstant.toEpochMilli();
-//            notificationAlarmManager.set(AlarmManager.RTC_WAKEUP, japanEpochMilli, notificationPendingIntent);
-//        }
-//        dataCount=(dataCount+1)%99999999;
-//    }
 }
