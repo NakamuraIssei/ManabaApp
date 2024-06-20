@@ -156,9 +156,13 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         LogOffButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
                             @Override
                             public void onClick(View v) {//ボタンが押されたら
-                                cookieManager.removeAllCookie();
-                                db.execSQL("DELETE FROM " + "TaskData");
-                                db.execSQL("DELETE FROM " + "ClassData");
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    cookieBag.entrySet().forEach(entry -> {
+                                    });
+                                    cookieManager.removeAllCookie();
+                                    db.execSQL("DELETE FROM " + "TaskData");
+                                    db.execSQL("DELETE FROM " + "ClassData");
+                                }
                             }
                         });
 
