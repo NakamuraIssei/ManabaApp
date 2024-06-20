@@ -23,7 +23,6 @@ public class DataManager {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
         }
     }
-
     public void setDB(SQLiteDatabase DB, Cursor Cursor) {// データベースを渡す
         db = DB;
         cursor = Cursor;

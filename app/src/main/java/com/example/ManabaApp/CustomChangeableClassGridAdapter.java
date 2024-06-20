@@ -40,22 +40,18 @@ public class CustomChangeableClassGridAdapter extends BaseAdapter {
     public void setColumnNum(int columnNum){
         this.columnNum=columnNum;
     }
-
     @Override
     public int getCount() {
         return (rowNum + 1) * (columnNum + 1); // 全体のマス数
     }
-
     @Override
     public Object getItem(int position) {
         return position;
     }
-
     @Override
     public long getItemId(int position) {
         return position;
     }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
@@ -93,7 +89,6 @@ public class CustomChangeableClassGridAdapter extends BaseAdapter {
         convertView.setTag(holder);
         return convertView;
     }
-
     private static class ViewHolder {
         public TextView dateText;
     }

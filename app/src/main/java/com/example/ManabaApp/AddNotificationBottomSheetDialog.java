@@ -29,7 +29,6 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
     private final int operationMode;//新規追加0、編集1
     private final NotificationCustomAdapter adapter;
 
-
     public AddNotificationBottomSheetDialog(@NonNull Context context, int operationMode, int taskId, NotificationCustomAdapter adapter) {
         super(context);
         this.operationMode = operationMode;
@@ -49,15 +48,12 @@ public class AddNotificationBottomSheetDialog extends BottomSheetDialog {
             }
         });
     }
-
     public static void setTaskDataManager(TaskDataManager taskDataManager) {
         AddNotificationBottomSheetDialog.taskDataManager = taskDataManager;
     }
-
     public void setEditNotificationNum(int editNotificationNum) {
         this.editNotificationNum = editNotificationNum;
     }
-
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {

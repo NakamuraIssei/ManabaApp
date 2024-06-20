@@ -44,7 +44,6 @@ public class ChangeableClassDialog extends Dialog {
         dayBag.put("土", 5);
         dayBag.put("日", 6);
     }
-
     static void setClassDataManager(ClassDataManager classDataManager) {
         ChangeableClassDialog.classDataManager = classDataManager;
     }
@@ -54,7 +53,6 @@ public class ChangeableClassDialog extends Dialog {
     static void setMainClassGridView(GridView mainClassGridView) {
         ChangeableClassDialog.mainClassGridView = mainClassGridView;
     }
-
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {

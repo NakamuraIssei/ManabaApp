@@ -40,7 +40,6 @@ public class UnRegisteredClassAdapter extends RecyclerView.Adapter<UnRegisteredC
             dialog.show();//追加課題の画面を表示
         });
     }
-
     @Override
     public int getItemCount() {
         //リサイクルビューに表示されるデータの数

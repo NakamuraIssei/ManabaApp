@@ -101,15 +101,6 @@ public class LogInManager extends AppCompatActivity {
         myWebView.loadUrl(url);//上で挙動設定したwebViewにurlを読み込ませて動かす
     }
 
-    public void clearCookies() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            cookieBag.entrySet().forEach(entry -> {
-            });
-        }
-        myWebView.clearCache(false);
-        cookieManager.removeAllCookie();
-    }
-
     void setListener(Listener listener) {
         this.listener = listener;
     }
