@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomSwitch" parent="Theme.AppCompat.Light">
+        <!--ボタンON時のボタンの通り道（透明度30%）-->
+        <item name="colorControlActivated">#000000</item>
+
+        <!--ボタンOFF時のボタンの通り道（透明度30%）-->
+        <item name="android:colorForeground">#000000</item>
+
+    </style>
+
+</resources>
+
