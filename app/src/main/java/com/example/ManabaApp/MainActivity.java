@@ -111,14 +111,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                 if (row != 0 && column != 0) {
                                     String className, classRoom, professorName, classURL;
                                     ClassData classData = cd.getClassDataList().get((row - 1) * 7 + column - 1);
-                                    className = classData.getClassName();
-                                    classRoom = classData.getClassRoom();
-                                    professorName = classData.getProfessorName();
-                                    classURL = classData.getClassURL();
-                                    Log.d("aaa", "今押した授業情報は" + className + "   " + professorName + "MainActivity 166");
-                                    if (!Objects.equals(className, "次は空きコマです。")) {
+                                    if (!Objects.equals(classData.getClassId(), 0)) {
                                         if (classData.getIsChangeable() == 0) {
-                                            UnChangeableClassDialog unChangeableClassDialog = new UnChangeableClassDialog(MainActivity.this, className, classRoom, professorName, classURL);
+                                            UnChangeableClassDialog unChangeableClassDialog = new UnChangeableClassDialog(MainActivity.this, classData);
                                             unChangeableClassDialog.show();
                                         } else {
                                             ChangeableClassDialog changeableClassDialog = new ChangeableClassDialog(MainActivity.this, classData,false);

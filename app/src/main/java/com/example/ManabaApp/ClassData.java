@@ -11,7 +11,7 @@ public class ClassData {
     private String classURL;
     private int isChangeable;//0の時、unChangeable,1の時、changeable　空きコマは0
     private int isNotifying;//0の時、通知しない、1の時、通知する　空きコマは1
-    private final ArrayList<TaskData> taskList;
+    private ArrayList<TaskData> taskList;
 
     ClassData(int classId, int dayAndPeriod, String className, String classRoom, String professorName, String classURL, int isChangeable, int isNotifying) {
         this.classId = classId;
@@ -56,5 +56,8 @@ public class ClassData {
     }
     public Boolean hasTask() {
         return taskList.size() > 0;
+    }
+    public void changeIsNotifying(int isNotifying){
+    this.isNotifying=isNotifying;
     }
 }

@@ -3,6 +3,7 @@ package com.example.ManabaApp;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.util.Log;
 
@@ -23,6 +24,9 @@ public class TaskDataManager extends DataManager {
     private final HashMap<Integer, NotificationCustomAdapter> notificationAdapterBag;
     private final ArrayList<TaskData> allTaskDataList;
     private DateTimeFormatter formatter;
+    protected static SQLiteDatabase db;
+    protected static Cursor cursor;
+    protected String dataName="TaskData";//継承先クラスのコンストラクタで設定！
     TaskDataManager(String dataName) {
         prepareForWork(dataName);
         notificationAdapterBag = new HashMap<>();
@@ -346,5 +350,9 @@ public class TaskDataManager extends DataManager {
             if (Objects.equals(className, classData.getClassName())) return true;
         }
         return false;
+    }
+    public static void setDB(SQLiteDatabase DB, Cursor Cursor) {// データベースを渡す
+        db = DB;
+        cursor = Cursor;
     }
 }

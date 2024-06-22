@@ -8,20 +8,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
-public class UnChangeableClassDialog extends Dialog {
-    private final String className;
-    private final String classRoom;
-    private final String professorName;
-    private final String classURL;
+import androidx.appcompat.widget.SwitchCompat;
 
-    public UnChangeableClassDialog(Context context, String className, String classRoom, String professorName, String classURL) {
+public class UnChangeableClassDialog extends Dialog {
+   private final ClassData classData;
+
+    public UnChangeableClassDialog(Context context,ClassData classData) {
         super(context);
-        this.className = className;
-        this.classRoom = classRoom;
-        this.professorName = professorName;
-        this.classURL = "https://ct.ritsumei.ac.jp/ct/" + classURL;
+        this.classData=classData;
     }
 
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
@@ -37,23 +34,44 @@ public class UnChangeableClassDialog extends Dialog {
 
         TextView nameText, roomText, professorNameText;
         Button classPageButton;
+        SwitchCompat notificationSwitch;
 
         nameText = findViewById(R.id.selectedClassName);
         roomText = findViewById(R.id.selectedClassRoom);
         professorNameText = findViewById(R.id.selectedProfessorName);
         classPageButton = findViewById(R.id.classPageButton);
+        notificationSwitch=findViewById(R.id.notificationSwitch);
 
-        nameText.setText(className);
-        roomText.setText(classRoom);
-        professorNameText.setText((professorName));
+        nameText.setText(classData.getClassName());
+        roomText.setText(classData.getClassRoom());
+        professorNameText.setText((classData.getProfessorName()));
+        if (classData.getIsNotifying() == 1) {
+            notificationSwitch.setChecked(true);
+        }else{
+            notificationSwitch.setChecked(false);
+        }
 
+        String classURL="https://ct.ritsumei.ac.jp/ct/" +classData.getClassURL();
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(classURL));
         chromeIntent.setPackage("com.android.chrome");  // Chromeのパッケージ名を指定
+
+
         classPageButton.setOnClickListener(new View.OnClickListener() {//ボタンが押されたら
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
                 getContext().startActivity(chromeIntent);
+            }
+        });
+
+        notificationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),1);
+                } else {
+                    ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),0);
+                }
             }
         });
     }

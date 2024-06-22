@@ -2,6 +2,8 @@ package com.example.ManabaApp;
 
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import java.io.IOException;
@@ -15,6 +17,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.Calendar;
 
 public class ClassDataManager extends DataManager {
+    protected static SQLiteDatabase db;
+    protected static Cursor cursor;
+    protected static String dataName="ClassData";//継承先クラスのコンストラクタで設定！
     protected static ArrayList<ClassData> classDataList;
     protected static ArrayList<ClassData> unRegisteredClassDataList;
     static String emptyClassName="次は空きコマです。";
@@ -355,5 +360,24 @@ public class ClassDataManager extends DataManager {
         } else {
             Log.d("aaa", dataName + "に追加失敗。ClassDataManager 166");
         }
+    }
+
+    public static void changeIsNotifying(int dayAndPeriod,int isNotifying){
+        classDataList.get(dayAndPeriod).changeIsNotifying(isNotifying);
+        ContentValues values = new ContentValues();
+        values.put("dayAndPeriod", dayAndPeriod);
+        values.put("isNotifying", isNotifying);
+        String selection = "dayAndPeriod = ?";
+        String[] selectionArgs = {String.valueOf(dayAndPeriod)};
+
+        int affectedRows = db.update(dataName, values, selection, selectionArgs);
+
+        if (affectedRows <= 0) {
+            Log.d("aaa", "isNotifyingの更新に失敗しました。");
+        }
+    }
+    public static void setDB(SQLiteDatabase DB, Cursor Cursor) {// データベースを渡す
+        db = DB;
+        cursor = Cursor;
     }
 }

@@ -185,7 +185,7 @@
             app:layout_constraintTop_toBottomOf="@+id/selectedProfessorName" />
 
         <androidx.appcompat.widget.SwitchCompat
-            android:id="@+id/chip"
+            android:id="@+id/notificationSwitch"
             android:layout_width="90dp"
             android:layout_height="45dp"
             android:layout_marginStart="10dp"
