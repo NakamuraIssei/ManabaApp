@@ -78,11 +78,10 @@ public class LoginDialog extends Dialog {
                         if (Objects.equals(cookie, " sessionid")) {//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
                             //ダイアログを閉じる
                             ManabaScraper.setCookie(cookieBag);
-                            classDataManager.eraseUnchangeableClass();
+                            classDataManager.reflectUnChangeableClassDataFromManaba();
                             classDataManager.getChangeableClassDataFromManaba();
                             classDataManager.eraseNotExistChangeableClass();
                             classDataManager.eraseRegisteredChangeableClass();
-                            classDataManager.getUnChangeableClassDataFromManaba();
                             classDataManager.requestFirstClassNotification();
                             classDataManager.requestSettingAllClassNotification();
 

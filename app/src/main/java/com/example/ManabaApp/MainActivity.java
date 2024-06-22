@@ -169,11 +169,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             dialog.show();//追加課題の画面を表示
                         } else {
                             ManabaScraper.setCookie(cookieBag);
-                            cd.eraseUnchangeableClass();
+                            cd.reflectUnChangeableClassDataFromManaba();
                             cd.getChangeableClassDataFromManaba();
                             cd.eraseNotExistChangeableClass();
                             cd.eraseRegisteredChangeableClass();
-                            cd.getUnChangeableClassDataFromManaba();
                             cd.requestFirstClassNotification();
                             cd.requestSettingAllClassNotification();
 
