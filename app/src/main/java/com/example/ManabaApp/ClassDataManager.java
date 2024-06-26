@@ -265,7 +265,7 @@ public class ClassDataManager extends DataManager {
     }
     public void eraseNotExistChangeableClass() {
         for (int i = 0; i < classDataList.size(); i++) {
-            if (!Objects.equals(classDataList.get(i).getClassName(), emptyClassName) && !isExistInUnRegisteredClassDataList(classDataList.get(i).getClassName())) {
+            if (!Objects.equals(classDataList.get(i).getClassName(), emptyClassName) && !isExistInUnRegisteredClassDataList(classDataList.get(i).getClassName())&&classDataList.get(i).getIsChangeable()==1) {
                 ClassData newData = new ClassData(0, classDataList.get(i).getDayAndPeriod(), emptyClassName, "", "","",0,1);
                 Log.d("aaa", classDataList.get(i).getClassName() + "はmanaba上にない可動授業なので一回削除します。");
                 replaceClassDataIntoDB(newData);
