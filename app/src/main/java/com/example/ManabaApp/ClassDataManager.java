@@ -194,7 +194,7 @@ public class ClassDataManager extends DataManager {
     public void requestFirstClassNotification(){
         //アプリを立ち上げたときの一番最初の次の授業を通知する作業
         ClassData cd=getClassInfor();
-        NotifyManager2.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom());
+        NotifyManager2.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom(),cd.getDayAndPeriod());
     }
     public void getChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
@@ -251,16 +251,6 @@ public class ClassDataManager extends DataManager {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-    }
-    public void eraseUnchangeableClass() {
-        for (int i = 0; i < classDataList.size(); i++) {
-            if (classDataList.get(i).getIsChangeable() == 0) {
-                ClassData newData = new ClassData(0, classDataList.get(i).getDayAndPeriod(), emptyClassName, "", "","",0,1);
-                Log.d("aaa", classDataList.get(i).getClassName() + "は登録済み授業なので一回空きコマにします。");
-                replaceClassDataIntoDB(newData);
-                replaceClassDataIntoClassList(newData);
-            }
         }
     }
     public void eraseNotExistChangeableClass() {
@@ -366,6 +356,9 @@ public class ClassDataManager extends DataManager {
         values.put("className", classData.getClassName());
         values.put("classRoom", classData.getClassRoom());
         values.put("classURL", classData.getClassURL());
+        values.put("professorName", classData.getProfessorName());
+        values.put("isChangeable", classData.getIsChangeable());
+        values.put("isNotifying", classData.getIsNotifying());
         Log.d("aaa", values + " ClassDataManager 160");
         Log.d("aaa", db + " ClassDataManager 161");
         Log.d("aaa", dataName + " ClassDataManager 162");
@@ -376,8 +369,8 @@ public class ClassDataManager extends DataManager {
             Log.d("aaa", dataName + "に追加失敗。ClassDataManager 166");
         }
     }
-
     public static void changeIsNotifying(int dayAndPeriod,int isNotifying){
+        //メモリ上のisNotifyingとDB内のisNotifyingを更新
         classDataList.get(dayAndPeriod).changeIsNotifying(isNotifying);
         ContentValues values = new ContentValues();
         values.put("dayAndPeriod", dayAndPeriod);

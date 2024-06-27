@@ -45,11 +45,7 @@ public class UnChangeableClassDialog extends Dialog {
         nameText.setText(classData.getClassName());
         roomText.setText(classData.getClassRoom());
         professorNameText.setText((classData.getProfessorName()));
-        if (classData.getIsNotifying() == 1) {
-            notificationSwitch.setChecked(true);
-        }else{
-            notificationSwitch.setChecked(false);
-        }
+        notificationSwitch.setChecked(classData.getIsNotifying() == 1);
 
         String classURL="https://ct.ritsumei.ac.jp/ct/" +classData.getClassURL();
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(classURL));
@@ -67,11 +63,8 @@ public class UnChangeableClassDialog extends Dialog {
         notificationSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),1);
-                } else {
-                    ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),0);
-                }
+                if (isChecked)ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),1);
+                else ClassDataManager.changeIsNotifying(classData.getDayAndPeriod(),0);
             }
         });
     }

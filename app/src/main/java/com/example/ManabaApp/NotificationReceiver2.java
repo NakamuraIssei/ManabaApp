@@ -53,6 +53,8 @@ public class NotificationReceiver2 extends BroadcastReceiver {
                     taskDataWork(title, subTitle, dataId);
                     break;
                 case "ClassData":
+                    int dayAndPeriod=intent.getIntExtra("DAYANDPERIOD",0);
+                    if(checkNotify(dayAndPeriod))
                     pushNotification(title, subTitle, context, notificationId);
                     if (classUpdateListener != null) {
                         classUpdateListener.onNotificationReceived(title);
@@ -170,4 +172,25 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         taskDataManager.makeAllTasksSubmitted();
         taskDataManager.getTaskDataFromManaba();
     }
+    private Boolean checkNotify(int dayAndPeriod) {
+        // DB内のdayAndPeriodの授業の通知設定(isNotifyingを確認)
+        String[] tdColumns = {"isNotifying"}; // 取り出したいカラム
+        String tdSelection = "dayAndPeriod = ?"; // WHERE句
+        String[] tdSelectionArgs = {String.valueOf(dayAndPeriod)}; // WHERE句の引数
+        cursor = db.query("ClassData", tdColumns, tdSelection, tdSelectionArgs, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            @SuppressLint("Range") int isNotifying = cursor.getInt(cursor.getColumnIndex("isNotifying"));
+            cursor.close();
+            Log.d("notify","うまく取り出せました"+dayAndPeriod+"時間目"+isNotifying);
+            return isNotifying == 1;
+        } else {
+            if (cursor != null) {
+                cursor.close();
+            }
+            Log.d("notify","あかんかったわ");
+            return false;
+        }
+    }
+
 }

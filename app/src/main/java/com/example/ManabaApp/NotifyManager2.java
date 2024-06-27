@@ -86,11 +86,12 @@ public class NotifyManager2 {
         }
         dataCount=(dataCount+1)%99999999;
     }
-    static void setFirstClassNotificationAlarm(String title, String subTitle) {
+    static void setFirstClassNotificationAlarm(String title, String subTitle,int dayAndPeriod) {
         Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
         notificationIntent.putExtra("DATANAME","ClassData");
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
+        notificationIntent.putExtra("DAYANDPERIOD",dayAndPeriod);
         notificationIntent.putExtra("SUBTITLE",subTitle);
         PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
