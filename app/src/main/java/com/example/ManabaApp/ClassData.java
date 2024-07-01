@@ -50,7 +50,12 @@ public class ClassData {
         return this.isNotifying;
     }
 
-
+    public void setClassRoom(String classRoom){
+        this.classRoom=classRoom;
+    }
+    public void setIsNotifying(int isNotifying){
+        this.isNotifying=isNotifying;
+    }
     public void addTaskData(TaskData taskData) {
         taskList.add(taskData);
     }
@@ -58,6 +63,6 @@ public class ClassData {
         return taskList.size() > 0;
     }
     public void changeIsNotifying(int isNotifying){
-    this.isNotifying=isNotifying;
+        this.isNotifying=isNotifying;
     }
 }

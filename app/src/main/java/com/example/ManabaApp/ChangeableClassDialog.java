@@ -14,9 +14,16 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
+
+import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 
 public class ChangeableClassDialog extends Dialog {
     private Context context;
@@ -28,6 +35,8 @@ public class ChangeableClassDialog extends Dialog {
     private String emptyClassName="次は空きコマです。";
     private static MainClassGridAdapter mainClassGridAdapter;
     private static GridView mainClassGridView;
+
+    private ArrayList<ClassData>selectedClass;
 
     public ChangeableClassDialog(Context context, ClassData registerationClassData,Boolean isFirst) {
         super(context);
@@ -43,6 +52,12 @@ public class ChangeableClassDialog extends Dialog {
         dayBag.put("金", 4);
         dayBag.put("土", 5);
         dayBag.put("日", 6);
+        selectedClass=new ArrayList<ClassData>();
+        for(ClassData cd: this.classDataList){
+            if(cd.getClassId()==registerationClassData.getClassId()){
+                selectedClass.add(cd);
+            }
+        }
     }
     static void setClassDataManager(ClassDataManager classDataManager) {
         ChangeableClassDialog.classDataManager = classDataManager;
@@ -52,6 +67,14 @@ public class ChangeableClassDialog extends Dialog {
     }
     static void setMainClassGridView(GridView mainClassGridView) {
         ChangeableClassDialog.mainClassGridView = mainClassGridView;
+    }
+    public void sortSelectedClass(){
+        Collections.sort(selectedClass, new Comparator<ClassData>() {
+            @Override
+            public int compare(ClassData classData1, ClassData classData2) {
+                return Integer.compare(classData1.getDayAndPeriod(), classData2.getDayAndPeriod());
+            }
+        });
     }
     @SuppressLint({"MissingInflatedId", "WrongViewCast"})
     @Override
@@ -64,14 +87,15 @@ public class ChangeableClassDialog extends Dialog {
             getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         }
 
-        TextView nameText, roomText, professorNameText,classCommentView;
+        TextView nameText,professorNameText,classCommentView;
+        RecyclerView roomListView;
         Button classPageButton,cancelButton,saveButton;
         ImageButton timeTableButton;
         CustomChangeableClassGridAdapter customChangeableClassGridAdapter;
         GridView customChangeableClassGridView;
 
         nameText = findViewById(R.id.selectedClassName);
-        roomText = findViewById(R.id.selectedClassRoom);
+        roomListView = findViewById(R.id.selectedClassRoomList);
         professorNameText = findViewById(R.id.selectedProfessorName);
         classCommentView=findViewById(R.id.classCommentView);
         classPageButton = findViewById(R.id.classPageButton);
@@ -79,10 +103,18 @@ public class ChangeableClassDialog extends Dialog {
         saveButton=findViewById(R.id.saveButton);
         customChangeableClassGridView=findViewById(R.id.mainClassGridView);
         timeTableButton=findViewById(R.id.imageView3);
+
         customChangeableClassGridAdapter=new CustomChangeableClassGridAdapter(context,classDataList,registerationClassData);
 
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        roomListView.setLayoutManager(layoutManager);
+
+        ChangeableClassRoomListAdapter selectedClassAdapter = new ChangeableClassRoomListAdapter(selectedClass);//Listviewを表示するためのadapterを設定
+        roomListView.setAdapter(selectedClassAdapter);//listViewにadapterを設定
+
         nameText.setText(registerationClassData.getClassName());
-        roomText.setText(registerationClassData.getClassRoom());
+
         professorNameText.setText((registerationClassData.getProfessorName()));
 
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ct.ritsumei.ac.jp/ct/"+registerationClassData.getClassURL()));
@@ -114,7 +146,7 @@ public class ChangeableClassDialog extends Dialog {
             @Override
             public void onClick(View v) {//ボタンが押されたら
                 for(int i=0;i<classDataList.size();i++){
-                    Log.d("aaa","newClassDataListの"+i+"番目dayAndPeriodは"+classDataList.get(i).getDayAndPeriod()+"ChangeableClassDialog108");
+                    Log.d("aaa","newClassDataListの"+i+"番目dayAndPeriodは"+classDataList.get(i).getClassRoom()+"ChangeableClassDialog108");
                 }
                 classDataManager.updateClassDataList(classDataList);
                 classDataManager.registerUnRegisteredClass(registerationClassData.getClassName());
@@ -125,6 +157,7 @@ public class ChangeableClassDialog extends Dialog {
             }
         });
         customChangeableClassGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // タップされたセルのPositionをログに表示
@@ -134,19 +167,22 @@ public class ChangeableClassDialog extends Dialog {
                 row = position % (7 + 1);
                 column = position / (7 + 1);
                 if (row != 0 && column != 0) {
-                    String pushedClassName;
+                    int pushedClassId;
                     int pushedClassNum=(row - 1) * 7 + column - 1;
                     ClassData pushedclassData = classDataList.get(pushedClassNum);
-                    pushedClassName = pushedclassData.getClassName();
+                    pushedClassId = pushedclassData.getClassId();
                     Log.d("aaa","今押した授業は"+column+"時限"+row+"曜日");
-                    if(Objects.equals(pushedClassName, registerationClassData.getClassName())){
-                        Log.d("aaa","今押した授業は既に登録済みの授業"+pushedClassName+ registerationClassData.getClassName()+"ChangeableClassDialog");
+                    if(Objects.equals(pushedClassId, registerationClassData.getClassId())){
+                        selectedClass.remove(classDataList.get(pushedClassNum));
                         classDataList.set(pushedClassNum,new ClassData(0,pushedClassNum,emptyClassName, "", "", "", 0,1));
                         customChangeableClassGridAdapter.notifyDataSetChanged();
-                    }else if(Objects.equals(pushedClassName, "次は空きコマです。")){
-                        Log.d("aaa","今押した授業は新たに登録しようとしている授業ChangeableClassDialog");
-                        classDataList.set(pushedClassNum,new ClassData(registerationClassData.getClassId(), pushedClassNum, registerationClassData.getClassName(), registerationClassData.getClassRoom(), registerationClassData.getProfessorName(), registerationClassData.getClassURL(), registerationClassData.getIsChangeable(), registerationClassData.getIsNotifying()));
+                        selectedClassAdapter.notifyDataSetChanged();
+                    }else if(Objects.equals(pushedClassId, 0)){
+                        classDataList.set(pushedClassNum,new ClassData(registerationClassData.getClassId(), pushedClassNum, registerationClassData.getClassName(), "", registerationClassData.getProfessorName(), registerationClassData.getClassURL(), registerationClassData.getIsChangeable(), 1));
+                        selectedClass.add(classDataList.get(pushedClassNum));
+                        sortSelectedClass();
                         customChangeableClassGridAdapter.notifyDataSetChanged();
+                        selectedClassAdapter.notifyDataSetChanged();
                     }else{
                         Log.d("aaa","今押した授業は変更不可授業ChangeableClassDialog");
                     }
@@ -159,7 +195,7 @@ public class ChangeableClassDialog extends Dialog {
             @SuppressLint("QueryPermissionsNeeded")
             @Override
             public void onClick(View v) {//ボタンが押されたら
-Log.d("aaa",registerationClassData.getClassURL());
+                Log.d("aaa",registerationClassData.getClassURL());
                 getContext().startActivity(chromeIntent);
             }
         });

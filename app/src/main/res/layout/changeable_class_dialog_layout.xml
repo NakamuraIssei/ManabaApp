@@ -136,21 +136,18 @@
             android:layout_height="wrap_content"
             android:numColumns="8"
             app:layout_constraintTop_toBottomOf="@+id/classCommentView"
-            app:layout_constraintBottom_toTopOf="@+id/selectedClassRoom"
+            app:layout_constraintBottom_toTopOf="@+id/selectedClassRoomList"
             app:layout_constraintStart_toStartOf="parent"
-           />
-        <TextView
-            android:id="@+id/selectedClassRoom"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/selectedClassRoomList"
+            android:layout_width="345dp"
+            android:layout_height="100dp"
             android:layout_marginTop="15dp"
-            android:text="@string/textview"
-            android:textColor="#000000"
-            android:textSize="25sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/mainClassGridView" />
-
 
         <View
             android:id="@+id/view"
@@ -162,16 +159,6 @@
             app:layout_constraintTop_toBottomOf="@+id/selectedProfessorName"
             tools:ignore="MissingConstraints" />
 
-        <View
-            android:id="@+id/view4"
-            android:layout_width="345dp"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/selectedClassRoom"
-            tools:ignore="MissingConstraints" />
-
         <ImageView
             android:id="@+id/ProfessorNameImageView"
             android:layout_width="35dp"
@@ -180,7 +167,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginTop="20dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/selectedClassRoom"
+            app:layout_constraintTop_toBottomOf="@+id/selectedClassRoomList"
             app:srcCompat="@drawable/professor_name_icon" />
 
         <TextView
@@ -193,7 +180,7 @@
             android:textColor="#000000"
             android:textSize="20sp"
             app:layout_constraintStart_toEndOf="@+id/ProfessorNameImageView"
-            app:layout_constraintTop_toBottomOf="@+id/selectedClassRoom" />
+            app:layout_constraintTop_toBottomOf="@+id/selectedClassRoomList" />
 
         <TextView
             android:id="@+id/selectedProfessorName"

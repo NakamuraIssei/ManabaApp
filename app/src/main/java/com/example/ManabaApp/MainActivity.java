@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     private HashMap<String, String> cookieBag;
     private TextView classNameTextView;
     private GridView classGridView;
-    private StickyListHeadersListView taskRecyclerView;
+    private StickyListHeadersListView taskListView;
     private ClassDataManager cd;
     private CookieManager cookieManager;
     private Context context;
@@ -76,18 +76,18 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
                         ImageButton imageButton = findViewById(R.id.exclamationButton);
                         imageButton.setOnClickListener(v -> {
-                                // ダイアログクラスのインスタンスを作成
-                                EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,ClassDataManager.unRegisteredClassDataList);//追加課題の画面のインスタンスを生成
-                                // ダイアログを表示
-                                dialog.show();//追加課題の画面を表示
+                            // ダイアログクラスのインスタンスを作成
+                            EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,ClassDataManager.unRegisteredClassDataList);//追加課題の画面のインスタンスを生成
+                            // ダイアログを表示
+                            dialog.show();//追加課題の画面を表示
                         });
 
-                        taskRecyclerView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
+                        taskListView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
 
                         //課題の情報をtaskDataから取得
                         TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
-                        taskRecyclerView.setAdapter(adapter);//listViewにadapterを設定
-                        
+                        taskListView.setAdapter(adapter);//listViewにadapterを設定
+
                         classGridView = findViewById(R.id.mainClassGridView);
                         ChangeableClassDialog.setMainClassGridView(classGridView);
                         classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
