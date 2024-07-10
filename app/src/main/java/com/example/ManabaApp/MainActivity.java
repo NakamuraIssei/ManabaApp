@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -163,6 +165,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
 
                         classNameTextView = findViewById(R.id.classnameView);
 
+                        //if (checkLogin())Log.d("start","loginがあかんわ");
                         if (!checkLogin()) {
                             LoginDialog dialog = new LoginDialog(context, "https://ct.ritsumei.ac.jp/ct/home_summary_report", cookieBag, cookieManager, taskDataManager, cd, adapter, (ClassUpdateListener) context, mainClassGridAdapter, classGridView,imageButton);//追加課題の画面のインスタンスを生成
                             // ダイアログを表示
@@ -213,24 +216,57 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         classNameTextView.setText(className);
     }
     public boolean checkLogin() {
-        String cookies = cookieManager.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");//クッキーマネージャに指定したurl(引数として受け取ったやつ)のページから一回クッキーを取ってきてもらう
-        if (cookies != null) {//取ってきたクッキーが空でなければ
-            cookieBag.clear();//クッキーバッグになんか残ってたら嫌やから空っぽにしておく
-            String[] cookieList = cookies.split(";");//1つの長い文字列として受け取ったクッキーを;で切り分ける
-            for (String cookie : cookieList) {//cookieListの中身でループを回す
-                String[] str = cookie.split("=");//切り分けたクッキーをさらに=で切り分ける
-                cookieBag.put(str[0], str[1]);//切り分けたクッキーをcookiebagに詰める
-            }
-            for (String cookie : cookieBag.keySet()) {
-                Log.d("aaa",cookie+"="+cookieBag.get(cookie)+" Main checkLogin");
-            }
-            for (String cookie : cookieBag.keySet()) {
-                //if(flag)break;
-                if (Objects.equals(cookie, " sessionid")) {//;で切り分けたクッキーが4種類以上なら（ログインできてたら）
+        try {
+            // クッキーを取得するための初期リクエスト
+            HttpURLConnection conn = (HttpURLConnection) new URL("https://ct.ritsumei.ac.jp/ct/home_summary_report").openConnection();
+            conn.setInstanceFollowRedirects(false); // リダイレクトを自動で追わないように設定
+
+            // クッキーを取得
+            String cookies = conn.getHeaderField("Set-Cookie");
+            if (cookies != null) {
+                cookieBag.clear();
+                String[] cookieList = cookies.split(";");
+                for (String cookie : cookieList) {
+                    String[] str = cookie.split("=");
+                    cookieBag.put(str[0].trim(), str[1].trim());
+                }
+
+                // ログインチェック
+                if (cookieBag.containsKey("sessionid")) {
                     return true;
                 }
+
+                // リダイレクトチェック
+                int status = conn.getResponseCode();
+                if (status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_MOVED_PERM) {
+                    String newUrl = conn.getHeaderField("Location");
+
+                    // リダイレクト先へ再リクエスト
+                    conn = (HttpURLConnection) new URL(newUrl).openConnection();
+                    conn.setInstanceFollowRedirects(false);
+
+                    // 保存したクッキーを再利用
+                    conn.setRequestProperty("Cookie", cookies);
+
+                    // 再リクエストのレスポンスを処理
+                    cookies = conn.getHeaderField("Set-Cookie");
+                    if (cookies != null) {
+                        cookieBag.clear();
+                        cookieList = cookies.split(";");
+                        for (String cookie : cookieList) {
+                            String[] str = cookie.split("=");
+                            cookieBag.put(str[0].trim(), str[1].trim());
+                        }
+
+                        // ログインチェック
+                        if (cookieBag.containsKey("sessionid")) {
+                            return true;
+                        }
+                    }
+                }
             }
-            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }

@@ -297,11 +297,9 @@ public class ClassDataManager extends DataManager {
     }
     public void updateClassDataList(ArrayList<ClassData> newClassDataList){
         for(int i=0;i<newClassDataList.size();i++){
-            if(!Objects.equals(newClassDataList.get(i).getClassName(), classDataList.get(i).getClassName())){
                 Log.d("aaa",newClassDataList.get(i).getClassName()+"ClassDataManger updateClassDataList");
                 replaceClassDataIntoClassList(newClassDataList.get(i));
                 replaceClassDataIntoDB(newClassDataList.get(i));
-            }
         }
     }
     public static int getMaxColumnNum() {

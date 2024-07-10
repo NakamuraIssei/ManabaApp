@@ -38,7 +38,6 @@ public class ChangeableClassRoomListAdapter extends RecyclerView.Adapter<Changea
             dayAndPeriod += String.valueOf((changeableClassList.get(position).getDayAndPeriod() % 7) + 1) + ":";
             holder.dayAndPeriodText.setText(dayAndPeriod);
             holder.classroomText.setText(changeableClassList.get(position).getClassRoom());
-            holder.notificationSwitch.setChecked(changeableClassList.get(position).getIsNotifying() == 1);
 
             // Temporarily disable the listener
             holder.notificationSwitch.setOnCheckedChangeListener(null);
