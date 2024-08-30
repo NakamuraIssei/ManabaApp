@@ -33,7 +33,6 @@ public class CustomChangeableClassGridAdapter extends BaseAdapter {
         this.Day.add("土");
         this.Day.add("日");
     }
-
     public void setRowNum(int rowNum){
         this.rowNum=rowNum;
     }

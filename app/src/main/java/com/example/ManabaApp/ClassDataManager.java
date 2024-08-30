@@ -222,7 +222,6 @@ public class ClassDataManager extends DataManager {
             throw new RuntimeException(e);
         }
     }
-
     public void reflectUnChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
             HashMap<Integer, String> classList;
