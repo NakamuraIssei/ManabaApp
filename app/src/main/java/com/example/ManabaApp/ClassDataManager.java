@@ -196,13 +196,20 @@ public class ClassDataManager extends DataManager {
         ClassData cd=getClassInfor();
         NotifyManager2.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom(),cd.getDayAndPeriod());
     }
-    public void getChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
+    public void getChangeableClassDataFromManaba() {
         try {
             ArrayList<String> classList;
             classList = ManabaScraper.scrapeChangableClassDataFromManaba();
             for (String k : classList) {
                 String[] str = k.split("\\?\\?\\?");// classId,className,professorName,classURL順に切り分ける
-                unRegisteredClassDataList.add(new ClassData(Integer.parseInt(str[0]), -1, str[1],"",str[2], str[3],1,1));
+
+                // str[1]の先頭の文字を削除
+                if (str[1].length() > 6) {
+                    str[1] = str[1].substring(6);
+                }
+
+                unRegisteredClassDataList.add(new ClassData(
+                        Integer.parseInt(str[0]), -1, str[1], "", str[2], str[3], 1, 1));
             }
         } catch (ExecutionException e) {
             Log.d("aaa", "授業スクレーピングみすった！　ClassDataManager　154");
@@ -215,6 +222,7 @@ public class ClassDataManager extends DataManager {
             throw new RuntimeException(e);
         }
     }
+
     public void reflectUnChangeableClassDataFromManaba() {//ここで時間割表、その他の曜日欄の授業情報処理
         try {
             HashMap<Integer, String> classList;
@@ -229,6 +237,14 @@ public class ClassDataManager extends DataManager {
                 int dayAndPeriod = entry.getKey(); // エントリのキー（授業番号）を取得
                 String value = entry.getValue(); // エントリの値（文字列データ）を取得
                 String[] str = value.split("\\?\\?\\?"); // 値を分割
+                // 授業名の先頭の授業コードを削除
+                if (str[1].length() > 6) {
+                    str[1] = str[1].substring(6);
+                }
+                if (str[1].length() > 6) {
+                    str[1] = str[1].substring(0, 6);
+                    str[1]+="...";
+                }
                 ClassData newData=new ClassData(Integer.parseInt(str[0]),dayAndPeriod,str[1], str[2], str[3],str[4],0,1);
                 newClassList.set(newData.getDayAndPeriod(),newData);
             }

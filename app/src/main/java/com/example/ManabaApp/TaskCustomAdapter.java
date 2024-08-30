@@ -119,15 +119,11 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
             }
         }else holder.remainingTimeText.setText("");
 
-        //if(!taskDataManager.getAllTaskDataList().get(position).getNotificationTiming().isEmpty())holder.pushButton.setImageResource(R.drawable.bell_round);
-
-        holder.pushButton.setOnClickListener(v -> {
-            Log.d("aaa","ベルボタン押せてるよー！TaskCustomAdapter 65");
-            // ダイアログクラスのインスタンスを作成
-            NotificationCustomDialog dialog = new NotificationCustomDialog(context,position,taskDataManager);//追加課題の画面のインスタンスを生成
-            // ダイアログを表示
-            dialog.show();//追加課題の画面を表示
-
+        // convertViewのクリックリスナーを設定
+        convertView.setOnClickListener(v -> {
+            Log.d("aaa", "アイテム全体が押せてるよー！TaskCustomAdapter 65");
+            NotificationCustomDialog dialog = new NotificationCustomDialog(context, position, taskDataManager);
+            dialog.show();
         });
 
         if(taskDataManager.getTaskGroupId(position)==0)convertView.setBackgroundColor(ContextCompat.getColor(context, androidx.cardview.R.color.cardview_dark_background));

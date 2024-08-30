@@ -191,6 +191,10 @@ public class TaskDataManager extends DataManager {
             for (String k : taskList) {
                 String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
                 if (!isExist(Long.parseLong(str[0]))) {//取得した課題を持っていなかったら追加する
+                    if(str[1].length()>15){str[1] = str[1].substring(0, 15);
+                    str[1]+="...";
+                    }
+                    str[1]+=" ";
                     addTaskData(Long.parseLong(str[0]), str[1], str[2], str[3],str[4]);//str[0]はTAskId,str[1]は課題名、str[2]は締め切り、str[3]は課題が出ている授業名、str[4]は課題提出URL
                     Log.d("aaa", k + "追加したよー！TaskDataManager　getTaskDataFromManaba");
                 } else {//取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
