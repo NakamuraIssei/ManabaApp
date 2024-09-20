@@ -50,14 +50,12 @@ public class NotificationCustomDialog extends Dialog {
 
         Button taskPageButton = findViewById(R.id.taskPageButton);
         Button cancelButton = findViewById(R.id.cancelButton);
-        Button editButton = findViewById(R.id.editButton);
+        Button deleteAllButton = findViewById(R.id.deleteAllButton);
         ImageButton addNotifyButton = findViewById(R.id.addNotifyButton);
-        ImageButton trashBoxButton = findViewById(R.id.trashBoxButtonButton);
         TextView selectedTaskNameText = findViewById(R.id.selectedTaskNameText);
         selectedTaskNameText.setText(taskDataManager.getAllTaskDataList().get(position).getTaskName());
 
         cancelButton.setVisibility(View.GONE);
-        trashBoxButton.setVisibility(View.GONE);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(context);
         notificationRecyclerView.setLayoutManager(layoutManager);
@@ -66,6 +64,48 @@ public class NotificationCustomDialog extends Dialog {
 
         NotificationCustomAdapter adapter = new NotificationCustomAdapter(context, notificationList, position);
         notificationRecyclerView.setAdapter(adapter);
+        GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public void onLongPress(MotionEvent e) {
+                // RecyclerView内のすべてのアイテムに対して処理を行う
+                for (int i = 0; i < notificationRecyclerView.getChildCount(); i++) {
+                    View childView = notificationRecyclerView.getChildAt(i);
+                    if (childView != null) {
+                        CheckBox checkBox = childView.findViewById(R.id.itemCheckBox);
+                        if (checkBox != null) {
+                            checkBox.setChecked(false);
+                            checkBox.setVisibility(View.VISIBLE); // チェックボックスを表示する
+                        }
+                    }
+                }
+
+                // ボタンの表示切り替え
+                addNotifyButton.setVisibility(View.GONE);
+                deleteAllButton.setVisibility(View.VISIBLE);
+                cancelButton.setVisibility(View.VISIBLE);
+
+                Log.d("LongPress", "All items' checkboxes made visible.");
+            }
+        });
+
+        // RecyclerViewにOnItemTouchListenerを設定
+        notificationRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                gestureDetector.onTouchEvent(e);  // GestureDetectorでタッチイベントを処理
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                // 必要に応じて追加のタッチ処理をここに書けます
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+                // タッチイベントのインターセプトを他の処理に委譲する場合に対応
+            }
+        });
         taskDataManager.addAdapter(position, adapter);
 
         Intent chromeIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://ct.ritsumei.ac.jp/ct/" + taskDataManager.getAllTaskDataList().get(position).getTaskURL()));
@@ -73,7 +113,6 @@ public class NotificationCustomDialog extends Dialog {
 
         // Load the trash icon drawable
         Drawable trashIcon = ContextCompat.getDrawable(context, R.drawable.ic_delete); // Ensure the correct drawable resource
-
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
@@ -124,21 +163,31 @@ public class NotificationCustomDialog extends Dialog {
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(notificationRecyclerView);
 
-        editButton.setOnClickListener(new View.OnClickListener() {
+
+        deleteAllButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // RecyclerView内のすべてのアイテムを元に戻す
+                ArrayList<Integer>deleteNum=new ArrayList<>();
                 for (int i = 0; i < notificationRecyclerView.getChildCount(); i++) {
                     View childView = notificationRecyclerView.getChildAt(i);
+                    childView.setTranslationX(0);  // アイテムを元の位置に戻す
+
+                    // チェックボックスを非表示にする
                     CheckBox checkBox = childView.findViewById(R.id.itemCheckBox);
-                    if (checkBox != null) {
-                        checkBox.setVisibility(View.VISIBLE);
+                    if (checkBox != null&&checkBox.isChecked()) {
+                        deleteNum.add(i);
                     }
                 }
-                addNotifyButton.setVisibility(View.GONE);
-                editButton.setVisibility(View.GONE);
-                cancelButton.setVisibility(View.VISIBLE);
-                trashBoxButton.setVisibility(View.VISIBLE);
-                Log.d("LongPress", "All items moved to the right and checkboxes displayed.");
+                for(int i=0;i<deleteNum.size();i++){
+                    deleteNum.set(i,deleteNum.get(i)-i);
+                }
+                for(int num:deleteNum){
+                    NotificationCustomAdapter adapter = (NotificationCustomAdapter) notificationRecyclerView.getAdapter();
+                    taskDataManager.deleteTaskNotification(position, num);
+                    adapter.notifyItemRemoved(num);
+                }
             }
         });
         cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -153,8 +202,7 @@ public class NotificationCustomDialog extends Dialog {
                     }
                 }
                 cancelButton.setVisibility(View.GONE);
-                trashBoxButton.setVisibility(View.GONE);
-                editButton.setVisibility(View.VISIBLE);
+                deleteAllButton.setVisibility(View.GONE);
                 addNotifyButton.setVisibility(View.VISIBLE);
                 Log.d("CancelButton", "All items moved back to the original position and checkboxes hidden.");
             }
@@ -165,34 +213,6 @@ public class NotificationCustomDialog extends Dialog {
             public void onClick(View v) {
                 AddNotificationBottomSheetDialog bottomSheetDialog = new AddNotificationBottomSheetDialog(context, 0, position, adapter);
                 bottomSheetDialog.show();
-            }
-        });
-        trashBoxButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // RecyclerView内のすべてのアイテムを元に戻す
-                ArrayList<Integer>deleteNum=new ArrayList<>();
-                for (int i = 0; i < notificationRecyclerView.getChildCount(); i++) {
-                    View childView = notificationRecyclerView.getChildAt(i);
-                    childView.setTranslationX(0);  // アイテムを元の位置に戻す
-
-                    // チェックボックスを非表示にする
-                    CheckBox checkBox = childView.findViewById(R.id.itemCheckBox);
-                    if (checkBox != null&&checkBox.isChecked()) {
-//                        NotificationCustomAdapter adapter = (NotificationCustomAdapter) notificationRecyclerView.getAdapter();
-//                        taskDataManager.deleteTaskNotification(position, i);
-//                        adapter.notifyItemRemoved(i);
-                        deleteNum.add(i);
-                    }
-                }
-                for(int i=0;i<deleteNum.size();i++){
-                    deleteNum.set(i,deleteNum.get(i)-i);
-                }
-                for(int num:deleteNum){
-                    NotificationCustomAdapter adapter = (NotificationCustomAdapter) notificationRecyclerView.getAdapter();
-                    taskDataManager.deleteTaskNotification(position, num);
-                    adapter.notifyItemRemoved(num);
-                }
             }
         });
 

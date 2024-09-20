@@ -15,32 +15,23 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.HashMap;
 
-public class NotifyManager2 {
+public class NotifyManager {
     private static int dataCount;
     private static HashMap<NotificationData,Integer> taskNotificationDataBag;
     private static HashMap<Integer,PendingIntent> pendingIntentBag;
     private static AlarmManager notificationAlarmManager;
-    private static ClassUpdateListener classUpdateListener;
     private static Context context;
 
     static void prepareForNotificationWork(Context context){
-        NotifyManager2.context =context;
+        NotifyManager.context =context;
         dataCount=1;
         taskNotificationDataBag =new HashMap<NotificationData,Integer>();
         pendingIntentBag=new HashMap<Integer,PendingIntent>();
         notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
-    static void setContext(Context context){
-        NotifyManager2.context =context;
-        if(notificationAlarmManager==null)
-            notificationAlarmManager=(AlarmManager) context.getSystemService(ALARM_SERVICE);
-    }
-    static void setClassUpdateListener(ClassUpdateListener listener) {
-        classUpdateListener = listener;
-    }
     static void setTaskNotificationAlarm(String dataName, String dataId, String title, String subTitle, LocalDateTime notificationTiming){
         taskNotificationDataBag.put(new NotificationData(dataName,title,subTitle,notificationTiming),dataCount);
-        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+        Intent notificationIntent = new Intent(context, NotificationReceiver.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME",dataName);
         notificationIntent.putExtra("DATAID",dataId);
@@ -71,7 +62,7 @@ public class NotifyManager2 {
         pendingIntentBag.remove(notificationId);
     }
     static void setClassNotificationAlarm(String title, String subTitle, int dayAndPeriod,Calendar calendar) {
-        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+        Intent notificationIntent = new Intent(context, NotificationReceiver.class);
         notificationIntent.setAction(String.valueOf(dataCount));
         notificationIntent.putExtra("DATANAME","ClassData");
         notificationIntent.putExtra("DAYANDPERIOD",dayAndPeriod);
@@ -87,7 +78,7 @@ public class NotifyManager2 {
         dataCount=(dataCount+1)%99999999;
     }
     static void setFirstClassNotificationAlarm(String title, String subTitle,int dayAndPeriod) {
-        Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+        Intent notificationIntent = new Intent(context, NotificationReceiver.class);
         notificationIntent.putExtra("DATANAME","ClassData");
         notificationIntent.putExtra("NOTIFICATIONID",-1);
         notificationIntent.putExtra("TITLE",title);
@@ -104,7 +95,7 @@ public class NotifyManager2 {
     static void setBackScrapingAlarm(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            Intent notificationIntent = new Intent(context, NotificationReceiver2.class);
+            Intent notificationIntent = new Intent(context, NotificationReceiver.class);
             notificationIntent.setAction(String.valueOf(dataCount));
             notificationIntent.putExtra("DATANAME","BackScraping");
             PendingIntent notificationPendingIntent = PendingIntent.getBroadcast(context, dataCount, notificationIntent, PendingIntent.FLAG_MUTABLE);

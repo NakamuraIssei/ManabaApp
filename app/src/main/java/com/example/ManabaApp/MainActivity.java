@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -32,9 +35,15 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
     private TextView classNameTextView;
     private GridView classGridView;
     private StickyListHeadersListView taskListView;
-    private ClassDataManager cd;
+    private ClassDataManager classDataManager;
+    private TaskDataManager taskDataManager;
     private CookieManager cookieManager;
+    private MainClassGridAdapter mainClassGridAdapter;
+    private TaskCustomAdapter adapter;
+    private ImageButton imageButton;
     private Context context;
+    private Handler handler;
+    private boolean networkCheck;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,21 +51,21 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         Objects.requireNonNull(getSupportActionBar()).hide();
         setContentView(R.layout.main_activity_layout);
 
+        handler = new Handler(Looper.getMainLooper());
         cookieManager = CookieManager.getInstance();
         cookieBag = new HashMap<>();
         context = this;
 
-        NotifyManager2.prepareForNotificationWork(this);
-        TaskDataManager taskDataManager = new TaskDataManager("TaskData");
+        NotifyManager.prepareForNotificationWork(this);
+        taskDataManager = new TaskDataManager();
         AddNotificationBottomSheetDialog.setTaskDataManager(taskDataManager);
-        cd = new ClassDataManager("ClassData");
+        classDataManager = new ClassDataManager();
 
-        ChangeableClassDialog.setClassDataManager(cd);
+        ChangeableClassDialog.setClassDataManager(classDataManager);
 
-        NotificationReceiver2.setTaskDataManager(taskDataManager);
-        NotifyManager2.setClassUpdateListener(this);
-        NotificationReceiver2.setClassUpdateListener(this);
-        NotifyManager2.setBackScrapingAlarm();
+        NotificationReceiver.setTaskDataManager(taskDataManager);
+        NotificationReceiver.setClassUpdateListener(this);
+        NotifyManager.setBackScrapingAlarm();
 
         MyDBHelper myDBHelper = new MyDBHelper(this);
         SQLiteDatabase db = myDBHelper.getWritableDatabase();
@@ -64,10 +73,10 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
         Cursor classCursor = db.query("ClassData", null, null, null, null, null, "dayAndPeriod");
 
         taskDataManager.setDB(db, taskCursor);
-        cd.setDB(db, classCursor);
+        classDataManager.setDB(db, classCursor);
 
-        cd.loadClassData();
-        if (!cd.checkClassData()) cd.resetClassData();
+        classDataManager.loadClassData();
+        if (!classDataManager.checkClassData()) classDataManager.resetClassData();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
@@ -76,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                     public void run() {
                         Log.d("aaa", "授業スクレーピング完了");
                         // Viewの初期化やイベントリスナーの設定などの処理を実装
-                        ImageButton imageButton = findViewById(R.id.exclamationButton);
+                        imageButton = findViewById(R.id.exclamationButton);
                         imageButton.setOnClickListener(v -> {
                             // ダイアログクラスのインスタンスを作成
                             EncourageRegistringDialog dialog = new EncourageRegistringDialog(context,ClassDataManager.unRegisteredClassDataList);//追加課題の画面のインスタンスを生成
@@ -87,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         taskListView = MainActivity.this.findViewById(R.id.sticky_list);//画面上のListViewの情報を変数listViewに設定
 
                         //課題の情報をtaskDataから取得
-                        TaskCustomAdapter adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
+                        adapter = new TaskCustomAdapter(MainActivity.this, taskDataManager);//Listviewを表示するためのadapterを設定
                         taskListView.setAdapter(adapter);//listViewにadapterを設定
 
                         classGridView = findViewById(R.id.mainClassGridView);
@@ -102,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                 int rowNum, columnNum, row, column;
                                 rowNum = 4;
                                 columnNum = 5;
-                                for (int i = 0; i < cd.getClassDataList().size(); i++) {
-                                    if (!Objects.equals(cd.getClassDataList().get(i).getClassName(), "次は空きコマです。")) {
+                                for (int i = 0; i < classDataManager.getClassDataList().size(); i++) {
+                                    if (!Objects.equals(classDataManager.getClassDataList().get(i).getClassName(), "次は空きコマです。")) {
                                         rowNum = Math.max(rowNum, (i % 7) + 1);
                                         columnNum = Math.max(columnNum, (i / 7) + 1);
                                     }
@@ -112,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                                 column = position / (columnNum + 1);
                                 if (row != 0 && column != 0) {
                                     String className, classRoom, professorName, classURL;
-                                    ClassData classData = cd.getClassDataList().get((row - 1) * 7 + column - 1);
+                                    ClassData classData = classDataManager.getClassDataList().get((row - 1) * 7 + column - 1);
                                     if (!Objects.equals(classData.getClassId(), 0)) {
                                         if (classData.getIsChangeable() == 0) {
                                             UnChangeableClassDialog unChangeableClassDialog = new UnChangeableClassDialog(MainActivity.this, classData);
@@ -128,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             }
                         });
 
-                        MainClassGridAdapter mainClassGridAdapter = new MainClassGridAdapter(context, cd.getClassDataList());
+                        mainClassGridAdapter = new MainClassGridAdapter(context, classDataManager.getClassDataList());
                         ChangeableClassDialog.setMainClassGridAdapter(mainClassGridAdapter);
                         mainClassGridAdapter.optimizeGridSize();
                         classGridView.setAdapter(mainClassGridAdapter);
@@ -164,31 +173,33 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         });
 
                         classNameTextView = findViewById(R.id.classnameView);
+                        networkCheck=true;
+                        checkLoginAsync();
+                    }
 
-                        //if (checkLogin())Log.d("start","loginがあかんわ");
-                        if (!checkLogin()) {
-                            LoginDialog dialog = new LoginDialog(context, "https://ct.ritsumei.ac.jp/ct/home_summary_report", cookieBag, cookieManager, taskDataManager, cd, adapter, (ClassUpdateListener) context, mainClassGridAdapter, classGridView,imageButton);//追加課題の画面のインスタンスを生成
-                            // ダイアログを表示
-                            dialog.show();//追加課題の画面を表示
-                        } else {
-                            ManabaScraper.setCookie(cookieBag);
-                            cd.reflectUnChangeableClassDataFromManaba();
-                            cd.getChangeableClassDataFromManaba();
-                            cd.eraseNotExistChangeableClass();
-                            cd.eraseRegisteredChangeableClass();
-                            cd.requestFirstClassNotification();
-                            cd.requestSettingAllClassNotification();
+                });
+            });
 
-                            taskDataManager.loadTaskData();
-                            taskDataManager.makeAllTasksSubmitted();
-                            taskDataManager.getTaskDataFromManaba();
-                            taskDataManager.sortAllTaskDataList();
-                            taskDataManager.setTaskDataIntoRegisteredClassData();
-                            taskDataManager.setTaskDataIntoUnRegisteredClassData();
+        }
+    }
 
-                            String className = cd.getClassInfor().getClassName();
-                            classNameTextView.setText(className);
-
+    @Override
+    public void onNotificationReceived(String className) {
+        classNameTextView.setText(className);
+    }
+    public void checkLoginAsync() {
+        // 新しいスレッドでネットワーク操作を実行
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //ここでネットつながってるかも同時にチェック
+                final boolean loginSuccessful = checkLogin();
+                // メインスレッドに戻って結果を処理
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!networkCheck){
+                            Log.d("aaa","ネットつながってないわー");
                             classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
                             mainClassGridAdapter.optimizeGridSize();
 
@@ -202,20 +213,59 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                             }else{
                                 imageButton.setVisibility(View.GONE); // ImageViewを非表示
                             }
+                        }else{
+                            if (!loginSuccessful) {
+                                Log.d("aaaa","ログインでき店カッター");
+                                LoginDialog dialog = new LoginDialog(context, "https://ct.ritsumei.ac.jp/ct/home_summary_report", cookieBag, cookieManager, taskDataManager, classDataManager, adapter, (ClassUpdateListener) context, mainClassGridAdapter, classGridView,imageButton);//追加課題の画面のインスタンスを生成
+                                // ダイアログを表示
+                                dialog.show();//追加課題の画面を表示
+                            } else {
+                                Log.d("aaa","ろぐいんできてる");
+                                try {
+                                    ManabaScraper.setCookie(cookieBag);
+                                    classDataManager.reflectUnChangeableClassDataFromManaba();
+                                    classDataManager.getChangeableClassDataFromManaba();
+                                    classDataManager.eraseNotExistChangeableClass();
+                                    classDataManager.eraseRegisteredChangeableClass();
+                                    classDataManager.requestFirstClassNotification();
+                                    classDataManager.requestSettingAllClassNotification();
+
+                                    taskDataManager.loadTaskData();
+                                    taskDataManager.makeAllTasksSubmitted();
+                                    taskDataManager.getTaskDataFromManaba();
+                                    taskDataManager.sortAllTaskDataList();
+                                    taskDataManager.setTaskDataIntoRegisteredClassData();
+                                    taskDataManager.setTaskDataIntoUnRegisteredClassData();
+
+                                    String className = classDataManager.getClassInfor().getClassName();
+                                    classNameTextView.setText(className);
+
+                                    classGridView.setNumColumns(ClassDataManager.getMaxColumnNum() + 1);
+                                    mainClassGridAdapter.optimizeGridSize();
+
+                                    adapter.notifyDataSetChanged();
+                                    mainClassGridAdapter.notifyDataSetChanged();
+                                    if (ClassDataManager.unRegisteredClassDataList.size() > 0) {
+                                        // 点滅アニメーションをロード
+                                        Animation blinkAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.blink);
+                                        // ImageButtonにアニメーションをセット
+                                        imageButton.startAnimation(blinkAnimation);
+                                    }else{
+                                        imageButton.setVisibility(View.GONE); // ImageViewを非表示
+                                    }
+                                }catch (RuntimeException e) {//tryの中でうまくいかなかった時の処理。
+                                    e.printStackTrace();
+                                    //ネットつながりませんでしたメッセージ
+                                }
+                            }
                         }
                     }
-
                 });
-            });
-
-        }
-    }
-
-    @Override
-    public void onNotificationReceived(String className) {
-        classNameTextView.setText(className);
+            }
+        }).start();
     }
     public boolean checkLogin() {
+        Log.d("aaaa","kaikaikai");
         try {
             // クッキーを取得するための初期リクエスト
             HttpURLConnection conn = (HttpURLConnection) new URL("https://ct.ritsumei.ac.jp/ct/home_summary_report").openConnection();
@@ -228,7 +278,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                 String[] cookieList = cookies.split(";");
                 for (String cookie : cookieList) {
                     String[] str = cookie.split("=");
+                    if(str.length>1){
                     cookieBag.put(str[0].trim(), str[1].trim());
+                    }
                 }
 
                 // ログインチェック
@@ -255,7 +307,9 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                         cookieList = cookies.split(";");
                         for (String cookie : cookieList) {
                             String[] str = cookie.split("=");
-                            cookieBag.put(str[0].trim(), str[1].trim());
+                            if(str.length>1){
+                                cookieBag.put(str[0].trim(), str[1].trim());
+                            }
                         }
 
                         // ログインチェック
@@ -265,7 +319,8 @@ public class MainActivity extends AppCompatActivity implements ClassUpdateListen
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            networkCheck=false;
             e.printStackTrace();
         }
         return false;

@@ -19,16 +19,16 @@ import java.util.Objects;
 public class LoginDialog extends Dialog {
 
     private Context context;
-    public static ClassUpdateListener classUpdateListener;
-    public WebView myWebView;
-    public String url;
-    public HashMap<String, String> cookieBag;
-    public CookieManager cookieManager;
-    public TaskDataManager taskDataManager;
-    public ClassDataManager classDataManager;
-    public TaskCustomAdapter adapter;
-    public MainClassGridAdapter mainClassGridAdapter;
-    public GridView classGridView;
+    private static ClassUpdateListener classUpdateListener;
+    private WebView myWebView;
+    private String url;
+    private HashMap<String, String> cookieBag;
+    private CookieManager cookieManager;
+    private TaskDataManager taskDataManager;
+    private ClassDataManager classDataManager;
+    private TaskCustomAdapter adapter;
+    private MainClassGridAdapter mainClassGridAdapter;
+    private GridView classGridView;
     private ImageButton imageButton;
 
     public LoginDialog(Context context, String url, HashMap<String, String> cookieBag, CookieManager cookieManager, TaskDataManager td, ClassDataManager cd, TaskCustomAdapter adapter, ClassUpdateListener listener, MainClassGridAdapter mainClassGridAdapter, GridView classGridView, ImageButton imageButton) {
@@ -60,7 +60,7 @@ public class LoginDialog extends Dialog {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 return false;
-            }//webView内で画面遷移？（他のページに飛ぶとか）できるようにする
+            }
 
             @SuppressLint("NotifyDataSetChanged")
             @Override

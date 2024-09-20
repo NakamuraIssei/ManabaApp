@@ -49,8 +49,9 @@
         android:background="@drawable/sticky_list_header_background"
         android:padding="0dp"
         android:text="課題一覧"
-        android:textColor="#000000"
+        android:textColor="#FFFFFF"
         android:textSize="26sp"
+        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/mainClassGridView" />

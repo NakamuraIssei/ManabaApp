@@ -19,16 +19,16 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-public class TaskDataManager extends DataManager {
+public class TaskDataManager {
 
     private final HashMap<Integer, NotificationCustomAdapter> notificationAdapterBag;
     private final ArrayList<TaskData> allTaskDataList;
     private DateTimeFormatter formatter;
-    protected static SQLiteDatabase db;
-    protected static Cursor cursor;
-    protected String dataName="TaskData";//継承先クラスのコンストラクタで設定！
-    TaskDataManager(String dataName) {
-        prepareForWork(dataName);
+    private static SQLiteDatabase db;
+    private static Cursor cursor;
+    private String dataName="TaskData";
+
+    TaskDataManager() {
         notificationAdapterBag = new HashMap<>();
         allTaskDataList = new ArrayList<TaskData>();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -184,20 +184,24 @@ public class TaskDataManager extends DataManager {
 
         }
     }
-    public void getTaskDataFromManaba() {//ここで課題の提出、未提出判定も行う。
+    public void getTaskDataFromManaba() {
         try {
-            ArrayList<String> taskList;
-            taskList = ManabaScraper.scrapeTaskDataFromManaba();
+            ArrayList<String> taskList = ManabaScraper.scrapeTaskDataFromManaba();
+            if (taskList == null) {
+                // 例外を作成して投げる
+                throw new RuntimeException("Task list is null. Unable to retrieve task data.");
+            }
             for (String k : taskList) {
-                String[] str = k.split("\\?\\?\\?");//切り分けたクッキーをさらに=で切り分ける
-                if (!isExist(Long.parseLong(str[0]))) {//取得した課題を持っていなかったら追加する
-                    if(str[1].length()>15){str[1] = str[1].substring(0, 15);
-                    str[1]+="...";
+                String[] str = k.split("\\?\\?\\?"); // 切り分けたクッキーをさらに=で切り分ける
+                if (!isExist(Long.parseLong(str[0]))) { // 取得した課題を持っていなかったら追加する
+                    if (str[1].length() > 15) {
+                        str[1] = str[1].substring(0, 15);
+                        str[1] += "...";
                     }
-                    str[1]+=" ";
-                    addTaskData(Long.parseLong(str[0]), str[1], str[2], str[3],str[4]);//str[0]はTAskId,str[1]は課題名、str[2]は締め切り、str[3]は課題が出ている授業名、str[4]は課題提出URL
+                    str[1] += " ";
+                    addTaskData(Long.parseLong(str[0]), str[1], str[2], str[3], str[4]); // str[0]はTaskId, str[1]は課題名, str[2]は締め切り, str[3]は課題が出ている授業名, str[4]は課題提出URL
                     Log.d("aaa", k + "追加したよー！TaskDataManager　getTaskDataFromManaba");
-                } else {//取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
+                } else { // 取得した課題を持っていたら提出していない判定(hassubmittedを0)にする。
                     for (int i = 0; i < allTaskDataList.size(); i++) {
                         if (Objects.equals(allTaskDataList.get(i).getTaskId(), Long.parseLong(str[0]))) {
                             allTaskDataList.get(i).changeSubmitted(0);
@@ -207,13 +211,14 @@ public class TaskDataManager extends DataManager {
                 }
             }
         } catch (ExecutionException e) {
-            Log.d("aaa", "課題スクレーピングみすった！　TaskDataManager　116");
-            throw new RuntimeException(e);
+            // 例外を作成して投げる
+            throw new RuntimeException("課題スクレーピング中にエラーが発生しました。", e);
         } catch (InterruptedException e) {
-            Log.d("aaa", "課題スクレーピングみすった！　TaskDataManager　119");
-            throw new RuntimeException(e);
+            // 例外を作成して投げる
+            throw new RuntimeException("課題スクレーピング中にスレッドが中断されました。", e);
         }
     }
+
     public void makeAllTasksSubmitted() {//ここでDBのhasSubmittedも更新
         for (int i = 0; i < allTaskDataList.size(); i++) {
             allTaskDataList.get(i).changeSubmitted(1);
@@ -322,10 +327,10 @@ public class TaskDataManager extends DataManager {
         }
     }
     public void requestSettingNotification(String dataName, Long taskId, String taskName, String dueDate, LocalDateTime notificationTiming) {
-        NotifyManager2.setTaskNotificationAlarm(dataName, String.valueOf(taskId), taskName, dueDate, notificationTiming);
+        NotifyManager.setTaskNotificationAlarm(dataName, String.valueOf(taskId), taskName, dueDate, notificationTiming);
     }
     public void requestCancelNotification(String dataName, String taskName, LocalDateTime dueDate, LocalDateTime notificationTiming) {
-        NotifyManager2.cancelTaskNotificationAlarm(dataName, taskName, dueDate.toString(), notificationTiming);
+        NotifyManager.cancelTaskNotificationAlarm(dataName, taskName, dueDate.toString(), notificationTiming);
     }
     public int deleteFinishedNotification(String taskName, LocalDateTime subTitle) {
         //dbの更新は呼び出し元で行うので、ここでは行わない。ここではメモリ上の通知情報のみ更新。

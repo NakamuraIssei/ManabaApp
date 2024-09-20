@@ -2,8 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/white_background">
-
+    android:background="@drawable/editable_text_background">
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/notificationSwitch"
@@ -29,9 +28,10 @@
         android:layout_marginBottom="5dp"
         android:layout_toStartOf="@+id/notificationSwitch"
         android:layout_toEndOf="@id/dayAndPeriodTextView"
-        android:text="教室名"
+        android:hint="教室名"
         android:textColor="#000000"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        />
 
     <TextView
         android:id="@+id/dayAndPeriodTextView"

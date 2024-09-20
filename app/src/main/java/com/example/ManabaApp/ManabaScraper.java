@@ -30,12 +30,13 @@ public class ManabaScraper {
         classURL = new ArrayList<>(Arrays.asList(
                 "https://ct.ritsumei.ac.jp/ct/home_course?chglistformat=list"));
     }
-    public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException {//ここのメゾッドで未提出課題、小テスト、アンケートの欄からスクレーピング
-        taskInfor = new ArrayList<>();
+    public static ArrayList<String> scrapeTaskDataFromManaba() throws ExecutionException, InterruptedException{//ここのメゾッドで未提出課題、小テスト、アンケートの欄からスクレーピング
+        taskInfor=null;
         CompletableFuture<ArrayList<String>> scrapingTask = null;//非同期処理をするために、CompletableFuture型のデータを使う。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {//おまじない。swiftなら無くても多分大丈夫！
             scrapingTask = CompletableFuture.supplyAsync(() -> {//非同期処理をするためのfuture1変数の設定
                 try {
+                    taskInfor = new ArrayList<>();
                     // Jsoupで対象URLの情報を取得する
                     for (String url : taskURL) {//URLのArrayListの中身でループを回す
                         Document doc = Jsoup.connect(url).cookies(cookiebag).get();//jsoupでHTMLを取得する。
@@ -61,6 +62,7 @@ public class ManabaScraper {
                     }
                 } catch (IOException e) {//tryの中でうまくいかなかった時の処理。
                     e.printStackTrace();
+
                 }
                 return taskInfor;
             });
@@ -71,7 +73,7 @@ public class ManabaScraper {
     }
     public static HashMap<Integer,String> scrapeUnChangableClassDataFromManaba() throws ExecutionException, InterruptedException, IOException {//ここでManabaの時間割表にある授業情報をスクレーピング
         String message="授業が重複しています。??? ??? ??? ";
-        registerdClassInfor = new HashMap<>();
+        registerdClassInfor = null;
         ArrayList<Character>days;
         days=new ArrayList<>(Arrays.asList(
                 '月',
@@ -91,8 +93,7 @@ public class ManabaScraper {
                     Elements doc2 = doc.select("#container > div.pagebody > div > div.contentbody-left > div.my-infolist.my-infolist-mycourses > div.mycourses-body > div > table > tbody");//取得したHTMLから課題のテーブル部分を切り取る。
 
                     Elements rows = doc2.select("tr");
-
-                    registerdClassInfor.clear();
+                    registerdClassInfor=new HashMap<>();
 
                     Log.d("yyyyy","時間割分析します。getRegisteredClassDataFromManabaaaaaaa"+rows.size());
                     for (int i = 1; i < rows.size(); i++) {

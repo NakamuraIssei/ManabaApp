@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -37,6 +38,7 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
     @Override
     public void onBindViewHolder(@NonNull NotificationCustomAdapter.ViewHolder holder, int position) {
         DateTimeFormatter formatter = null;
+        // チェックボックスの初期化: 毎回非表示とチェックなしにリセットする
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM/dd　HH:mm");
             String time = notificationTiming.get(position).format(formatter);
@@ -60,11 +62,13 @@ public class NotificationCustomAdapter extends RecyclerView.Adapter<Notification
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageButton editButton;
         TextView text1;
+        CheckBox checkBox;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             editButton = itemView.findViewById(R.id.button2);
             text1 = itemView.findViewById(android.R.id.text1);
+            checkBox=itemView.findViewById(R.id.notificationSwitch);
         }
     }
 }

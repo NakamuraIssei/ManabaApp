@@ -35,7 +35,6 @@ public class ChangeableClassDialog extends Dialog {
     private String emptyClassName="次は空きコマです。";
     private static MainClassGridAdapter mainClassGridAdapter;
     private static GridView mainClassGridView;
-
     private ArrayList<ClassData>selectedClass;
 
     public ChangeableClassDialog(Context context, ClassData registerationClassData,Boolean isFirst) {
@@ -86,7 +85,7 @@ public class ChangeableClassDialog extends Dialog {
         if (getWindow() != null) {
             getWindow().setBackgroundDrawableResource(R.drawable.dialog_background);
         }
-
+        setCanceledOnTouchOutside(false);
         TextView nameText,professorNameText,classCommentView;
         RecyclerView roomListView;
         Button classPageButton,cancelButton,saveButton;

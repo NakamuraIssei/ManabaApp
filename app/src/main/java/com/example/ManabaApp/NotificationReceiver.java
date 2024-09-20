@@ -20,21 +20,19 @@ import androidx.core.app.NotificationManagerCompat;
 import java.util.HashMap;
 import java.util.Objects;
 
-public class NotificationReceiver2 extends BroadcastReceiver {
+public class NotificationReceiver extends BroadcastReceiver {
     public static TaskDataManager taskDataManager;
     private static ClassUpdateListener classUpdateListener;
     public NotificationManager notificationManager;
     public SQLiteDatabase db;
     public Cursor cursor;
 
-    static void setClassUpdateListener(ClassUpdateListener listener) {
+    public static void setClassUpdateListener(ClassUpdateListener listener) {
         classUpdateListener = listener;
     }
-
-    static void setTaskDataManager(TaskDataManager taskDataManager) {
-        NotificationReceiver2.taskDataManager = taskDataManager;
+    public static void setTaskDataManager(TaskDataManager taskDataManager) {
+        NotificationReceiver.taskDataManager = taskDataManager;
     }
-
     public void onReceive(Context context, Intent intent) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             String dataName = intent.getStringExtra("DATANAME");
@@ -67,8 +65,7 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         }
 
     }
-
-    private void pushNotification(String title, String subTitle, Context context, int notificationId) {
+    public void pushNotification(String title, String subTitle, Context context, int notificationId) {
         //通知作業
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Log.d("classname", title + "NotificationReceiver2 pushNotification");
@@ -108,7 +105,7 @@ public class NotificationReceiver2 extends BroadcastReceiver {
             wakeLock.release();
         }
     }
-    private void taskDataWork(String title, String subTitle, String dataId) {
+    public void taskDataWork(String title, String subTitle, String dataId) {
         String[] tdColumns = {"notificationTiming"}; // 取り出したいカラム
         String tdSelection = "taskId = ?"; // WHERE句
         String[] tdSelectionArgs = {dataId}; // WHERE句の引数
@@ -140,9 +137,9 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         if (taskDataManager != null)
             taskDataManager.deleteFinishedTaskNotification(title, subTitle);
     }
-    private void backScraping(Context context) {
-        NotifyManager2.prepareForNotificationWork(context);
-        NotifyManager2.setBackScrapingAlarm();
+    public void backScraping(Context context) {
+        NotifyManager.prepareForNotificationWork(context);
+        NotifyManager.setBackScrapingAlarm();
 
         CookieManager ck = CookieManager.getInstance();
         String cookies = ck.getCookie("https://ct.ritsumei.ac.jp/ct/home_summary_report");
@@ -158,8 +155,8 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         }
         ManabaScraper.setCookie(cookieBag);
         Log.d("aaa", "今からバックグラウンドでのスクレイピングします。　NotificationReceiver2 209");
-        TaskDataManager taskDataManager = new TaskDataManager("TaskData");
-        ClassDataManager classDataManager = new ClassDataManager("ClassData");
+        TaskDataManager taskDataManager = new TaskDataManager();
+        ClassDataManager classDataManager = new ClassDataManager();
         cursor = db.query("TaskData", null, null, null, null, null, "taskId");
         taskDataManager.setDB(db, cursor);
         cursor = db.query("ClassData", null, null, null, null, null, "classId");
@@ -172,7 +169,7 @@ public class NotificationReceiver2 extends BroadcastReceiver {
         taskDataManager.makeAllTasksSubmitted();
         taskDataManager.getTaskDataFromManaba();
     }
-    private Boolean checkNotify(int dayAndPeriod) {
+    public Boolean checkNotify(int dayAndPeriod) {
         // DB内のdayAndPeriodの授業の通知設定(isNotifyingを確認)
         String[] tdColumns = {"isNotifying"}; // 取り出したいカラム
         String tdSelection = "dayAndPeriod = ?"; // WHERE句

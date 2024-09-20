@@ -4,29 +4,37 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.Calendar;
 
-public class ClassDataManager extends DataManager {
+public class ClassDataManager{
     protected static SQLiteDatabase db;
     protected static Cursor cursor;
     protected static String dataName="ClassData";//継承先クラスのコンストラクタで設定！
     protected static ArrayList<ClassData> classDataList;
     protected static ArrayList<ClassData> unRegisteredClassDataList;
-    static String emptyClassName="次は空きコマです。";
-    ClassDataManager(String dataName) {
+    private static String emptyClassName="次は空きコマです。";
+    private int dataCount;
+    private DateTimeFormatter formatter;
+    ClassDataManager() {
         classDataList = new ArrayList<ClassData>();
         unRegisteredClassDataList = new ArrayList<ClassData>();
-        prepareForWork(dataName);
+        dataCount = 0;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.JAPAN);
+        }
     }
     public ArrayList<ClassData> getClassDataList() {
         return classDataList;
@@ -186,7 +194,7 @@ public class ClassDataManager extends DataManager {
                         calendar.set(Calendar.SECOND, 0);  // 秒を指定
                         break;
                 }
-                NotifyManager2.setClassNotificationAlarm(classData.getClassName(),classData.getClassRoom(),classData.getDayAndPeriod(),calendar);
+                NotifyManager.setClassNotificationAlarm(classData.getClassName(),classData.getClassRoom(),classData.getDayAndPeriod(),calendar);
             }
         }
 
@@ -194,7 +202,7 @@ public class ClassDataManager extends DataManager {
     public void requestFirstClassNotification(){
         //アプリを立ち上げたときの一番最初の次の授業を通知する作業
         ClassData cd=getClassInfor();
-        NotifyManager2.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom(),cd.getDayAndPeriod());
+        NotifyManager.setFirstClassNotificationAlarm(cd.getClassName(),cd.getClassRoom(),cd.getDayAndPeriod());
     }
     public void getChangeableClassDataFromManaba() {
         try {

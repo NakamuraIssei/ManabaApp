@@ -24,7 +24,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersAdapter {
     private final Context context;
     private final TaskDataManager taskDataManager;
-    private final LayoutInflater mInflater;
+    private final LayoutInflater inflater;
     private final ArrayList<String> sectionTitle = new ArrayList<>(Arrays.asList(
             "提出した課題",
             "今日",
@@ -32,19 +32,17 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
             "明後日以降"
     ));
 
-
-
     public TaskCustomAdapter(Context context,TaskDataManager taskDataManager) {
         this.context = context;
         this.taskDataManager=taskDataManager;
-        this.mInflater = LayoutInflater.from(context);
+        this.inflater = LayoutInflater.from(context);
     }
     @Override
     public View getHeaderView(int i, View view, ViewGroup viewGroup) {
         HeaderViewHolder holder;
 
         if (view == null) {
-            view = mInflater.inflate(R.layout.task_headder_layout, null);
+            view = inflater.inflate(R.layout.task_headder_layout, null);
             holder = new HeaderViewHolder(view);
             view.setTag(holder);
         } else {
@@ -58,7 +56,6 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     public long getHeaderId(int i) {
         return getHeaderItem(i);
     }
-
     public int getHeaderItem(int position) {
         return taskDataManager.getTaskGroupId(position);
     }
@@ -68,7 +65,7 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
         TaskData taskData=taskDataManager.getAllTaskDataList().get(position);
 
         if (convertView == null) {
-            convertView = mInflater.inflate(R.layout.task_item_layout, parent, false);
+            convertView = inflater.inflate(R.layout.task_item_layout, parent, false);
             holder = new ItemViewHolder(convertView);
             convertView.setTag(holder);
         } else {
@@ -132,7 +129,6 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
         holder.remainingTimeText.setText("");
         return convertView;
     }
-
     @Override
     public int getCount() {
         return taskDataManager.getAllTaskDataList().size();
@@ -145,14 +141,12 @@ public class TaskCustomAdapter extends BaseAdapter implements StickyListHeadersA
     public long getItemId(int position) {
         return position;
     }
-
     public static class HeaderViewHolder {
         TextView sectionText;
         public HeaderViewHolder(@NonNull View itemView) {
             sectionText = itemView.findViewById(android.R.id.text1);
         }
     }
-
     public static class ItemViewHolder {
         ImageButton pushButton;
         TextView taskNameText;

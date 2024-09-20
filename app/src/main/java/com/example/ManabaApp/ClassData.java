@@ -49,7 +49,6 @@ public class ClassData {
     public int getIsNotifying() {
         return this.isNotifying;
     }
-
     public void setClassRoom(String classRoom){
         this.classRoom=classRoom;
     }
